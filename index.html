@@ -183,6 +183,7 @@ button.vcard:hover{transform:translateY(-2px)}
   <div class="side">
     <button id="backBtn" class="backBtn">→ رجوع للقرى</button>
     <button id="aerialBtn" aria-pressed="false">منظر جوي (M)</button>
+    <button id="timeBtn" aria-pressed="true">الوقت: الغروب</button>
     <button id="sndBtn" aria-pressed="true">الصوت: يعمل</button>
     <button id="ttsBtn" aria-pressed="true">قراءة الحوار: تعمل</button>
   </div>
@@ -585,19 +586,19 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0xdcd6c8, MOBILE?110:160, MOBILE?600:760);
-const SUN_OFF=[-62,56,34]; // late-afternoon sun from the south-west: warm light, long shadows
+const SUN_OFF=[-70,34,42]; // golden-hour sun low in the south-west (changed by the time-of-day button)
 const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 1200);
 // sky dome: deep blue overhead, warm haze at the horizon, a soft glow around the sun
 const skyDome=(function(){
   const dir=new THREE.Vector3(...SUN_OFF).normalize();
-  const m=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,uniforms:{sunDir:{value:dir}},
+  const m=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,uniforms:{sunDir:{value:dir},zen:{value:new THREE.Color()},mid:{value:new THREE.Color()},hor:{value:new THREE.Color()},glow:{value:new THREE.Color()}},
     vertexShader:"varying vec3 vD; void main(){ vD=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }",
-    fragmentShader:`uniform vec3 sunDir; varying vec3 vD;
+    fragmentShader:`uniform vec3 sunDir; uniform vec3 zen; uniform vec3 mid; uniform vec3 hor; uniform vec3 glow; varying vec3 vD;
       void main(){ float h=clamp(vD.y,-0.2,1.0);
-        vec3 zen=vec3(0.20,0.42,0.72), mid=vec3(0.50,0.68,0.86), hor=vec3(0.90,0.86,0.78), gnd=vec3(0.78,0.72,0.62);
+        vec3 gnd=hor*0.82;
         vec3 c = h>0.0 ? mix(hor, mix(mid,zen,smoothstep(0.25,0.9,h)), smoothstep(0.0,0.25,h)) : mix(hor,gnd,smoothstep(0.0,-0.2,h));
         float s=max(dot(normalize(vD),sunDir),0.0);
-        c += vec3(1.0,0.82,0.55)*(pow(s,8.0)*0.35+pow(s,64.0)*0.6) + vec3(1.0,0.95,0.85)*smoothstep(0.9993,0.9997,s)*1.5;
+        c += glow*(pow(s,6.0)*0.45+pow(s,48.0)*0.7) + vec3(1.0,0.95,0.85)*smoothstep(0.9993,0.9997,s)*1.5;
         gl_FragColor=vec4(c,1.0); }`});
   const d=new THREE.Mesh(new THREE.SphereGeometry(1000,32,16),m); d.renderOrder=-1; d.frustumCulled=false; scene.add(d);
   // a few soft clouds high above
@@ -608,9 +609,10 @@ const skyDome=(function(){
   const cm=new THREE.MeshBasicMaterial({map:ct,transparent:true,depthWrite:false,fog:false,opacity:.75});
   for(let i=0;i<9;i++){ const c=new THREE.Mesh(new THREE.PlaneGeometry(260,120),cm); c.rotation.x=Math.PI/2; c.rotation.z=Math.random()*3;
     const a=i/9*Math.PI*2+Math.random()*.5, r=220+Math.random()*260; c.position.set(Math.cos(a)*r,240+Math.random()*60,Math.sin(a)*r); d.add(c); }
+  d.userData.mat=m; d.userData.clouds=cm;
   return d;
 })();
-scene.add(new THREE.HemisphereLight(0xcfe0f5, 0x9a7a58, 0.5));
+const hemi=new THREE.HemisphereLight(0xcfe0f5, 0x9a7a58, 0.5); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffdcae, 1.6);
 sun.position.set(...SUN_OFF); sun.castShadow = true; sun.shadow.mapSize.set(MOBILE?1024:2048,MOBILE?1024:2048);
 { const r=MOBILE?28:45; Object.assign(sun.shadow.camera,{left:-r,right:r,top:r,bottom:-r,near:1,far:260}); }
@@ -682,7 +684,7 @@ const MAT = {
   hole: new THREE.MeshStandardMaterial({color:0x22160f,roughness:1}),
   wood: new THREE.MeshStandardMaterial({color:0x5e3d24,roughness:.85}),
   plain: new THREE.MeshStandardMaterial({color:0xffffff,roughness:.9}),
-  palm: new THREE.MeshStandardMaterial({color:0x56712f,roughness:1,side:THREE.DoubleSide}),
+  palm: new THREE.MeshStandardMaterial({color:0x5f9a2e,roughness:1,side:THREE.DoubleSide}),
 };
 
 /* ---------- Instanced collectors ---------- */
@@ -991,10 +993,10 @@ for(let gx=-62;gx<=48;gx+=6.1){
 for(let x=-6;x<=34;x+=8.5) for(let z=31;z<=58;z+=7){
   if(Math.hypot(x-L3[0],z-L3[1])<15) continue;
   if(overlapsOcc(x-3.8,x+3.8,z-3,z+3,0)) continue;
-  put(I.plain,x,.06,z,7.6,.12,6.1,0,0,[0x5f8a3a,0x6f9a45,0x4f7d34,0x7a9a4a][(rnd()*4)|0]);
+  put(I.plain,x,.06,z,7.6,.12,6.1,0,0,[0x4f9a2c,0x63ad36,0x469024,0x78b843][(rnd()*4)|0]);
   put(I.ruin,x,.35,z-3.3,8.4,.7,.5,0,0,0xd9c0aa);
 }
-for(let x=-58;x<=-16;x+=8.5) for(let z=52;z<=60;z+=7){ put(I.plain,x,.06,z,7.6,.12,6.1,0,0,[0x5f8a3a,0x6f9a45,0x4f7d34][(rnd()*3)|0]); put(I.ruin,x,.35,z-3.3,8.4,.7,.5,0,0,0xd9c0aa); }
+for(let x=-58;x<=-16;x+=8.5) for(let z=52;z<=60;z+=7){ put(I.plain,x,.06,z,7.6,.12,6.1,0,0,[0x4f9a2c,0x63ad36,0x469024][(rnd()*3)|0]); put(I.ruin,x,.35,z-3.3,8.4,.7,.5,0,0,0xd9c0aa); }
 label("المزارع",14,5,44);
 }
 const trunkGeo=new THREE.CylinderGeometry(.16,.26,1,7); trunkGeo.translate(0,.5,0);
@@ -1006,7 +1008,7 @@ function palm(x,z){ const h=R(6,10), lean=R(-.12,.12);
   addCol(x-.3,x+.3,z-.3,z+.3,h);
 }
 const canopyGeo=new THREE.IcosahedronGeometry(1,0);
-function tree(x,z,s){ put(I.trunk,x,0,z,.9*s,2.2*s,.9*s,0,0,0x6a5038); put(I.canopy,x,2.4*s,z,2.1*s,1.2*s,2.1*s,R(0,3),0,0x5d6e33); addCol(x-.35,x+.35,z-.35,z+.35,3*s); }
+function tree(x,z,s){ put(I.trunk,x,0,z,.9*s,2.2*s,.9*s,0,0,0x6a5038); put(I.canopy,x,2.4*s,z,2.1*s,1.2*s,2.1*s,R(0,3),0,0x4f8a2e); addCol(x-.35,x+.35,z-.35,z+.35,3*s); }
 if(!HD){
 for(let i=0;i<(MOBILE?22:46);i++) palm(R(-82,-58),R(-44,46));
 for(let i=0;i<14;i++){ const x=R(-10,60), z=R(32,62); if(Math.hypot(x-L3[0],z-L3[1])<10) continue; palm(x,z); }
@@ -1040,7 +1042,7 @@ function buildHaydan(){
   for(let i=0;i<(MOBILE?12:26);i++){ const x=R(-85,10), z=R(-30,-12); if(nearStop(x,z,3.2)) continue; tree(x,z,R(1,1.6)); }
   label("النخيل والأشجار",-45,11,-22);
   // stone-walled farms (F2) between the palms and the road
-  const FARM=[0x6f8a3c,0x7c9446,0x8a8a4c,0xa08a5c,0x627f36];
+  const FARM=[0x4f9a2c,0x63ad36,0x76b440,0xa08a5c,0x469024];
   for(let x=-62;x<=6;x+=9.5) for(let z=-7;z<=15;z+=8.5){
     const roadZ=26+(x+26)*(14/48); if(z+4>Math.min(roadZ-4,22)) continue;
     put(I.plain,x,.05,z,8.2,.1,7.2,0,0,FARM[(rnd()*FARM.length)|0]);
@@ -1213,6 +1215,22 @@ function shathath(cx,cz){
 if(!HD) shathath(8,-305);
 
 
+/* ---------- Green terraced fields on the banks of Wadi Al-Arin around the village ---------- */
+(function(){
+  const G=[0x4f9a2c,0x63ad36,0x469024,0x78b843,0x5aa232,0x8cbf4a];
+  function terraces(x0,x1,z0,z1){
+    for(let x=x0;x<x1;x+=R(7,9.5)) for(let z=z0;z<z1;z+=R(5.5,7)){
+      const w=R(6,8.6), d=R(4.6,6.2); if(overlapsOcc(x-w/2,x+w/2,z-d/2,z+d/2,1)) continue;
+      if(colliders.some(c=>x+w/2>c.x0&&x-w/2<c.x1&&z+d/2>c.z0&&z-d/2<c.z1)) continue;
+      put(I.plain,x,.07,z,w,.14,d,0,0,G[(rnd()*G.length)|0]);
+      put(I.ruin,x,.22,z+d/2+.15,w+.3,.44,.32,0,0,0xc9a47e);
+      if(rnd()<.35) put(I.canopy,x+R(-w/2,w/2),.6,z-d/2,.7,.5,.7,R(0,3),0,0x4f8a2e);
+    }
+  }
+  if(HD){ terraces(-95,70,-74,-50); terraces(-95,-40,-46,-30); }
+  else { terraces(-82,-50,50,74); terraces(52,82,30,74); terraces(-82,-66,-40,40); }
+})();
+
 /* ---------- Commit instanced meshes ---------- */
 function commit(list,geo,mat,cast){
   if(!list.m.length) return;
@@ -1244,17 +1262,63 @@ qattPanels.forEach(q=>{
   scene.add(m);
 });
 
+/* ---------- Lanterns along the lanes: warm glow at golden hour ---------- */
+const lamps=[];
+(function(){
+  const cv=document.createElement("canvas"); cv.width=cv.height=64; const g=cv.getContext("2d"); const gr=g.createRadialGradient(32,32,0,32,32,32);
+  gr.addColorStop(0,"rgba(255,236,190,1)"); gr.addColorStop(.25,"rgba(255,190,90,.75)"); gr.addColorStop(1,"rgba(255,140,40,0)"); g.fillStyle=gr; g.fillRect(0,0,64,64);
+  const tex=new THREE.CanvasTexture(cv);
+  const glowMat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false});
+  const postMat=new THREE.MeshStandardMaterial({color:0x4a3220,roughness:.9}), bulbMat=new THREE.MeshStandardMaterial({color:0xffe2a8,emissive:0xffb050,emissiveIntensity:1});
+  let acc=0; const maxN=MOBILE?36:70;
+  for(const pl of PATHS) for(let i=0;i<pl.length-1;i++){ const [ax,az]=pl[i],[bx,bz]=pl[i+1], L=Math.hypot(bx-ax,bz-az), nx=-(bz-az)/L, nz=(bx-ax)/L;
+    for(let d=acc;d<L;d+=11){ if(lamps.length>=maxN) break; const x=ax+(bx-ax)*d/L+nx*1.25, z=az+(bz-az)*d/L+nz*1.25;
+      if(colliders.some(c=>x>c.x0-.2&&x<c.x1+.2&&z>c.z0-.2&&z<c.z1+.2)) continue;
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(.05,.07,2.4,6),postMat); post.position.set(x,1.2,z); scene.add(post);
+      const bulb=new THREE.Mesh(new THREE.BoxGeometry(.22,.3,.22),bulbMat); bulb.position.set(x,2.5,z); scene.add(bulb);
+      const sp=new THREE.Sprite(glowMat); sp.scale.set(2.2,2.2,1); sp.position.set(x,2.5,z); scene.add(sp); lamps.push({sp,bulb}); }
+    acc=(acc+11-(L%11))%11; }
+  lamps.glowMat=glowMat; lamps.bulbMat=bulbMat;
+})();
+/* ---------- Time of day: golden hour (default, as in the Sarat Abidah film) or bright midday ---------- */
+const TIMES={
+  golden:{sun:[-70,34,42], sunC:0xffbf80, sunI:1.75, hemiS:0xffd6b0, hemiG:0x8a6448, hemiI:.55, fog:0xe9c7a0, exp:.94,
+    zen:[0.17,0.33,0.62], mid:[0.62,0.62,0.74], hor:[1.0,0.70,0.42], glow:[1.0,0.62,0.28], cloud:0xffd2b0, lamp:.95, win:.55, label:"الوقت: الغروب"},
+  noon:{sun:[-62,56,34], sunC:0xffdcae, sunI:1.6, hemiS:0xcfe0f5, hemiG:0x9a7a58, hemiI:.5, fog:0xdcd6c8, exp:1.0,
+    zen:[0.20,0.42,0.72], mid:[0.50,0.68,0.86], hor:[0.90,0.86,0.78], glow:[1.0,0.82,0.55], cloud:0xffffff, lamp:.12, win:0, label:"الوقت: النهار"}
+};
+let timeMode="golden";
+function applyTime(k){ const T0=TIMES[k]; timeMode=k;
+  SUN_OFF[0]=T0.sun[0]; SUN_OFF[1]=T0.sun[1]; SUN_OFF[2]=T0.sun[2];
+  sun.color.setHex(T0.sunC); sun.intensity=T0.sunI; hemi.color.setHex(T0.hemiS); hemi.groundColor.setHex(T0.hemiG); hemi.intensity=T0.hemiI;
+  scene.fog.color.setHex(T0.fog); renderer.toneMappingExposure=T0.exp;
+  const u=skyDome.userData.mat.uniforms; u.sunDir.value.set(...T0.sun).normalize(); ["zen","mid","hor","glow"].forEach(n=>u[n].value.setRGB(...T0[n]));
+  skyDome.userData.clouds.color.setHex(T0.cloud);
+  lamps.glowMat.opacity=T0.lamp; lamps.bulbMat.emissiveIntensity=T0.lamp>.5?1.2:.15;
+  MAT.hole.emissive=new THREE.Color(0xff9a3c); MAT.hole.emissiveIntensity=T0.win;
+  const b=document.getElementById("timeBtn"); if(b){ b.textContent=T0.label; b.setAttribute("aria-pressed",String(k==="golden")); }
+}
+applyTime("golden");
+
 /* ---------- Labels ---------- */
 const labels=[];
 function roundRect(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
 function makeLabel(text,x,y,z){
-  const cv=document.createElement("canvas"); cv.width=760; cv.height=140; const g=cv.getContext("2d");
+  const cv=document.createElement("canvas"); cv.width=760; cv.height=170; const g=cv.getContext("2d");
   g.font='700 58px "Reem Kufi", Tahoma, sans-serif'; g.textAlign="center"; g.textBaseline="middle"; g.direction="rtl";
-  const w=Math.min(740,g.measureText(text).width+70);
-  g.fillStyle="rgba(28,19,14,.74)"; roundRect(g,380-w/2,22,w,96,48); g.fill(); g.fillStyle="#f6f1e7"; g.fillText(text,380,72);
+  const w=Math.min(660,g.measureText(text).width+80), x0=380-w/2, x1=380+w/2, t=34, h=104;
+  // paper
+  const pg=g.createLinearGradient(0,t,0,t+h); pg.addColorStop(0,"#f3e4c0"); pg.addColorStop(.5,"#ead6a8"); pg.addColorStop(1,"#d8bd88");
+  g.fillStyle=pg; g.beginPath(); g.moveTo(x0,t+6); for(let k=0;k<=12;k++) g.lineTo(x0+(x1-x0)*k/12, t+(k%2?2:7)); g.lineTo(x1,t+h-6);
+  for(let k=12;k>=0;k--) g.lineTo(x0+(x1-x0)*k/12, t+h-(k%2?2:7)); g.closePath(); g.fill();
+  g.strokeStyle="rgba(110,70,30,.35)"; g.lineWidth=3; g.stroke();
+  // rolled ends
+  for(const ex of [x0,x1]){ const rg=g.createLinearGradient(ex-16,0,ex+16,0); rg.addColorStop(0,"#b8935a"); rg.addColorStop(.5,"#f0deb4"); rg.addColorStop(1,"#a8834c");
+    g.fillStyle=rg; roundRect(g,ex-16,t-14,32,h+28,14); g.fill(); g.strokeStyle="rgba(90,55,20,.5)"; g.lineWidth=2; g.stroke(); }
+  g.fillStyle="#4a2a12"; g.fillText(text,380,t+h/2+4);
   const tex=new THREE.CanvasTexture(cv); tex.encoding=THREE.sRGBEncoding;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,fog:false}));
-  if(y>100) sp.scale.set(52,9.6,1); else sp.scale.set(7.6,1.4,1); sp.position.set(x,y,z); scene.add(sp); labels.push(sp);
+  if(y>100) sp.scale.set(52,11.6,1); else sp.scale.set(7.6,1.7,1); sp.position.set(x,y,z); scene.add(sp); labels.push(sp);
 }
 const fontReady=(document.fonts&&document.fonts.load)?document.fonts.load('700 58px "Reem Kufi"').catch(()=>{}):Promise.resolve();
 fontReady.then(()=>SIGNS.forEach(buildSign));
@@ -1534,6 +1598,7 @@ stick.addEventListener("pointerup",joyEnd); stick.addEventListener("pointercance
 const aerialBtn=document.getElementById("aerialBtn");
 function toggleAerial(){ aerial=!aerial; aerialBtn.setAttribute("aria-pressed",String(aerial)); resize(); }
 aerialBtn.addEventListener("click",()=>{ toggleAerial(); canvas.focus(); });
+document.getElementById("timeBtn").addEventListener("click",()=>{ applyTime(timeMode==="golden"?"noon":"golden"); canvas.focus(); });
 const sndBtn=document.getElementById("sndBtn"), ttsBtn=document.getElementById("ttsBtn");
 sndBtn.addEventListener("click",()=>{ const o=SFX.toggle(); sndBtn.textContent=o?"الصوت: يعمل":"الصوت: متوقف"; sndBtn.setAttribute("aria-pressed",String(o)); canvas.focus(); });
 ttsBtn.addEventListener("click",()=>{
