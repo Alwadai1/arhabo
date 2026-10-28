@@ -528,20 +528,39 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.08;
+renderer.toneMappingExposure = 1.0;
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0xcfd6d6, MOBILE?100:140, MOBILE?560:680);
+scene.fog = new THREE.Fog(0xdcd6c8, MOBILE?110:160, MOBILE?600:760);
+const SUN_OFF=[-62,56,34]; // late-afternoon sun from the south-west: warm light, long shadows
 const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 1200);
-(function(){
-  const cv=document.createElement("canvas"); cv.width=4; cv.height=256; const g=cv.getContext("2d");
-  const gr=g.createLinearGradient(0,0,0,256); gr.addColorStop(0,"#4f86c0"); gr.addColorStop(.6,"#a9c4dc"); gr.addColorStop(1,"#e3e1d6");
-  g.fillStyle=gr; g.fillRect(0,0,4,256); const t=new THREE.CanvasTexture(cv); t.encoding=THREE.sRGBEncoding; scene.background=t;
+// sky dome: deep blue overhead, warm haze at the horizon, a soft glow around the sun
+const skyDome=(function(){
+  const dir=new THREE.Vector3(...SUN_OFF).normalize();
+  const m=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,uniforms:{sunDir:{value:dir}},
+    vertexShader:"varying vec3 vD; void main(){ vD=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }",
+    fragmentShader:`uniform vec3 sunDir; varying vec3 vD;
+      void main(){ float h=clamp(vD.y,-0.2,1.0);
+        vec3 zen=vec3(0.20,0.42,0.72), mid=vec3(0.50,0.68,0.86), hor=vec3(0.90,0.86,0.78), gnd=vec3(0.78,0.72,0.62);
+        vec3 c = h>0.0 ? mix(hor, mix(mid,zen,smoothstep(0.25,0.9,h)), smoothstep(0.0,0.25,h)) : mix(hor,gnd,smoothstep(0.0,-0.2,h));
+        float s=max(dot(normalize(vD),sunDir),0.0);
+        c += vec3(1.0,0.82,0.55)*(pow(s,8.0)*0.35+pow(s,64.0)*0.6) + vec3(1.0,0.95,0.85)*smoothstep(0.9993,0.9997,s)*1.5;
+        gl_FragColor=vec4(c,1.0); }`});
+  const d=new THREE.Mesh(new THREE.SphereGeometry(1000,32,16),m); d.renderOrder=-1; d.frustumCulled=false; scene.add(d);
+  // a few soft clouds high above
+  const cv=document.createElement("canvas"); cv.width=cv.height=256; const g=cv.getContext("2d");
+  for(let i=0;i<26;i++){ const x=40+Math.random()*176, y=90+Math.random()*70, r=25+Math.random()*45; const gr=g.createRadialGradient(x,y,0,x,y,r);
+    gr.addColorStop(0,"rgba(255,255,255,.55)"); gr.addColorStop(1,"rgba(255,255,255,0)"); g.fillStyle=gr; g.fillRect(0,0,256,256); }
+  const ct=new THREE.CanvasTexture(cv);
+  const cm=new THREE.MeshBasicMaterial({map:ct,transparent:true,depthWrite:false,fog:false,opacity:.75});
+  for(let i=0;i<9;i++){ const c=new THREE.Mesh(new THREE.PlaneGeometry(260,120),cm); c.rotation.x=Math.PI/2; c.rotation.z=Math.random()*3;
+    const a=i/9*Math.PI*2+Math.random()*.5, r=220+Math.random()*260; c.position.set(Math.cos(a)*r,240+Math.random()*60,Math.sin(a)*r); d.add(c); }
+  return d;
 })();
-scene.add(new THREE.HemisphereLight(0xeaf2ff, 0x8a6a4c, 0.72));
-const sun = new THREE.DirectionalLight(0xffe2b8, 1.6);
-sun.position.set(-50, 70, -30); sun.castShadow = true; sun.shadow.mapSize.set(MOBILE?1024:2048,MOBILE?1024:2048);
+scene.add(new THREE.HemisphereLight(0xcfe0f5, 0x9a7a58, 0.5));
+const sun = new THREE.DirectionalLight(0xffdcae, 1.6);
+sun.position.set(...SUN_OFF); sun.castShadow = true; sun.shadow.mapSize.set(MOBILE?1024:2048,MOBILE?1024:2048);
 { const r=MOBILE?28:45; Object.assign(sun.shadow.camera,{left:-r,right:r,top:r,bottom:-r,near:1,far:260}); }
-sun.shadow.bias=-0.0006; scene.add(sun); scene.add(sun.target);
+sun.shadow.bias=-0.0006; sun.shadow.normalBias=.04; if(sun.shadow.radius!==undefined) sun.shadow.radius=3; scene.add(sun); scene.add(sun.target);
 
 /* ---------- Textures (canvas, sampled in world space) ---------- */
 function canvasTex(size, draw){ const cv=document.createElement("canvas"); cv.width=cv.height=size; draw(cv.getContext("2d"),size);
@@ -746,7 +765,7 @@ function hillH(x,z){ const dx=Math.max(0,Math.abs(x)-85), dz=Math.max(0,Math.abs
   const vg=new THREE.ShapeGeometry(shp); vg.rotateX(-Math.PI/2);
   const v=new THREE.Mesh(vg,MAT.gravel); v.position.y=.02; v.receiveShadow=true; scene.add(v);
   if(HD) return;
-  const road=new THREE.Mesh(new THREE.PlaneGeometry(220,10),new THREE.MeshStandardMaterial({color:0x4b4b4e,roughness:.9}));
+  const road=new THREE.Mesh(new THREE.PlaneGeometry(220,10),new THREE.MeshStandardMaterial({color:0x303033,roughness:.9}));
   road.rotation.x=-Math.PI/2; road.position.set(0,.03,-58.5); road.receiveShadow=true; scene.add(road);
   for(let x=-90;x<100;x+=6){ const m=new THREE.Mesh(boxGeo,MAT.white); m.scale.set(2.6,.02,.18); m.position.set(x,.05,-58.5); scene.add(m); }
   const curb=new THREE.Mesh(boxGeo,new THREE.MeshStandardMaterial({color:0xbdb6aa})); curb.scale.set(220,.18,1.6); curb.position.set(0,.09,-52.8); curb.receiveShadow=true; scene.add(curb);
@@ -947,7 +966,7 @@ function buildHaydan(){
   ITEMS.forEach(it=>occ.push({x0:it.pos[0]-2.6,x1:it.pos[0]+2.6,z0:it.pos[1]-2.6,z1:it.pos[1]+2.6}));
   Object.values(NPCS).forEach(n=>occ.push({x0:n.pos[0]-2.4,x1:n.pos[0]+2.4,z0:n.pos[1]-2.4,z1:n.pos[1]+2.4}));
   // the road (R1): asphalt along the south
-  const roadMat=new THREE.MeshStandardMaterial({color:0x4b4b4e,roughness:.9});
+  const roadMat=new THREE.MeshStandardMaterial({color:0x303033,roughness:.9});
   { // one smooth ribbon along the road's centre line
     const pts=[]; for(let i=0;i<HAYDAN_ROAD.length-1;i++){ const [ax,az]=HAYDAN_ROAD[i],[bx,bz]=HAYDAN_ROAD[i+1]; const n=Math.ceil(Math.hypot(bx-ax,bz-az)/3);
       for(let k=0;k<n;k++) pts.push([ax+(bx-ax)*k/n, az+(bz-az)*k/n]); } pts.push(HAYDAN_ROAD[HAYDAN_ROAD.length-1]);
@@ -1015,7 +1034,7 @@ function massif(x,z,rb,rt,h,sd){
     const n=1+.14*Math.sin(a*5+sd)+.08*Math.sin(a*11+sd*2)+.05*Math.sin(a*23+vy*.3); p.setX(i,vx*n); p.setZ(i,vz*n);
     const band=Math.floor((vy+h/2)/(h/11))%2; const c=new THREE.Color(band?0x6f655b:0x7e7266); col.push(c.r,c.g,c.b); }
   geo.setAttribute("color",new THREE.Float32BufferAttribute(col,3)); geo.computeVertexNormals();
-  const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,flatShading:true})); m.position.set(x,h/2-3,z); scene.add(m);
+  const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,color:0xa89a8a,roughness:1,flatShading:true})); m.position.set(x,h/2-3,z); scene.add(m);
   const t=new THREE.Mesh(new THREE.CircleGeometry(rt*1.1,64),new THREE.MeshStandardMaterial({color:0x6b6656,roughness:1})); t.rotation.x=-Math.PI/2; t.position.set(x,h-3,z); scene.add(t);
 }
 massif(-260,-240,110,60,62,2); massif(320,-120,90,50,48,3); massif(-300,160,80,40,38,4); massif(150,320,120,70,44,5);
@@ -1044,7 +1063,7 @@ function shathath(cx,cz){
       else if(u>.78){ c.copy(CAP).multiplyScalar(.8+.2*(.5+.5*Math.sin(a*170))); }
       else if(u>.3){ c.copy(SLOPE); const band=.5+.5*Math.sin(u*62+Math.sin(a*5)*1.6); if(band>.68) c.lerp(RED,.55*(band-.68)/.32+.15); }
       else { c.copy(LOW).lerp(SLOPE,u/.3); }
-      c.offsetHSL(0,0,sp); c.lerp(HAZE,.18); col.push(c.r,c.g,c.b);
+      c.offsetHSL(0,0,sp); c.lerp(HAZE,.18); c.multiplyScalar(.5); col.push(c.r,c.g,c.b);
     }
   }
   for(let i=0;i<RINGS;i++) for(let j=0;j<SEG;j++){
@@ -1617,7 +1636,7 @@ function frame(){
   beam.material.opacity=.14+Math.sin(t*2)*.04;
   if(state==="start"){
     const ang=reduce?.5:t*.05+.5, ox=HD?20:-5, oz=HD?-2:-4; camera.position.set(Math.sin(ang)*105+ox,52,Math.cos(ang)*105+oz); camera.lookAt(ox,2,oz);
-    sun.target.position.set(0,0,0); sun.position.set(-50,70,-30);
+    sun.target.position.set(0,0,0); sun.position.set(...SUN_OFF);
   } else if(aerial){
     // oblique view from the south, wide enough to keep Jabal Shithath in frame behind the town
     if(HD){ camPos.set(player.position.x*.3+10,72,96); look.set(player.position.x*.3+10,0,-8); }
@@ -1638,7 +1657,7 @@ function frame(){
     camPos.set(player.position.x+(tx-player.position.x)*f, hy+(ty-hy)*f, player.position.z+(tz-player.position.z)*f);
     camera.position.lerp(camPos,Math.min(1,dt*10)); look.set(player.position.x,hy+Math.max(0,.2-pitch)*22,player.position.z); camera.lookAt(look);
   }
-  if(state!=="start"){ sun.target.position.set(player.position.x,0,player.position.z); sun.position.set(player.position.x-50,70,player.position.z-30); }
+  if(state!=="start"){ sun.target.position.set(player.position.x,0,player.position.z); sun.position.set(player.position.x+SUN_OFF[0],SUN_OFF[1],player.position.z+SUN_OFF[2]); }
   labels.forEach(l=>{ const d=camera.position.distanceTo(l.position); l.material.opacity=(state==="start"||aerial)?.95:Math.max(0,Math.min(1,(40-d)/12)); });
   if(state!=="start"){
     const px=player.position.x, pz=player.position.z, cl=v=>Math.max(0,Math.min(1,v));
@@ -1648,6 +1667,7 @@ function frame(){
     SFX.ambience(dt,{souq:cl(1-(dSouq-3)/22), farm, well:cl(1-(Math.hypot(px-L1[0],pz-L1[1])-4)/12), village:.6*(1-farm*.5)}); }
   }
   if(state!=="start"){ miniT+=dt; hintT+=dt; if(miniT>.05){drawMini();miniT=0;} if(hintT>.1){updateHint();hintT=0;} }
+  skyDome.position.copy(camera.position);
   renderer.render(scene,camera);
   if(state==="card"&&tModel){ tModel.rotation.y=t*.9; thumbR.render(tScene,tCam); }
   requestAnimationFrame(frame);
