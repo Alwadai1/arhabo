@@ -66,6 +66,13 @@ button:focus-visible{outline:3px solid var(--qatt-yellow);outline-offset:3px}
   border:2px solid var(--nura);box-shadow:0 4px 18px rgba(0,0,0,.35);background:#3b2a1e}
 .side{position:absolute;top:calc(env(safe-area-inset-top,0px) + 174px);left:max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:8px;width:150px;align-items:stretch}
 .side button{pointer-events:auto;background:var(--glass);color:var(--nura);border:1px solid var(--glass-line);border-radius:10px;padding:8px 10px;font:600 13px/1.2 var(--f-body)}
+.langbar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);left:max(12px,env(safe-area-inset-left,0px));z-index:30;display:flex;gap:4px;background:rgba(28,19,14,.6);border:1px solid var(--glass-line);border-radius:999px;padding:4px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.langbar[hidden]{display:none}
+.langbar button{background:transparent;color:var(--nura);border:0;border-radius:999px;padding:6px 12px;font:600 13px/1 var(--f-body)}
+.langbar button[aria-pressed="true"]{background:var(--qatt-yellow);color:var(--ink)}
+html[dir=ltr] .overlay,html[dir=ltr] #hud{direction:ltr}
+html[dir=ltr] .vcard{text-align:left}
+html[dir=ltr] .langbar{left:auto;right:max(12px,env(safe-area-inset-right,0px))}
 #intro{background:radial-gradient(ellipse at center,rgba(28,19,14,.15),rgba(28,19,14,.55));z-index:5}
 #intro.playing{background:linear-gradient(rgba(0,0,0,.35),transparent 18%,transparent 78%,rgba(0,0,0,.45));pointer-events:none}
 #intro.playing .introSkip{pointer-events:auto}
@@ -237,6 +244,7 @@ button.vcard:hover{transform:translateY(-2px)}
   <div class="tag">نسخة تجريبية</div>
 </div>
 
+<div class="langbar" role="group" aria-label="Language / اللغة"><button data-lang="ar">عربي</button><button data-lang="en">English</button><button data-lang="fr">Français</button></div>
 <div class="overlay" id="intro">
   <div class="introGate" id="introGate">
     <div class="qatt" style="width:180px;border-radius:3px;margin:0 auto 18px"></div>
@@ -471,7 +479,20 @@ button.vcard:hover{transform:translateY(-2px)}
 <script>
 (function(){
 "use strict";
-const AR = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
+/* ---------- Language: Arabic (default), English or French ---------- */
+const LANG=(()=>{ try{ const v=localStorage.getItem("arhaboLang"); return ["ar","en","fr"].includes(v)?v:"ar"; }catch(_){ return "ar"; } })();
+const I18N={"Arhabo · حكايا القرى التراثية": ["Arhabo · Heritage Village Tales", "Arhabo · Contes des villages du patrimoine"], "أرحبو": ["Arhabo", "Arhabo"], "أرحبو · Arhabo": ["Arhabo", "Arhabo"], "أكثر من 140 بيتاً من الطين والحجر، والسوق التاريخي، والمسجد التاريخي، وقصر آل زابن.": ["More than 140 houses of mud and stone, the historic souq, the historic mosque and the Al Zaben palace.", "Plus de 140 maisons de terre et de pierre, le souk historique, la mosquée historique et le palais Al Zaben."], "أنثى": ["Female", "Femme"], "ابدأ الرحلة": ["Start the journey", "Commencer le voyage"], "ابدأ المغامرة ←": ["Start the adventure →", "Commencer l'aventure →"], "ابدأ جولة الطلحة ←": ["Start the Al-Talha tour →", "Visiter Al-Talha →"], "ابدأ جولة حيدان ←": ["Start the Haydan tour →", "Visiter Haydan →"], "ابدأ: ضيافة أبي ظافر": ["Start: Abu Dhafer's hospitality", "Commencer : l'hospitalité d'Abou Dhafer"], "اتجه إلى الضوء الذهبي": ["Head for the golden light", "Dirigez-vous vers la lumière dorée"], "اختر محافظة. المحافظة المضيئة متاحة الآن، واضغط أي محافظة أخرى لتعرف عنها.": ["Choose a governorate. The glowing one is open now; tap any other to learn about it.", "Choisissez un gouvernorat. Celui qui brille est ouvert ; touchez les autres pour les découvrir."], "اسحب بالفأرة أو بإصبعك يميناً ويساراً وأعلى وأسفل.": ["Drag with the mouse or your finger left, right, up and down.", "Faites glisser avec la souris ou le doigt : gauche, droite, haut, bas."], "اسمك في اللعبة": ["Your name in the game", "Votre nom dans le jeu"], "اقترب من الشخصية واضغط E أو زر «تحدّث».": ["Walk up to a character and press E or the “Talk” button.", "Approchez-vous d'un personnage et appuyez sur E ou sur « Parler »."], "اقترب من المباني والمعالم ذات اللوحات، واضغط «اقرأ عن» لتعرف تاريخها من رواية الأهالي. لكل قصة ١٠ نقاط، و٥٠ نقطة إذا قرأتها كلها.": ["Walk up to buildings and landmarks with signs and press “Read about” to learn their history as told by the locals. Each story is worth 10 points, and 50 more if you read them all.", "Approchez-vous des bâtiments et des lieux portant un panneau et appuyez sur « Lire » pour découvrir leur histoire racontée par les habitants. Chaque histoire vaut 10 points, et 50 de plus si vous les lisez toutes."], "اكتب اسمك": ["Type your name", "Votre nom"], "اكتملت المهمة: أُكرم الضيف": ["Quest complete: the guest is honoured", "Quête accomplie : l'invité est honoré"], "الأسهم أو W A S D، وعلى الجوال العصا أسفل الشاشة. Shift للجري.": ["Arrow keys or W A S D; on phones, the stick at the bottom of the screen. Shift to run.", "Flèches ou W A S D ; sur mobile, le joystick en bas de l'écran. Maj pour courir."], "الاستخدام": ["Use", "Usage"], "التاريخ": ["History", "Histoire"], "التالي": ["Next", "Suivant"], "التراثية": ["Heritage Town", "patrimonial"], "الجنس": ["Gender", "Genre"], "الحديث": ["Talking", "Parler"], "الحركة": ["Moving", "Se déplacer"], "الحركة: W A S D أو الأسهم · الكاميرا: اسحب بالفأرة (يميناً ويساراً وأعلى وأسفل) أو Q و R و F · تحدّث: E · الجري: Shift · منظر جوي: M · رجوع: Esc": ["Move: W A S D or arrows · Camera: drag with the mouse (left, right, up, down) or Q, R and F · Talk: E · Run: Shift · Aerial view: M · Back: Esc", "Déplacement : W A S D ou flèches · Caméra : glisser avec la souris ou Q, R et F · Parler : E · Courir : Maj · Vue aérienne : M · Retour : Échap"], "الدلّة": ["The dallah", "La dallah"], "الصوت: يعمل": ["Sound: on", "Son : activé"], "القرى التراثية": ["Heritage villages", "Villages du patrimoine"], "الكاميرا": ["Camera", "Caméra"], "المهمة": ["Quest", "Quête"], "النقاط": ["Points", "Points"], "الوقت: الغروب": ["Time: sunset", "Heure : coucher du soleil"], "بطاقة البلدة: ظهران الجنوب": ["Town card: Dhahran Al-Janoub", "Fiche : Dhahran Al-Janoub"], "بلدة ظهران الجنوب": ["Dhahran Al-Janoub Town", "Ville de Dhahran Al-Janoub"], "بلدة ظهران الجنوب التراثية": ["Dhahran Al-Janoub Heritage Town", "Ville historique de Dhahran Al-Janoub"], "تحدّث": ["Talk", "Parler"], "تحدّث مع أبي ظافر عند البوابة": ["Talk to Abu Dhafer at the gate", "Parlez à Abou Dhafer à la porte"], "تخطّي ←": ["Skip →", "Passer →"], "تعرف قرية تراثية هنا؟": ["Know a heritage village here?", "Vous connaissez un village du patrimoine ici ?"], "جديدة · تجريبية": ["New · Beta", "Nouveau · Bêta"], "جولة جديدة": ["Play again", "Rejouer"], "جولة في بلدة ظهران الجنوب التراثية: أزقّتها وبيوتها، والبئر والقصر والسوق، وجبل شثاث في الأفق. ساعد أبا ظافر في تجهيز ضيافة ضيفه، وتعرّف على أدوات أهل البلدة في الماضي.": ["A tour of the Dhahran Al-Janoub heritage town: its lanes and houses, the well, the palace and the souq, with Jabal Shithath on the horizon. Help Abu Dhafer prepare to welcome his guest, and discover the tools the townspeople used in the past.", "Une visite de la ville historique de Dhahran Al-Janoub : ruelles et maisons, le puits, le palais et le souk, avec le mont Shithath à l'horizon. Aidez Abou Dhafer à préparer l'accueil de son invité et découvrez les objets d'autrefois."], "حكايا القرى التراثية · Heritage Villages of Saudi Arabia": ["Heritage Village Tales · Heritage Villages of Saudi Arabia", "Contes des villages du patrimoine · Heritage Villages of Saudi Arabia"], "خريطة توضيحية لقرى ظهران الجنوب التراثية": ["Illustrated map of the heritage villages of Dhahran Al-Janoub", "Carte illustrée des villages du patrimoine de Dhahran Al-Janoub"], "خريطة توضيحية لمحافظات منطقة عسير": ["Illustrated map of the governorates of the Asir region", "Carte illustrée des gouvernorats de la région d'Asir"], "خريطة توضيحية، والمواقع تقريبية · الشمال إلى الأعلى": ["Illustrated map; locations are approximate · North is up", "Carte illustrée ; emplacements approximatifs · Le nord en haut"], "خريطة توضيحية، والمواقع تقريبية.": ["Illustrated map; locations are approximate.", "Carte illustrée ; emplacements approximatifs."], "خريطة عسير": ["Asir map", "Carte d'Asir"], "خريطة مصغرة": ["Mini-map", "Mini-carte"], "خريطة منطقة عسير": ["Map of the Asir Region", "Carte de la région d'Asir"], "ذكر": ["Male", "Homme"], "ساعدنا": ["Help us", "Aidez-nous"], "ش": ["N", "N"], "صوّر بيوتها ومعالمها، واجمع قصصها من أهلها، وأرسلها لمن شاركك اللعبة لتُضاف.": ["Photograph its houses and landmarks, collect its stories from its people, and send them to whoever shared the game with you.", "Photographiez ses maisons et ses lieux, recueillez ses histoires auprès des habitants et envoyez-les à la personne qui vous a partagé le jeu."], "ضيافة أبي ظافر": ["Abu Dhafer's hospitality", "L'hospitalité d'Abou Dhafer"], "ظهران الجنوب": ["Dhahran Al-Janoub", "Dhahran Al-Janoub"], "على الجوال: حرّك الشخصية بالعصا أسفل اليسار، واسحب على الشاشة لتدوير الكاميرا ورفعها وخفضها. الوضع الأفقي أفضل.": ["On phones: move with the stick at bottom left, and drag on the screen to turn, raise and lower the camera. Landscape works best.", "Sur mobile : déplacez-vous avec le joystick en bas à gauche et faites glisser l'écran pour orienter la caméra. Le mode paysage est préférable."], "فكرة وتطوير: المهندس عبدالله محمد آل خرصان الوادعي": ["Idea and development: Eng. Abdullah Mohammed Al Kharsan Al-Wadai", "Idée et développement : Ing. Abdullah Mohammed Al Kharsan Al-Wadai"], "في آل المؤنس، يحيط بها سور حيدان ببابيه: باب الحوزة وباب السلام. فيها مسجد الصحابي معاذ بن جبل وبئره، ودار الفروق «سداح» بمفاتيحها الأربعة، وقصر ابن عجلة بطوابقه الأربعة.": ["In Al-Mu'nis, ringed by the Haydan wall with its two gates, Bab Al-Hawza and Bab Al-Salam. Home to the mosque of the Companion Mu'adh ibn Jabal and its well, Dar Al-Furuq “Sadah” with its four keys, and the four-storey Ibn Ajla palace.", "À Al-Mu'nis, entouré du rempart de Haydan et de ses deux portes, Bab Al-Hawza et Bab Al-Salam. On y trouve la mosquée du Compagnon Mu'adh ibn Jabal et son puits, Dar Al-Furuq « Sadah » aux quatre clés, et le palais Ibn Ajla à quatre étages."], "في أقصى جنوب منطقة عسير، على ضفاف وادي العرين، ويحرسها من الشمال جبل شثاث. اختر قرية تراثية لتبدأ المغامرة.": ["In the far south of the Asir region, on the banks of Wadi Al-Arin, guarded to the north by Jabal Shithath. Choose a heritage village to begin your adventure.", "À l'extrême sud de la région d'Asir, sur les rives du wadi Al-Arin, gardé au nord par le mont Shithath. Choisissez un village du patrimoine pour commencer l'aventure."], "قراءة الحوار: تعمل": ["Read dialogue aloud: on", "Lecture des dialogues : activée"], "قرى تراثية أخرى": ["More heritage villages", "Autres villages du patrimoine"], "قريباً": ["Coming soon", "Bientôt"], "قرية الطلحة": ["Al-Talha", "Al-Talha"], "قرية الطلحة التراثية": ["Al-Talha Heritage Village", "Village historique d'Al-Talha"], "قرية حيدان": ["Haydan", "Haydan"], "قرية حيدان التراثية": ["Haydan Heritage Village", "Village historique de Haydan"], "قصرها الأثري صار متحفاً يحكي تراثها، وحوله بيوت قديمة من الحجر والطين، ومزارع مسوّرة، وقصر طيني في بستان على بئر سلوة.": ["Its heritage palace is now a museum telling the village's story, surrounded by old houses of stone and mud, walled fields, and a mud palace in an orchard by the well of Salwa.", "Son palais historique est devenu un musée qui raconte le village, entouré de vieilles maisons de pierre et de terre, de champs clos et d'un palais de terre dans un verger près du puits de Salwa."], "قطعة تراثية ١ من ٥": ["Heritage piece 1 of 5", "Objet du patrimoine 1 sur 5"], "لعبة فيديو تفاعلية تأخذك في رحلة إلى قرى منطقة عسير وبلداتها التراثية. اختر محافظة من الخريطة، ثم اختر قرية، وابدأ المغامرة.": ["An interactive video game that takes you on a journey to the heritage villages and towns of the Asir region. Choose a governorate on the map, then a village, and begin the adventure.", "Un jeu vidéo interactif qui vous emmène dans les villages et villes du patrimoine de la région d'Asir. Choisissez un gouvernorat sur la carte, puis un village, et commencez l'aventure."], "متابعة الجولة": ["Continue the tour", "Continuer la visite"], "متاحة": ["Open", "Ouvert"], "محافظة": ["Governorate", "Gouvernorat"], "محافظة في جنوب منطقة عسير قرب الحدود اليمنية. تتميّز بلدتها التراثية ببيوتها البرجية المبنية بمداميك الطين فوق أساس من الحجر، ونوافذها المؤطّرة بالأبيض، وأزقّتها الضيقة والمسقوفة التي تلتقي عند البئر، وساحتها التراثية للاحتفالات ومزارعها في الجنوب.": ["A governorate in the south of the Asir region, near the Yemeni border. Its heritage town is known for tower houses of layered mud on stone foundations, white-framed windows, narrow covered lanes that meet at the well, a heritage square for celebrations and farms to the south.", "Gouvernorat du sud de la région d'Asir, près de la frontière yéménite. Sa ville historique est connue pour ses maisons-tours en terre sur fondations de pierre, ses fenêtres encadrées de blanc, ses ruelles étroites et couvertes qui se rejoignent au puits, sa place des fêtes et ses champs au sud."], "مشهد ثلاثي الأبعاد لبلدة ظهران الجنوب التراثية": ["3D scene of the Dhahran Al-Janoub heritage town", "Scène 3D de la ville historique de Dhahran Al-Janoub"], "مع": ["to", "à"], "معلومات تجريبية، صحّحها لنا إن وجدت خطأ.": ["Beta information; please tell us if you spot a mistake.", "Informations en version bêta ; signalez-nous toute erreur."], "معلومة": ["Did you know", "Le saviez-vous"], "ملاحظاتك عن البلدة تهمّنا، أرسلها لمن شاركك الرابط.": ["Your notes about the town matter to us; send them to whoever shared the link.", "Vos remarques sur la ville comptent ; envoyez-les à la personne qui vous a partagé le lien."], "منظر جوي (M)": ["Aerial view (M)", "Vue aérienne (M)"], "نسخة تجريبية": ["Beta", "Bêta"], "نضيف قرى المحافظة واحدة بعد أخرى بمساعدة أهلها.": ["We are adding the governorate's villages one by one, with the help of their people.", "Nous ajoutons les villages du gouvernorat un par un, avec l'aide de leurs habitants."], "هذه نسخة تجريبية. إن لاحظت بيتاً أو معلماً أو اسماً أو معلومة تحتاج تصحيحاً، أخبر من أرسل لك الرابط.": ["This is a beta version. If you notice a house, landmark, name or fact that needs correcting, tell whoever sent you the link.", "Ceci est une version bêta. Si une maison, un lieu, un nom ou une information doit être corrigé, prévenez la personne qui vous a envoyé le lien."], "وادي العرين": ["Wadi Al-Arin", "Wadi Al-Arin"], "يُفضّل تشغيل الصوت": ["Sound on is recommended", "Activez le son de préférence"], "٠": ["0", "0"], "٠ / ٥": ["0 / 5", "0 / 5"], "→ خريطة عسير": ["← Asir map", "← Carte d'Asir"], "→ رجوع للقرى": ["← Back to villages", "← Retour aux villages"], "→ قرى ظهران الجنوب": ["← Villages of Dhahran Al-Janoub", "← Villages de Dhahran Al-Janoub"], "▶ ادخل الرحلة": ["▶ Enter the journey", "▶ Entrer dans le voyage"], " (قريباً)": [" (coming soon)", " (bientôt)"], " التراثية": ["", ""], " من أمامك": [" in front of you", " devant vous"], "D1 دار الفروق «سداح»": ["D1 Dar Al-Furuq “Sadah”", "D1 Dar Al-Furuq « Sadah »"], "F2 مزارع مسوّرة بالحجر": ["F2 Stone-walled farms", "F2 Champs clos de pierre"], "M1 مسجد معاذ بن جبل": ["M1 Mosque of Mu'adh ibn Jabal", "M1 Mosquée de Mu'adh ibn Jabal"], "M2 بئر المسجد": ["M2 The mosque's well", "M2 Le puits de la mosquée"], "M3 مسجد بن عجلة": ["M3 Ibn Ajla Mosque", "M3 Mosquée Ibn Ajla"], "P1 قصر ابن عجلة": ["P1 Ibn Ajla Palace", "P1 Palais Ibn Ajla"], "V1 وادي العرين · F1 النخيل والأشجار": ["V1 Wadi Al-Arin · F1 Palms and trees", "V1 Wadi Al-Arin · F1 Palmiers et arbres"], "W1 سور حيدان · G1 باب الحوزة · G2 باب السلام": ["W1 Haydan wall · G1 Bab Al-Hawza · G2 Bab Al-Salam", "W1 Rempart de Haydan · G1 Bab Al-Hawza · G2 Bab Al-Salam"], "{أبغاك تجيب|أبغاكِ تجيبين} لي أربع حاجات: النجر من السوق، والقربة من البير، والمدهان من بيت العم ناصر غرب البلدة، والدلة من قصر آل زابن.": ["I need you to bring me four things: the najr from the souq, the water skin from the well, the midhan from Uncle Nasser's house west of the town, and the dallah from the Al Zaben palace.", "J'ai besoin que tu m'apportes quatre choses : le najr du souk, l'outre du puits, le midhan de chez l'oncle Nasser à l'ouest de la ville, et la dallah du palais Al Zaben."], "{أحسنت|أحسنتِ} يا {name}، {أكملت|أكملتِ} جولة حيدان": ["Well done, {name}! You have completed the Haydan tour", "Bravo, {name} ! Vous avez terminé la visite de Haydan"], "{أحسنت|أحسنتِ} يا {name}، اكتملت المهمة وأُكرم الضيف": ["Well done, {name}! The quest is complete and the guest is honoured", "Bravo, {name} ! La quête est accomplie et l'invité est honoré"], "{ادخل|ادخلي} بيوت الطلحة القديمة": ["Enter the old houses of Al-Talha", "Entrez dans les vieilles maisons d'Al-Talha"], "{اذهب|اذهبي} إلى أبي طلال صاحب قصر آل زابن": ["Go to Abu Talal, owner of the Al Zaben palace", "Allez voir Abou Talal, propriétaire du palais Al Zaben"], "{اذهب|اذهبي} إلى العم حسن في السوق": ["Go to Uncle Hasan at the souq", "Allez voir l'oncle Hassan au souk"], "{اذهب|اذهبي} إلى العم ناصر غرب البلدة": ["Go to Uncle Nasser in the west of the town", "Allez voir l'oncle Nasser à l'ouest de la ville"], "{اذهب|اذهبي} إلى القصر الأثري": ["Go to the heritage palace", "Allez au palais historique"], "{اذهب|اذهبي} إلى القصر الطيني في البستان": ["Go to the mud palace in the orchard", "Allez au palais de terre du verger"], "{اذهب|اذهبي} إلى المزارع المسوّرة": ["Go to the stone-walled farms", "Allez aux champs clos de pierre"], "{اذهب|اذهبي} إلى بئر المسجد": ["Go to the mosque's well", "Allez au puits de la mosquée"], "{اذهب|اذهبي} إلى باب قصر ابن عجلة": ["Go to the gate of the Ibn Ajla palace", "Allez à la porte du palais Ibn Ajla"], "{اذهب|اذهبي} إلى دار الفروق «سداح»": ["Go to Dar Al-Furuq “Sadah”", "Allez à Dar Al-Furuq « Sadah »"], "{اذهب|اذهبي} إلى سالم عند البئر": ["Go to Salem at the well", "Allez voir Salem au puits"], "{اذهب|اذهبي} إلى سور حيدان": ["Go to the Haydan wall", "Allez au rempart de Haydan"], "{اذهب|اذهبي} إلى مزارع الطلحة": ["Go to the farms of Al-Talha", "Allez aux champs d'Al-Talha"], "{اذهب|اذهبي} إلى مسجد بن عجلة": ["Go to the Ibn Ajla mosque", "Allez à la mosquée Ibn Ajla"], "{اذهب|اذهبي} إلى مسجد معاذ بن جبل": ["Go to the mosque of Mu'adh ibn Jabal", "Allez à la mosquée de Mu'adh ibn Jabal"], "{اذهب|اذهبي} إلى وادي العرين": ["Go to Wadi Al-Arin", "Allez au wadi Al-Arin"], "{اقرأ|اقرئي}": ["Read", "Lire"], "{امشِ|امشي} ورا الضو الذهبي، وإذا {خلّصت ألقاك|خلّصتِ ألقاكِ} في ساحة قصر آل زابن.": ["Follow the golden light, and when you're done I'll meet you in the Al Zaben palace courtyard.", "Suis la lumière dorée ; quand tu auras fini, retrouve-moi dans la cour du palais Al Zaben."], "{امشِ|امشي} ورا الضو الذهبي، وكل ما {توصل|توصلين} معلم {تعرف|تعرفين} قصته.": ["Follow the golden light, and at every landmark you reach you'll learn its story.", "Suis la lumière dorée : à chaque lieu atteint, tu découvriras son histoire."], "{تحدّث|تحدّثي}": ["Talk", "Parler"], "{تحدّث|تحدّثي} مع أبي ظافر عند البوابة": ["Talk to Abu Dhafer at the gate", "Parlez à Abou Dhafer à la porte"], "{تحدّث|تحدّثي} مع الراوي عند مدخل القرية": ["Talk to the storyteller at the village entrance", "Parlez au conteur à l'entrée du village"], "{تعال|تعالي} {أوريك|أوريكِ} قريتنا: البيوت القديمة، والمزارع، والقصر الطيني اللي في البستان، والقصر الأثري اللي صار متحف.": ["Come, let me show you our village: the old houses, the farms, the mud palace in the orchard, and the heritage palace that became a museum.", "Viens, je vais te montrer notre village : les vieilles maisons, les champs, le palais de terre du verger et le palais historique devenu musée."], "{تعال|تعالي} {أوريك|أوريكِ} معالمها: المزارع ووادي العرين، والسور، ومسجد معاذ بن جبل وبئره، وقصر ابن عجلة فوق الجبل، ودار الفروق «سداح»، ومسجد بن عجلة.": ["Come, let me show you its landmarks: the farms and Wadi Al-Arin, the wall, the mosque of Mu'adh ibn Jabal and its well, the Ibn Ajla palace on the hill, Dar Al-Furuq “Sadah” and the Ibn Ajla mosque.", "Viens, je vais te montrer ses lieux : les champs et le wadi Al-Arin, le rempart, la mosquée de Mu'adh ibn Jabal et son puits, le palais Ibn Ajla sur la colline, Dar Al-Furuq « Sadah » et la mosquée Ibn Ajla."], "{خذ هذي الجنبية هدية مني، تنلبس في وسط الحزام، وهي زينة الرجال عندنا في الجنوب.|خذي هذي الجنبية هدية مني لأهل بيتك، تنلبس في وسط الحزام، وهي زينة الرجال عندنا في الجنوب.}": ["Take this janbiya as a gift from me. It is worn at the centre of the belt, and it is the pride of the men here in the south.", "Prends cette janbiya en cadeau. Elle se porte au centre de la ceinture ; c'est la parure des hommes ici, dans le Sud."], "{خذ|خذي} ": ["Take ", "Prenez "], "{خذه|خذيه}، ولا سمعوا الجيران صوت دقّه عرفوا إن عندكم ضيف.": ["Take it. When the neighbours hear it pounding, they know you have a guest.", "Prends-le. Quand les voisins l'entendent piler, ils savent que vous recevez un invité."], "{شف|شوفي} وراك من جهة الشمال: ذاك جبل شثاث، حارس ظهران من قديم.": ["Look behind you to the north: that's Jabal Shithath, guardian of Dhahran since the old days.", "Regarde derrière toi, au nord : c'est le mont Shithath, gardien de Dhahran depuis toujours."], "{عُد|عودي} إلى أبي ظافر في فناء قصر آل زابن": ["Return to Abu Dhafer in the Al Zaben palace courtyard", "Retournez voir Abou Dhafer dans la cour du palais Al Zaben"], "{قرأت|قرأتِ} تاريخ كل بيوت البلدة!": ["You've read the history of every house in the town!", "Vous avez lu l'histoire de toutes les maisons de la ville !"], "أبها ومراكزها": ["Abha and its districts", "Abha et ses districts"], "أبو طلال": ["Abu Talal", "Abou Talal"], "أبو ظافر": ["Abu Dhafer", "Abou Dhafer"], "أرحبو يا {ولدي|بنتي}. {انتبه|انتبهي} في أزقّة البلدة، ضيّقة ومتعرّجة، وتظلّل الماشي من الشمس.": ["Arhabo, my child. Mind the town's lanes: narrow and winding, they shade walkers from the sun.", "Arhabo, mon enfant. Attention aux ruelles de la ville : étroites et sinueuses, elles protègent les passants du soleil."], "أرحبو! {حيّاك|حيّاكِ} في السوق. أبو ظافر {مرسلك|مرسلكِ}؟": ["Arhabo! Welcome to the souq. Did Abu Dhafer send you?", "Arhabo ! Bienvenue au souk. C'est Abou Dhafer qui t'envoie ?"], "أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله في الطلحة.": ["Arhabo! Arhabo, {name}, welcome to Al-Talha.", "Arhabo ! Arhabo, {name}, bienvenue à Al-Talha."], "أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله في حيدان.": ["Arhabo! Arhabo, {name}, welcome to Haydan.", "Arhabo ! Arhabo, {name}, bienvenue à Haydan."], "أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله، {جيت|جيتِ} في وقتك.": ["Arhabo! Arhabo, {name}, God bless you, you've come just in time.", "Arhabo ! Arhabo, {name}, sois le bienvenu, tu arrives au bon moment."], "أرحبو، {حيّاك|حيّاكِ} الله في قصرنا. هذا قصر آل زابن، بيت طين عمره فوق المية سنة، واليوم صار مزار للزوار.": ["Arhabo, welcome to our palace. This is the Al Zaben palace, a mud house over a hundred years old, and today a place visitors come to see.", "Arhabo, bienvenue dans notre palais. Voici le palais Al Zaben, une maison de terre de plus de cent ans, aujourd'hui visitée par les touristes."], "أسماء البيوت وأسرها، وصور الأبواب والنوافذ.": ["The names of the houses and their families, and photos of the doors and windows.", "Le nom des maisons et de leurs familles, et des photos des portes et fenêtres."], "أنواع الأشجار والنخيل، وأسماء القرى على ضفافه.": ["The kinds of trees and palms, and the names of the villages on its banks.", "Les espèces d'arbres et de palmiers, et le nom des villages sur ses rives."], "إحدى محافظات منطقة عسير.": ["One of the governorates of the Asir region.", "L'un des gouvernorats de la région d'Asir."], "إعداد القهوة وتقديمها: تُمسك الدلة باليسرى ويُقدَّم الفنجال باليمنى.": ["Making and serving coffee: the dallah is held in the left hand and the cup offered with the right.", "Préparer et servir le café : la dallah se tient de la main gauche, la tasse s'offre de la droite."], "إناء القهوة العربية بمقبضه الطويل ومنقاره المعقوف، وأول ما يُقدَّم للضيف في المجلس.": ["The Arabic coffee pot, with its long handle and curved spout, the first thing offered to a guest in the majlis.", "La cafetière arabe, à long manche et bec recourbé : la première chose offerte à l'invité dans le majlis."], "ابدأ: جولة في الطلحة": ["Start: a tour of Al-Talha", "Commencer : visite d'Al-Talha"], "ابدأ: جولة في حيدان": ["Start: a tour of Haydan", "Commencer : visite de Haydan"], "استلم": ["Receive", "Recevoir"], "اسم كل ربع، وشكل الباب والمفاتيح.": ["The name of each quarter, and the shape of the door and keys.", "Le nom de chaque quartier, et la forme de la porte et des clés."], "اكتملت المهمة": ["Quest complete", "Quête accomplie"], "البئر": ["The well", "Le puits"], "البئر «مشبعة»": ["The well “Mushbi'ah”", "Le puits « Mushbi'ah »"], "البئر المركزية": ["The central well", "Le puits central"], "البئر في ساحة مفتوحة تحيط بها البيوت البرجية، ومنها تتفرع الأزقة شرقاً.": ["The well sits in an open square ringed by tower houses, with lanes branching off to the east.", "Le puits se trouve sur une place ouverte entourée de maisons-tours, d'où partent des ruelles vers l'est."], "البحر الأحمر": ["Red Sea", "Mer Rouge"], "البوابة الشمالية": ["The North Gate", "La porte nord"], "الجمارك": ["Customs", "Douanes"], "الجنبية": ["The janbiya", "La janbiya"], "الدلة جاهزة ومحمّسة، {شلّها|شلّيها} لأبو ظافر. {سبقك|سبقكِ} للساحة وهو {ينتظرك|ينتظركِ}.": ["The dallah is ready and roasted; take it to Abu Dhafer. He went ahead to the courtyard and is waiting for you.", "La dallah est prête ; porte-la à Abou Dhafer. Il est parti devant à la cour et t'attend."], "الراوي": ["The storyteller", "Le conteur"], "الرمز": ["Code", "Code"], "الزراعة.": ["Farming.", "Agriculture."], "الساحة التراثية": ["Heritage square", "Place du patrimoine"], "السقّاء": ["The water carrier", "Le porteur d'eau"], "السلام عليكم، أرحبو. هذي البير قلب البلدة، منها يشربون الناس وتنسقى المزارع.": ["Peace be upon you, Arhabo. This well is the heart of the town; people drink from it and the farms are watered from it.", "Que la paix soit sur toi, Arhabo. Ce puits est le cœur de la ville : on y boit et on y arrose les champs."], "السوق": ["Souq", "Souk"], "السوق عند الطريق الشمالي": ["The souq by the north road", "Le souk près de la route nord"], "الصوت: متوقف": ["Sound: off", "Son : coupé"], "الطلحة القديمة": ["Old Al-Talha", "Le vieil Al-Talha"], "العم حسن": ["Uncle Hasan", "Oncle Hassan"], "العم ناصر": ["Uncle Nasser", "Oncle Nasser"], "القصر الأثري بالطلحة": ["The heritage palace of Al-Talha", "Le palais historique d'Al-Talha"], "القصر الطيني في البستان": ["The mud palace in the orchard", "Le palais de terre du verger"], "القِربة": ["The qirba (water skin)", "La qirba (outre)"], "الكرم عندنا ما هو بالقهوة بس، الكرم في اللي يسعى يكرم ضيفه.": ["Generosity here isn't just coffee; it's in the one who strives to honour his guest.", "Ici, la générosité n'est pas que le café : elle est chez celui qui s'efforce d'honorer son invité."], "الليلة عندنا ضيف عزيز، والضيف عندنا في ظهران له حقّه وقدره.": ["Tonight we have a dear guest, and a guest here in Dhahran has his due and his respect.", "Ce soir nous recevons un invité cher, et ici à Dhahran l'invité a ses droits et son rang."], "المدرسة الأولى": ["The First School", "La première école"], "المدرسة الثانية": ["The Second School", "La deuxième école"], "المزارع": ["Farms", "Champs"], "المزارع المسوّرة بالحجر": ["Stone-walled farms", "Champs clos de pierre"], "المستوصف الأول": ["The First Clinic", "Le premier dispensaire"], "المسجد التاريخي": ["The Historic Mosque", "La mosquée historique"], "الموقع: ": ["Location: ", "Lieu : "], "المِدهان": ["The midhan (stone pot)", "Le midhan (marmite en pierre)"], "النخيل والأشجار": ["Palms and trees", "Palmiers et arbres"], "النِّجر": ["The najr (coffee mortar)", "Le najr (mortier à café)"], "الوقت: النهار": ["Time: day", "Heure : jour"], "اليمن": ["Yemen", "Yémen"], "بئر سلوة": ["Well of Salwa", "Puits de Salwa"], "بئر قديمة وسط البلدة تحيط بها البيوت من كل الجهات، عمقها أكثر من عشرين متراً، وعمرها أكثر من مائة عام.": ["An old well in the middle of the town, surrounded by houses on every side, more than twenty metres deep and over a hundred years old.", "Un vieux puits au cœur de la ville, entouré de maisons de tous côtés, profond de plus de vingt mètres et vieux de plus de cent ans."], "بئر مسجد معاذ": ["Well of the Mu'adh mosque", "Puits de la mosquée de Mu'adh"], "بئر ملحقة بمسجد معاذ بن جبل، وهي جزء من موقعه التاريخي.": ["A well attached to the mosque of Mu'adh ibn Jabal, part of its historic site.", "Un puits rattaché à la mosquée de Mu'adh ibn Jabal, partie de son site historique."], "بجانب سور مسجد معاذ من الجهة الشرقية": ["Beside the east wall of the Mu'adh mosque", "Près du mur est de la mosquée de Mu'adh"], "بطاقة القرية: الطلحة": ["Village card: Al-Talha", "Fiche : Al-Talha"], "بطاقة القرية: حيدان": ["Village card: Haydan", "Fiche : Haydan"], "بنتي": ["my child", "mon enfant"], "بيت آل فايع": ["Al Fayea House", "Maison Al Fayea"], "بيت حجري طيني": ["Stone and mud house", "Maison de pierre et de terre"], "بيت طيني تراثي من أربعة طوابق، عمره أكثر من مائة عام، وعلى جدرانه القط العسيري.": ["A four-storey heritage mud house, over a hundred years old, with Asiri qatt painting on its walls.", "Une maison de terre historique de quatre étages, vieille de plus de cent ans, aux murs ornés de peinture qatt d'Asir."], "بيت طيني من أربعة أدوار وحوش كبير، عمره نحو مائة وعشرين عاماً، بُني من الطين والأعشاب. سكنته أسرة من آل زاهر، وفي عام 1352هـ أُجِّر الحوش والغرف الأرضية لشعبة الجمارك والمالية.": ["A four-storey mud house with a large courtyard, about 120 years old, built of mud and straw. A family of Al Zaher lived here, and in 1352 AH the courtyard and ground-floor rooms were rented to the customs and finance office.", "Maison de terre de quatre étages avec une grande cour, vieille d'environ 120 ans, bâtie en terre et en paille. Une famille Al Zaher y vivait ; en 1352 de l'Hégire, la cour et le rez-de-chaussée furent loués au bureau des douanes et des finances."], "بيت مال القبيلة للأزمات: الحروب، وشحّ المطر، والديات. بابه بأربعة مفاتيح، لكل ربع من أرباع القبيلة مفتاح، ولا يُفتح إلا بحضورها كلها. والفروق متداول إلى اليوم. قريباً: مغامرة المفاتيح الأربعة.": ["The tribe's treasury for hard times: wars, droughts and blood money. Its door has four keys, one for each quarter of the tribe, and it opens only when all are present. The tradition of al-furuq continues today. Coming soon: the adventure of the four keys.", "Le trésor de la tribu pour les temps difficiles : guerres, sécheresses et prix du sang. Sa porte a quatre clés, une par quartier de la tribu, et ne s'ouvre qu'en présence de tous. La tradition d'al-furuq perdure. Bientôt : l'aventure des quatre clés."], "بين النخيل والطريق": ["Between the palms and the road", "Entre les palmiers et la route"], "بيوت الطلحة القديمة": ["The old houses of Al-Talha", "Les vieilles maisons d'Al-Talha"], "بيوت القرية": ["The village houses", "Les maisons du village"], "تاجر السوق": ["Souq trader", "Marchand du souk"], "تاريخ المسجد، وصلته بقصر ابن عجلة.": ["The mosque's history, and its link to the Ibn Ajla palace.", "L'histoire de la mosquée et son lien avec le palais Ibn Ajla."], "جبل شثاث · حارس ظهران الجنوب": ["Jabal Shithath · Guardian of Dhahran Al-Janoub", "Mont Shithath · Gardien de Dhahran Al-Janoub"], "جنوب القرية قرب الطريق": ["South of the village near the road", "Au sud du village, près de la route"], "جنوب غرب بيوت القرية": ["South-west of the village houses", "Au sud-ouest des maisons du village"], "جولة في الطلحة ": ["Al-Talha tour ", "Visite d'Al-Talha "], "جولة في حيدان ": ["Haydan tour ", "Visite de Haydan "], "جولة في قرية الطلحة بظهران الجنوب: بيوتها القديمة من الحجر والطين، ومزارعها المسوّرة، والقصر الطيني في البستان على بئر سلوة، والقصر الأثري الذي صار متحفاً.": ["A tour of Al-Talha in Dhahran Al-Janoub: its old houses of stone and mud, walled fields, the mud palace in the orchard by the well of Salwa, and the heritage palace that became a museum.", "Une visite d'Al-Talha à Dhahran Al-Janoub : ses vieilles maisons de pierre et de terre, ses champs clos, le palais de terre du verger près du puits de Salwa et le palais historique devenu musée."], "جولة في قرية حيدان بآل المؤنس في ظهران الجنوب: المزارع ووادي العرين، وسور حيدان، ومسجد الصحابي معاذ بن جبل وبئره، وقصر ابن عجلة على قمة الجبل، ودار الفروق «سداح»، ومسجد بن عجلة.": ["A tour of Haydan in Al-Mu'nis, Dhahran Al-Janoub: the farms and Wadi Al-Arin, the Haydan wall, the mosque of the Companion Mu'adh ibn Jabal and its well, the Ibn Ajla palace on the hilltop, Dar Al-Furuq “Sadah” and the Ibn Ajla mosque.", "Une visite de Haydan à Al-Mu'nis, Dhahran Al-Janoub : les champs et le wadi Al-Arin, le rempart, la mosquée du Compagnon Mu'adh ibn Jabal et son puits, le palais Ibn Ajla au sommet de la colline, Dar Al-Furuq « Sadah » et la mosquée Ibn Ajla."], "حاضر": ["Will do", "D'accord"], "حجر مستدير مسطّح كان يُستعمل في الماضي لسحق البارود، لتزويد أهل القرية بالذخيرة لمواجهة التهديدات الخارجية وحماية القرية.": ["A flat round stone once used to grind gunpowder, supplying the villagers with ammunition to face outside threats and protect the village.", "Une pierre ronde et plate qui servait autrefois à broyer la poudre, pour fournir des munitions aux habitants face aux menaces extérieures et protéger le village."], "حفظ الماء ونقله من البئر إلى البيوت، وحمله في الرعي والسفر.": ["Keeping water and carrying it from the well to the houses, and on grazing trips and journeys.", "Garder l'eau et la porter du puits aux maisons, ainsi qu'au pâturage et en voyage."], "حكيم البلدة": ["The town's wise elder", "Le sage de la ville"], "حول بيوت القرية": ["Around the village houses", "Autour des maisons du village"], "حيدان قرية قديمة يحيطها سور، ومن دخل السور فهو آمن. هذي عادة أهلها من قديم.": ["Haydan is an old village surrounded by a wall, and whoever enters the wall is safe. That's been the way of its people since the old days.", "Haydan est un vieux village entouré d'un rempart, et quiconque en franchit l'enceinte est en sécurité. C'est la coutume de ses habitants depuis toujours."], "خنجر بنصل معقوف وغمد مزخرف يُلبس في وسط الحزام، وما زال جزءاً من الزي الرجالي في المناسبات بالجنوب.": ["A dagger with a curved blade and an ornate sheath, worn at the centre of the belt; still part of men's dress at occasions in the south.", "Un poignard à lame recourbée et fourreau orné, porté au centre de la ceinture ; il fait encore partie de la tenue masculine lors des fêtes dans le Sud."], "دار الفروق «سداح»": ["Dar Al-Furuq “Sadah”", "Dar Al-Furuq « Sadah »"], "دقّ البن قبل إعداد القهوة.": ["Pounding coffee beans before making coffee.", "Piler le café avant de le préparer."], "زينة ورمز للوجاهة، وتُصنع وتُباع في سوق ظهران الجنوب.": ["An ornament and sign of standing, made and sold in the souq of Dhahran Al-Janoub.", "Une parure et un signe de prestige, fabriquée et vendue au souk de Dhahran Al-Janoub."], "سالم": ["Salem", "Salem"], "سور حيدان": ["Haydan wall", "Rempart de Haydan"], "سور يحيط بالقرية كاملة، بعضه قائم وبعضه أثّرت فيه عوامل البيئة. وللسور بابان: باب الحوزة وباب السلام. وتُعرف حيدان بأنها دار أمان، فمن دخل سورها فهو آمن.": ["A wall surrounding the whole village, partly standing and partly worn by the weather. It has two gates: Bab Al-Hawza and Bab Al-Salam. Haydan is known as a house of safety: whoever enters its wall is safe.", "Un rempart entoure tout le village, en partie debout, en partie érodé par le temps. Il a deux portes : Bab Al-Hawza et Bab Al-Salam. Haydan est connue comme un refuge : quiconque franchit son rempart est en sécurité."], "شرق القرية القديمة": ["East of the old village", "À l'est du vieux village"], "شمال القرية": ["North of the village", "Au nord du village"], "شمال القرية قرب الوادي": ["North of the village, near the wadi", "Au nord du village, près du wadi"], "شمال شرق القرية القديمة، قرب شعب سعد": ["North-east of the old village, near Shi'b Sa'd", "Au nord-est du vieux village, près de Shi'b Sa'd"], "صاحب القصر": ["Owner of the palace", "Propriétaire du palais"], "صور النقوش القديمة إن وُجدت.": ["Photos of the old paintings, if any remain.", "Des photos des anciennes peintures, s'il en reste."], "صور داخل المسجد.": ["Photos of the mosque's interior.", "Des photos de l'intérieur de la mosquée."], "طهي الطعام وتقديمه ساخناً للأسرة والضيوف.": ["Cooking food and serving it hot to family and guests.", "Cuire les plats et les servir chauds à la famille et aux invités."], "عاصمة منطقة عسير، على قمم جبال السروات، يحيط بها كثير من القرى التراثية.": ["Capital of the Asir region, on the peaks of the Sarawat mountains, surrounded by many heritage villages.", "Capitale de la région d'Asir, sur les sommets des monts Sarawat, entourée de nombreux villages du patrimoine."], "عبّيت {لك|لكِ} القربة الحين. {علّقها|علّقيها} في الظل ويبقى ماها بارد.": ["I've filled the water skin for you. Hang it in the shade and the water stays cool.", "Je t'ai rempli l'outre. Suspends-la à l'ombre et l'eau restera fraîche."], "على ضفاف وادي العرين ومزارعه": ["On the banks of Wadi Al-Arin and its farms", "Sur les rives du wadi Al-Arin et de ses champs"], "على قمة الجبل في شمال شرق القرية": ["On the hilltop, north-east of the village", "Au sommet de la colline, au nord-est du village"], "على وادي العرين بضفاف المزارع": ["On Wadi Al-Arin, beside the farms", "Sur le wadi Al-Arin, près des champs"], "عمره أكثر من مائة عام.": ["Over a hundred years old.", "Plus de cent ans."], "عمره نحو مائة عام.": ["About a hundred years old.", "Environ cent ans."], "عمره نحو مائة وخمسين عاماً.": ["About a hundred and fifty years old.", "Environ cent cinquante ans."], "عمق البئر وقصتها، وهل ما زال فيها ماء.": ["The well's depth and story, and whether it still holds water.", "La profondeur du puits, son histoire, et s'il contient encore de l'eau."], "عن": ["about", "sur"], "غرب أبها على منحدرات تهامة، وتشتهر بقرية رجال التراثية وقصورها الحجرية.": ["West of Abha on the slopes of Tihama, famous for the heritage village of Rijal and its stone palaces.", "À l'ouest d'Abha sur les pentes de la Tihama, célèbre pour le village historique de Rijal et ses palais de pierre."], "غرب البلدة عند الزقاق المتعرّج": ["West of the town by the winding lane", "À l'ouest de la ville, près de la ruelle sinueuse"], "غرب البلدة، قرب السوق الشعبي القديم": ["West of the town, near the old popular souq", "À l'ouest de la ville, près de l'ancien souk populaire"], "في جنوب الجزيرة، بين الجبال والوديان": ["In the south of Arabia, among mountains and valleys", "Au sud de l'Arabie, entre montagnes et vallées"], "في جنوب شرق منطقة عسير على مرتفعات السراة، وتشتهر بمزارعها وقراها التراثية.": ["In the south-east of the Asir region on the Sarat highlands, known for its farms and heritage villages.", "Au sud-est de la région d'Asir, sur les hauts plateaux de la Sarat, connu pour ses champs et ses villages du patrimoine."], "فيه نقوش أثرية، ومساحته نحو 290 متراً مربعاً.": ["It has ancient inscriptions, and covers about 290 square metres.", "Elle possède des inscriptions anciennes et couvre environ 290 mètres carrés."], "قديماً بئر الماء للبلدة، واليوم مهجورة.": ["Once the town's water well; now abandoned.", "Autrefois le puits de la ville ; aujourd'hui abandonné."], "قديماً سحق البارود، واليوم أثر قائم بجانب سور المسجد.": ["Once used to grind gunpowder; today a relic beside the mosque wall.", "Autrefois pour broyer la poudre ; aujourd'hui un vestige près du mur de la mosquée."], "قديماً سكن الأهالي، واليوم أطلال وبيوت قديمة.": ["Once the villagers' homes; today ruins and old houses.", "Autrefois les maisons des habitants ; aujourd'hui des ruines et de vieilles maisons."], "قديماً سكن ثم مدرسة ابتدائية لأبناء البلدة، واليوم مبنى تراثي مرمّم.": ["Once a home, then a primary school for the town's children; today a restored heritage building.", "Autrefois une maison, puis une école primaire pour les enfants de la ville ; aujourd'hui un bâtiment historique restauré."], "قديماً سكن ثم مقر لإدارة ظهران، واليوم مهجور.": ["Once a home, then the seat of Dhahran's administration; today abandoned.", "Autrefois une maison, puis le siège de l'administration de Dhahran ; aujourd'hui abandonné."], "قديماً سكن عائلي، واليوم مرمّم غير مستخدم.": ["Once a family home; today restored but unused.", "Autrefois une maison familiale ; aujourd'hui restaurée mais inoccupée."], "قديماً سكن عائلي، واليوم مزار سياحي تزوره الوفود.": ["Once a family home; today a tourist site visited by delegations.", "Autrefois une maison familiale ; aujourd'hui un site touristique visité par des délégations."], "قديماً سكن للأسرة وشعبة للجمارك والمالية، واليوم مبنى مرمّم غير مستخدم.": ["Once a family home and the customs and finance office; today restored but unused.", "Autrefois maison familiale et bureau des douanes et des finances ; aujourd'hui restaurée mais inoccupée."], "قديماً سكن للأسرة، واليوم مهجور ومتهالك.": ["Once a family home; today abandoned and crumbling.", "Autrefois une maison familiale ; aujourd'hui abandonnée et délabrée."], "قديماً سكن وحماية وتخزين، واليوم متحف سياحي.": ["Once a home, a refuge and a storehouse; today a museum.", "Autrefois maison, refuge et grenier ; aujourd'hui un musée."], "قديماً سكن ومبنى للشرطة، واليوم مرمّم غير مستخدم.": ["Once a home and police building; today restored but unused.", "Autrefois maison et poste de police ; aujourd'hui restaurée mais inoccupée."], "قديماً سكن ومركز صحي، واليوم مرمّم غير مستخدم.": ["Once a home and health centre; today restored but unused.", "Autrefois maison et centre de santé ; aujourd'hui restaurée mais inoccupée."], "قديماً مزرعة، واليوم مسرح للاحتفالات والمناسبات.": ["Once a farm; today a stage for celebrations and events.", "Autrefois un champ ; aujourd'hui une scène pour les fêtes et les événements."], "قرأت عن ": ["Read about ", "Découvert : "], "قراءة الحوار بصوت": ["Read dialogue aloud", "Lire les dialogues"], "قرب السوق الشعبي": ["Near the popular souq", "Près du souk populaire"], "قرب المسجد التاريخي": ["Near the historic mosque", "Près de la mosquée historique"], "قرب المسجد التاريخي والجمارك": ["Near the historic mosque and customs", "Près de la mosquée historique et des douanes"], "قرى ": ["Heritage villages of ", "Villages du patrimoine de "], "قرى من طين وحجر، عمرها مئات السنين": ["Villages of mud and stone, centuries old", "Des villages de terre et de pierre, vieux de plusieurs siècles"], "قرية الطلحة <span>التراثية</span>": ["Al-Talha <span>Heritage Village</span>", "Al-Talha <span>village historique</span>"], "قرية تراثية في آل المؤنس بمحافظة ظهران الجنوب، يحيطها سور له بابان، وتُعرف بأنها دار أمان. قريباً: مغامرة مفاتيح دار الفروق «سداح» الأربعة، ومجلس الشورى وقصة «راعي العليا».": ["A heritage village in Al-Mu'nis, Dhahran Al-Janoub governorate, ringed by a wall with two gates and known as a house of safety. Coming soon: the adventure of the four keys of Dar Al-Furuq “Sadah”, and the council and the story of “Ra'i Al-Ulya”.", "Un village historique d'Al-Mu'nis, gouvernorat de Dhahran Al-Janoub, entouré d'un rempart à deux portes et connu comme un refuge. Bientôt : l'aventure des quatre clés de Dar Al-Furuq « Sadah », le conseil et l'histoire de « Ra'i Al-Ulya »."], "قرية حيدان <span>التراثية</span>": ["Haydan <span>Heritage Village</span>", "Haydan <span>village historique</span>"], "قرية في محافظة ظهران الجنوب، قصرها الأثري صار متحفاً يحكي تراثها، وحوله بيوت قديمة من الحجر والطين ومزارع مسوّرة. ونضيف قصصها كلما وصلتنا من أهلها.": ["A village in Dhahran Al-Janoub governorate whose heritage palace is now a museum telling its story, surrounded by old houses of stone and mud and walled fields. We add its stories as they reach us from its people.", "Un village du gouvernorat de Dhahran Al-Janoub dont le palais historique est devenu un musée qui raconte son histoire, entouré de vieilles maisons de pierre et de terre et de champs clos. Nous ajoutons ses récits au fil des contributions des habitants."], "قصة سعيد ابن عجلة بعد موافقة أسرته، وصور غرف القصر.": ["The story of Saeed Ibn Ajla, once his family agrees, and photos of the palace rooms.", "L'histoire de Saïd Ibn Ajla, avec l'accord de sa famille, et des photos des pièces du palais."], "قصر آل دوبان": ["Al Duban Palace", "Palais Al Duban"], "قصر آل زابن": ["Al Zaben Palace", "Palais Al Zaben"], "قصر آل زابن بيت طيني من أربعة طوابق عمره أكثر من مائة عام، وصار اليوم مزاراً سياحياً.": ["The Al Zaben palace is a four-storey mud house over a hundred years old, and today a place visitors come to see.", "Le palais Al Zaben est une maison de terre de quatre étages, vieille de plus de cent ans, aujourd'hui visitée par les touristes."], "قصر أثري يُقدَّر عمره بأكثر من 150 عاماً، من ثلاثة طوابق إلى خمسة بحسب الروايات، بُني من الحجر والطين والخشب وسعف النخل، وعلى جدرانه القط العسيري. كان بيتاً للسكن والحماية وتخزين الطعام، وهو اليوم متحف أثري مرمّم يرى فيه الجيل الجديد تراث الطلحة وظهران الجنوب.": ["A heritage palace thought to be over 150 years old, three to five storeys high depending on the account, built of stone, mud, wood and palm fronds, with Asiri qatt painting on its walls. It was a home, a refuge and a food store; today it is a restored museum where young people can see the heritage of Al-Talha and Dhahran Al-Janoub.", "Un palais historique de plus de 150 ans, de trois à cinq étages selon les récits, bâti en pierre, terre, bois et palmes, aux murs ornés de peinture qatt d'Asir. Il servait d'habitation, de refuge et de grenier ; c'est aujourd'hui un musée restauré où les jeunes découvrent le patrimoine d'Al-Talha et de Dhahran Al-Janoub."], "قصر ابن عجلة": ["Ibn Ajla Palace", "Palais Ibn Ajla"], "قصر طيني من دورين منفصلين وقبو، وسط بستان على بئر سلوة. بناه صاحبه عام 1390هـ بعد عودته من العمل في أرامكو، ويُعد أحدث بيت طيني في الطلحة. أساسه من الحجر ثم الطين، وسقفه من خشب النظار الجيد النادر. وكانت على جدرانه نقوش ملوّنة بأيدي الجدّات، ثم طُلي حديثاً بالأبيض.": ["A mud palace of two separate storeys and a basement, in an orchard by the well of Salwa. Its owner built it in 1390 AH after returning from working at Aramco, and it is the newest mud house in Al-Talha. Its foundation is stone, then mud, and its roof is made of fine, rare nathar wood. Its walls once carried coloured designs painted by the grandmothers, before it was recently painted white.", "Un palais de terre de deux étages séparés et d'un sous-sol, dans un verger près du puits de Salwa. Son propriétaire l'a bâti en 1390 de l'Hégire après avoir travaillé chez Aramco ; c'est la maison de terre la plus récente d'Al-Talha. Fondations en pierre, murs en terre et toit en bois de nathar, rare et précieux. Ses murs portaient autrefois des motifs colorés peints par les grands-mères, avant d'être récemment repeints en blanc."], "قصر من أربعة طوابق على قمة جبل صخري، غرفه صغيرة فهو بمثابة حصن، ويُعدّ أعلى إطلالة في المحافظة؛ من نافذته تُرى القرية ونخيلها ووادي العرين. يُدخل إليه من بابه في الجهة الجنوبية، بين جدارين من الحجر وتحت سقف من الخشب. زاره أمير منطقة عسير.": ["A four-storey palace on a rocky hilltop with small rooms, so that it served as a fortress, and said to have the highest view in the governorate; from its window you can see the village, its palms and Wadi Al-Arin. It is entered by its south gate, between two stone walls under a timber roof. The Emir of the Asir region has visited it.", "Un palais de quatre étages au sommet d'une colline rocheuse, aux petites pièces qui en faisaient une forteresse ; on dit qu'il offre la plus haute vue du gouvernorat : de sa fenêtre on voit le village, ses palmiers et le wadi Al-Arin. On y entre par la porte sud, entre deux murs de pierre sous un toit de bois. L'émir de la région d'Asir l'a visité."], "قصصه الكثيرة التي تُروى لزوّاره.": ["The many stories told to its visitors.", "Les nombreuses histoires racontées à ses visiteurs."], "قلب القرية": ["Heart of the village", "Cœur du village"], "قلب القرية القديم: بيوت متلاصقة من الحجر والطين، تهدّم كثير منها وبقيت جدرانه، وبينها أشجار، وحولها اليوم البيوت الحديثة.": ["The old heart of the village: tightly packed houses of stone and mud, many fallen with only walls left standing, trees between them, and newer homes around them today.", "Le vieux cœur du village : des maisons serrées de pierre et de terre, beaucoup effondrées dont seuls les murs subsistent, des arbres entre elles et, tout autour, des maisons récentes."], "قِدر من الحجر المنحوت يحفظ الحرارة طويلاً، وتُقدَّم فيه الأكلات الشعبية الجنوبية ساخنة.": ["A carved stone pot that keeps food hot for a long time; traditional southern dishes are served in it.", "Une marmite en pierre taillée qui garde la chaleur longtemps ; on y sert les plats traditionnels du Sud."], "كان صوت دقّ النجر يُعلم الجيران أن القهوة تُعدّ وأن المجلس مفتوح.": ["The sound of the najr pounding told the neighbours coffee was being made and the majlis was open.", "Le bruit du najr annonçait aux voisins qu'on préparait le café et que le majlis était ouvert."], "كان مقرّ شعبة الجمارك والمالية في البلدة.": ["It was the seat of the town's customs and finance office.", "C'était le siège du bureau des douanes et des finances de la ville."], "كانت مزرعة طينية، وتبرّع بها صاحبها عام 1440هـ لتكون مسرحاً للاحتفالات والمناسبات. أُقيم فيها تدشين جمعية رحالة الجنوب بحضور أمير منطقة عسير، والاحتفاء بيوم التأسيس.": ["Once a mud farm, its owner donated it in 1440 AH as a stage for celebrations and events. The Southern Travellers Association was launched here in the presence of the Emir of Asir, and Founding Day has been celebrated here.", "Ancien champ, son propriétaire l'a offert en 1440 de l'Hégire comme scène pour les fêtes et les événements. L'association des voyageurs du Sud y a été lancée en présence de l'émir d'Asir, et on y a célébré la Journée de la fondation."], "لا يوجد صوت عربي في هذا الجهاز": ["No voice for this language on this device", "Aucune voix pour cette langue sur cet appareil"], "لما ضاق مبنى المدرسة الأولى، استُعين ببيت طيني من ثلاثة أدوار فسُمّي المدرسة الثانية، وكان يديره الأستاذ محمد بن علي بن هاشل رحمه الله.": ["When the first school became too small, a three-storey mud house was used and named the Second School; it was run by the teacher Mohammed bin Ali bin Hashel, may he rest in peace.", "Quand la première école devint trop petite, une maison de terre de trois étages fut utilisée et appelée la deuxième école ; elle était dirigée par l'enseignant Mohammed bin Ali bin Hashel, que Dieu ait son âme."], "ما شاء الله يا {name}! النجر والقربة والمدهان والدلة، كلها كملت.": ["Masha'Allah, {name}! The najr, the water skin, the midhan and the dallah: everything is here.", "Machallah, {name} ! Le najr, l'outre, le midhan et la dallah : tout est là."], "ما كان يُزرع فيها، ومن يعتني بها اليوم.": ["What used to be grown there, and who looks after it today.", "Ce qu'on y cultivait et qui s'en occupe aujourd'hui."], "ما يُزرع فيها ومواسمه.": ["What is grown there, and its seasons.", "Ce qu'on y cultive et ses saisons."], "مبنى الإمارة": ["The Emirate Building", "Le bâtiment de l'émirat"], "مبنى الجمارك والمالية": ["The Customs and Finance Building", "Le bâtiment des douanes et des finances"], "مبنى الشرطة": ["The Police Building", "Le poste de police"], "مبنى طيني كبير من سبعة أدوار، فيه غرف كثيرة ونوافذ صغيرة جداً لتكون مرصداً لحراس البلدة. أُجِّر للإمارة نحو عام 1353هـ ليكون سكناً للأمير ومقراً للعمل.": ["A large seven-storey mud building with many rooms and very small windows that served as lookouts for the town's guards. It was rented to the emirate around 1353 AH as the governor's residence and office.", "Un grand bâtiment de terre de sept étages, aux nombreuses pièces et aux fenêtres minuscules servant de postes de guet aux gardes de la ville. Il fut loué à l'émirat vers 1353 de l'Hégire comme résidence et bureau du gouverneur."], "مبنى طيني من خمسة أدوار وحوش كبير، سكنته أسرة آل فايع أجيالاً. وبحسب رواية الأهالي استُقبل فيه الوفدان السعودي واليمني لتوقيع اتفاقية الصلح النهائي لترسيم الحدود، نحو عام 1352هـ.": ["A five-storey mud building with a large courtyard, home to the Al Fayea family for generations. According to local accounts, it hosted the Saudi and Yemeni delegations for the signing of the final border agreement, around 1352 AH.", "Un bâtiment de terre de cinq étages avec une grande cour, demeure de la famille Al Fayea depuis des générations. Selon les habitants, il a accueilli les délégations saoudienne et yéménite pour la signature de l'accord frontalier final, vers 1352 de l'Hégire."], "مبنى طيني من دورين يملكه آل رقصة من وادعة. افتُتح فيه مركز صحي عام 1370هـ: سكن أصحابه الدور العلوي، وأُجِّر الدور الأرضي والحوش للمستوصف.": ["A two-storey mud building owned by the Al Raqsa family of Wada'a. A health centre opened here in 1370 AH: the owners lived upstairs and rented the ground floor and courtyard to the clinic.", "Un bâtiment de terre de deux étages appartenant à la famille Al Raqsa de Wada'a. Un centre de santé y ouvrit en 1370 de l'Hégire : les propriétaires vivaient à l'étage et louaient le rez-de-chaussée et la cour au dispensaire."], "مبنى طيني من سبعة أدوار وحوش. أُجِّر للشرطة عام 1353هـ، وكان يستقبل المعاملات الأمنية من منطقة أبها في ذلك الوقت.": ["A seven-storey mud building with a courtyard. It was rented to the police in 1353 AH and handled security matters from the Abha region at the time.", "Un bâtiment de terre de sept étages avec cour. Loué à la police en 1353 de l'Hégire, il traitait alors les affaires de sécurité venues de la région d'Abha."], "متصفحك لا يدعم العرض ثلاثي الأبعاد (WebGL). جرّب متصفحاً آخر أو جهاز كمبيوتر.": ["Your browser doesn't support 3D (WebGL). Try another browser or a computer.", "Votre navigateur ne prend pas en charge la 3D (WebGL). Essayez un autre navigateur ou un ordinateur."], "مدخل قصر آل زابن": ["Entrance of the Al Zaben palace", "Entrée du palais Al Zaben"], "مدينة": ["City", "Ville"], "مرمّم ويستقبل الزوار.": ["Restored and open to visitors.", "Restauré et ouvert aux visiteurs."], "مزارع الطلحة": ["Farms of Al-Talha", "Champs d'Al-Talha"], "مزارع تحيط بها جدران من الحجر شرق القرية القديمة، بعضها مزروع أخضر وبعضها ينتظر موسمه.": ["Stone-walled fields east of the old village, some green and some waiting for their season.", "Des champs clos de pierre à l'est du vieux village, certains verts, d'autres attendant leur saison."], "مزارع تحيط بها جدران من الحجر، بين النخيل في الشمال والطريق في الجنوب.": ["Farms enclosed by stone walls, between the palms to the north and the road to the south.", "Des champs clos de murs de pierre, entre les palmiers au nord et la route au sud."], "مساحتها نحو 600 متر مربع.": ["It covers about 600 square metres.", "Elle couvre environ 600 mètres carrés."], "مسار السور كاملاً، وموقع البابين.": ["The full course of the wall, and where the two gates stand.", "Le tracé complet du rempart et l'emplacement des deux portes."], "مسجد الصحابي معاذ بن جبل": ["Mosque of the Companion Mu'adh ibn Jabal", "Mosquée du Compagnon Mu'adh ibn Jabal"], "مسجد بن عجلة": ["Ibn Ajla Mosque", "Mosquée Ibn Ajla"], "مسجد تاريخي يصلي فيه الناس إلى اليوم.": ["A historic mosque where people still pray today.", "Une mosquée historique où l'on prie encore aujourd'hui."], "مسجد معاذ بن جبل": ["Mosque of Mu'adh ibn Jabal", "Mosquée de Mu'adh ibn Jabal"], "مسجد من الطين والحجر، وأعمدته وسقفه من خشب السدر والطلح والنخل. بحسب الرواية أقامه الصحابي معاذ بن جبل رضي الله عنه في السنة التاسعة للهجرة عند بعثه إلى اليمن. زاره أمير منطقة عسير ووجّه بإعادة تأهيله. وبجانب سوره من الجهة الشرقية مسحقة البارود: حجر مستدير كان يُسحق عليه البارود قديماً لتزويد أهل القرية بالذخيرة وحمايتها من التهديدات الخارجية.": ["A mosque of mud and stone, its pillars and roof made of sidr, talh and palm wood. According to tradition, the Companion Mu'adh ibn Jabal (may God be pleased with him) founded it in the ninth year of the Hijra when he was sent to Yemen. The Emir of Asir visited it and ordered its restoration. Beside its east wall lies the gunpowder grinding stone: a round stone once used to grind gunpowder to supply the villagers with ammunition and protect the village from outside threats.", "Une mosquée de terre et de pierre, aux piliers et au toit en bois de sidr, de talh et de palmier. Selon la tradition, le Compagnon Mu'adh ibn Jabal l'a fondée en l'an 9 de l'Hégire lors de sa mission au Yémen. L'émir d'Asir l'a visitée et a ordonné sa restauration. Près de son mur est se trouve la pierre à poudre : une pierre ronde sur laquelle on broyait la poudre pour fournir des munitions aux habitants et protéger le village."], "مسجد يقع جنوب القرية قرب الطريق العام.": ["A mosque south of the village near the main road.", "Une mosquée au sud du village, près de la route principale."], "مسحقة البارود": ["The gunpowder grinding stone", "La pierre à poudre"], "مشهد ثلاثي الأبعاد لقرية الطلحة التراثية": ["3D scene of Al-Talha heritage village", "Scène 3D du village historique d'Al-Talha"], "مشهد ثلاثي الأبعاد لقرية حيدان التراثية": ["3D scene of Haydan heritage village", "Scène 3D du village historique de Haydan"], "مقابل المسجد التاريخي والمدرسة الثانية": ["Opposite the historic mosque and the second school", "En face de la mosquée historique et de la deuxième école"], "من أهل البلدة": ["A townsman", "Un habitant"], "من أهل الطلحة": ["From Al-Talha", "Habitant d'Al-Talha"], "من أهل حيدان": ["From Haydan", "Habitant de Haydan"], "من تاريخ البلدة · توثيق أهل البلدة": ["Town history · documented by its people", "Histoire de la ville · racontée par ses habitants"], "من تاريخ القرية · رواية أهل الطلحة": ["Village history · as told by the people of Al-Talha", "Histoire du village · racontée par les habitants d'Al-Talha"], "من تاريخ القرية · رواية أهل حيدان": ["Village history · as told by the people of Haydan", "Histoire du village · racontée par les habitants de Haydan"], "من رواية أهل حيدان.": ["As told by the people of Haydan.", "Selon les habitants de Haydan."], "موقعه في اللعبة تقريبي، ويُحدَّد مع أهل البلدة.": ["Its location in the game is approximate and will be confirmed with the townspeople.", "Son emplacement dans le jeu est approximatif et sera confirmé avec les habitants."], "نضيف قراها واحدة بعد أخرى قريباً بإذن الله، بمساعدة أهلها.": ["We'll add its villages one by one soon, with the help of their people.", "Nous ajouterons bientôt ses villages un par un, avec l'aide de leurs habitants."], "هاون نحاسي ثقيل تُدقّ فيه حبوب القهوة المحمّصة والهيل.": ["A heavy brass mortar for pounding roasted coffee beans and cardamom.", "Un lourd mortier en laiton pour piler le café torréfié et la cardamome."], "هدية أبي ظافر في فناء قصر آل زابن": ["Abu Dhafer's gift in the Al Zaben palace courtyard", "Le cadeau d'Abou Dhafer dans la cour du palais Al Zaben"], "هذا المدهان، منحوت من الحجر، يحفظ الأكل حار لين يوصل المجلس.": ["This is the midhan, carved from stone; it keeps the food hot all the way to the majlis.", "Voici le midhan, taillé dans la pierre ; il garde le plat chaud jusqu'au majlis."], "هذا نجر نحاس ثقيل، ندقّ فيه البن المحمّس مع الهيل.": ["This is a heavy brass najr; we pound roasted coffee in it with cardamom.", "Voici un lourd najr en laiton ; on y pile le café torréfié avec la cardamome."], "وأهلها يستقبلون الضيف بكلمة واحدة…": ["And its people greet every guest with a single word…", "Et ses habitants accueillent chaque invité d'un seul mot…"], "وادي العرين والنخيل": ["Wadi Al-Arin and the palms", "Le wadi Al-Arin et les palmiers"], "وسط البلدة": ["Town centre", "Centre de la ville"], "وسط بستان على بئر سلوة، قرب القصر الأثري": ["In an orchard by the well of Salwa, near the heritage palace", "Dans un verger près du puits de Salwa, près du palais historique"], "وعاء من جلد الماعز المدبوغ يُملأ من البئر ويُعلَّق في الظل، فيبقى الماء فيه بارداً لأن الماء يرشح ببطء من مسام الجلد ويتبخر.": ["A vessel of tanned goatskin filled at the well and hung in the shade; the water stays cool because it seeps slowly through the skin and evaporates.", "Une outre en peau de chèvre tannée, remplie au puits et suspendue à l'ombre : l'eau reste fraîche car elle suinte lentement à travers la peau et s'évapore."], "وفي وسط البلدة ساحة يجتمع فيها الأهالي للتشاور وتبادل الأحاديث، واستقبلت أمير منطقة عسير عدة مرات.": ["In the middle of the town is a square where people gather to talk and consult, and it has welcomed the Emir of Asir several times.", "Au centre de la ville, une place où les habitants se réunissent pour discuter et se concerter ; elle a accueilli l'émir d'Asir à plusieurs reprises."], "ولدي": ["my child", "mon enfant"], "يحرسها جبل شثاث، ويسقيها وادي العرين": ["Guarded by Jabal Shithath, watered by Wadi Al-Arin", "Gardés par le mont Shithath, abreuvés par le wadi Al-Arin"], "يقع وسط البلدة وتحيط به البيوت من كل الجهات، ويتكون من المسجد والحوش والمواضي والمنزالة. يُروى أن عمره أكثر من ألف عام، وكانت تُقام فيه صلاة الجمعة. ورُمّم ضمن مشروع الأمير محمد بن سلمان لتطوير المساجد التاريخية.": ["In the middle of the town, surrounded by houses on every side; it includes the mosque, its courtyard, the ablution area and the guest hall. It is said to be over a thousand years old, and Friday prayers were once held here. It was restored under the Prince Mohammed bin Salman project for developing historic mosques.", "Au centre de la ville, entourée de maisons de tous côtés, elle comprend la mosquée, la cour, les ablutions et la salle des hôtes. On la dit vieille de plus de mille ans, et la prière du vendredi s'y tenait. Elle a été restaurée dans le cadre du projet du prince Mohammed ben Salmane pour le développement des mosquées historiques."], "يلبس أبو ظافر جنبيته في كل مناسبة، وأهداك واحدة تقديراً لسعيك في إكرام الضيف.": ["Abu Dhafer wears his janbiya at every occasion, and gave you one in thanks for your effort to honour the guest.", "Abou Dhafer porte sa janbiya à chaque occasion, et vous en a offert une pour vous remercier d'avoir honoré l'invité."], "يمرّ وادي العرين من شمال القرية، وهو الوادي نفسه الذي يمرّ ببلدة ظهران الجنوب التراثية. وعلى ضفافه مزارع وقرى، ونخيل وأشجار كثيفة.": ["Wadi Al-Arin runs north of the village; it is the same wadi that passes the Dhahran Al-Janoub heritage town. Along its banks are farms and villages, palms and dense trees.", "Le wadi Al-Arin passe au nord du village ; c'est le même wadi qui traverse la ville historique de Dhahran Al-Janoub. Sur ses rives : champs et villages, palmiers et arbres touffus."], "يُستكمل": ["Still to collect", "À compléter"], "يُنحت المدهان يدوياً من حجر واحد، لذلك يعيش لأجيال.": ["The midhan is carved by hand from a single stone, so it lasts for generations.", "Le midhan est taillé à la main dans une seule pierre ; il traverse ainsi les générations."], "أبها": ["Abha", "Abha"], "خميس مشيط": ["Khamis Mushait", "Khamis Mushait"], "بيشة": ["Bisha", "Bisha"], "النماص": ["Al-Namas", "Al-Namas"], "محايل": ["Muhayil", "Muhayil"], "تثليث": ["Tathlith", "Tathlith"], "رجال ألمع": ["Rijal Alma", "Rijal Alma"], "سراة عبيدة": ["Sarat Abidah", "Sarat Abidah"], "أحد رفيدة": ["Ahad Rafidah", "Ahad Rafidah"], "بلقرن": ["Balqarn", "Balqarn"], "المجاردة": ["Al-Majardah", "Al-Majardah"], "تنومة": ["Tanomah", "Tanomah"], "طريب": ["Tarib", "Tarib"], "بارق": ["Bariq", "Bariq"], "البرك": ["Al-Birk", "Al-Birk"], "الحرجة": ["Al-Harjah", "Al-Harjah"], "الأمواه": ["Al-Amwah", "Al-Amwah"], "الفرشة": ["Al-Farshah", "Al-Farshah"], "بلدة ظهران الجنوب <span>التراثية</span>": ["Dhahran Al-Janoub <span>Heritage Town</span>", "Dhahran Al-Janoub <span>ville historique</span>"], "م": ["m", "m"], "من": ["of", "sur"], "نقطة": ["points", "points"], "مجموع نقاطك": ["Your total", "Votre total"], "قصص مقروءة": ["Stories read", "Histoires lues"], "بيوت مقروءة": ["Houses read", "Maisons lues"], "قصص قرأت تاريخها": ["stories read", "histoires lues"], "بيوت قرأت تاريخها": ["houses explored", "maisons découvertes"], "الموقع": ["Location", "Lieu"], "وُجدت عند": ["Found at", "Trouvé à"], "معلم": ["Landmark", "Lieu"], "قطعة تراثية": ["Heritage piece", "Objet du patrimoine"], "عربي": ["عربي", "عربي"], "معلم ": ["Landmark ", "Lieu "]};
+function TR(s){ if(LANG==="ar"||s==null) return s; const t=I18N[s]; return t ? t[LANG==="en"?0:1] : s; }
+function setLang(l){ try{ localStorage.setItem("arhaboLang",l); }catch(_){} location.reload(); }
+if(LANG!=="ar"){
+  document.documentElement.lang=LANG; document.documentElement.dir="ltr";
+  const tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); const nodes=[]; while(tw.nextNode()) nodes.push(tw.currentNode);
+  nodes.forEach(n=>{ const t=n.nodeValue.trim(); if(t && I18N[t]) n.nodeValue=n.nodeValue.replace(t,TR(t)); });
+  document.querySelectorAll("[aria-label],[placeholder]").forEach(e=>{ ["aria-label","placeholder"].forEach(a=>{ const v=e.getAttribute(a); if(v&&I18N[v]) e.setAttribute(a,TR(v)); }); });
+  const h1=document.querySelector("#start h1.town"); if(h1) h1.innerHTML=TR("بلدة ظهران الجنوب <span>التراثية</span>");
+}
+document.querySelectorAll(".langbar button").forEach(b=>{ b.setAttribute("aria-pressed",String(b.dataset.lang===LANG)); b.addEventListener("click",()=>{ if(b.dataset.lang!==LANG) setLang(b.dataset.lang); }); });
+const AR = n => LANG==="ar" ? String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]) : String(n);
 let seed = 20260308;
 function rnd(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
 const R = (a,b) => a + (b-a)*rnd();
@@ -512,159 +533,159 @@ const FOOT = HD ? (TL?TALHA_FOOT:HAYDAN_FOOT) : FOOT_D;
 
 /* ---------- Story: «ضيافة أبي ظافر» ---------- */
 const ITEMS_D = [
-  {key:"najr", code:"S1", name:"النِّجر", place:"السوق عند الطريق الشمالي", pos:[-5.2,-43.6],
-   desc:"هاون نحاسي ثقيل تُدقّ فيه حبوب القهوة المحمّصة والهيل.",
-   use:"دقّ البن قبل إعداد القهوة.",
-   fact:"كان صوت دقّ النجر يُعلم الجيران أن القهوة تُعدّ وأن المجلس مفتوح."},
-  {key:"gerba", code:"L1", name:"القِربة", place:"البئر المركزية", pos:[12.6,-18.8],
-   desc:"وعاء من جلد الماعز المدبوغ يُملأ من البئر ويُعلَّق في الظل، فيبقى الماء فيه بارداً لأن الماء يرشح ببطء من مسام الجلد ويتبخر.",
-   use:"حفظ الماء ونقله من البئر إلى البيوت، وحمله في الرعي والسفر.",
-   fact:"البئر في ساحة مفتوحة تحيط بها البيوت البرجية، ومنها تتفرع الأزقة شرقاً."},
-  {key:"midhaan", code:"A2", name:"المِدهان", place:"غرب البلدة عند الزقاق المتعرّج", pos:[-26.4,13.4],
-   desc:"قِدر من الحجر المنحوت يحفظ الحرارة طويلاً، وتُقدَّم فيه الأكلات الشعبية الجنوبية ساخنة.",
-   use:"طهي الطعام وتقديمه ساخناً للأسرة والضيوف.",
-   fact:"يُنحت المدهان يدوياً من حجر واحد، لذلك يعيش لأجيال."},
-  {key:"dallah", code:"P1", name:"الدلّة", place:"مدخل قصر آل زابن", pos:[8.6,12.2],
-   desc:"إناء القهوة العربية بمقبضه الطويل ومنقاره المعقوف، وأول ما يُقدَّم للضيف في المجلس.",
-   use:"إعداد القهوة وتقديمها: تُمسك الدلة باليسرى ويُقدَّم الفنجال باليمنى.",
-   fact:"قصر آل زابن بيت طيني من أربعة طوابق عمره أكثر من مائة عام، وصار اليوم مزاراً سياحياً."},
-  {key:"janbiya", code:"P1", name:"الجنبية", place:"هدية أبي ظافر في فناء قصر آل زابن", pos:[3.4,10.4],
-   desc:"خنجر بنصل معقوف وغمد مزخرف يُلبس في وسط الحزام، وما زال جزءاً من الزي الرجالي في المناسبات بالجنوب.",
-   use:"زينة ورمز للوجاهة، وتُصنع وتُباع في سوق ظهران الجنوب.",
-   fact:"يلبس أبو ظافر جنبيته في كل مناسبة، وأهداك واحدة تقديراً لسعيك في إكرام الضيف."}
+  {key:"najr", code:"S1", name:TR("النِّجر"), place:TR("السوق عند الطريق الشمالي"), pos:[-5.2,-43.6],
+   desc:TR("هاون نحاسي ثقيل تُدقّ فيه حبوب القهوة المحمّصة والهيل."),
+   use:TR("دقّ البن قبل إعداد القهوة."),
+   fact:TR("كان صوت دقّ النجر يُعلم الجيران أن القهوة تُعدّ وأن المجلس مفتوح.")},
+  {key:"gerba", code:"L1", name:TR("القِربة"), place:TR("البئر المركزية"), pos:[12.6,-18.8],
+   desc:TR("وعاء من جلد الماعز المدبوغ يُملأ من البئر ويُعلَّق في الظل، فيبقى الماء فيه بارداً لأن الماء يرشح ببطء من مسام الجلد ويتبخر."),
+   use:TR("حفظ الماء ونقله من البئر إلى البيوت، وحمله في الرعي والسفر."),
+   fact:TR("البئر في ساحة مفتوحة تحيط بها البيوت البرجية، ومنها تتفرع الأزقة شرقاً.")},
+  {key:"midhaan", code:"A2", name:TR("المِدهان"), place:TR("غرب البلدة عند الزقاق المتعرّج"), pos:[-26.4,13.4],
+   desc:TR("قِدر من الحجر المنحوت يحفظ الحرارة طويلاً، وتُقدَّم فيه الأكلات الشعبية الجنوبية ساخنة."),
+   use:TR("طهي الطعام وتقديمه ساخناً للأسرة والضيوف."),
+   fact:TR("يُنحت المدهان يدوياً من حجر واحد، لذلك يعيش لأجيال.")},
+  {key:"dallah", code:"P1", name:TR("الدلّة"), place:TR("مدخل قصر آل زابن"), pos:[8.6,12.2],
+   desc:TR("إناء القهوة العربية بمقبضه الطويل ومنقاره المعقوف، وأول ما يُقدَّم للضيف في المجلس."),
+   use:TR("إعداد القهوة وتقديمها: تُمسك الدلة باليسرى ويُقدَّم الفنجال باليمنى."),
+   fact:TR("قصر آل زابن بيت طيني من أربعة طوابق عمره أكثر من مائة عام، وصار اليوم مزاراً سياحياً.")},
+  {key:"janbiya", code:"P1", name:TR("الجنبية"), place:TR("هدية أبي ظافر في فناء قصر آل زابن"), pos:[3.4,10.4],
+   desc:TR("خنجر بنصل معقوف وغمد مزخرف يُلبس في وسط الحزام، وما زال جزءاً من الزي الرجالي في المناسبات بالجنوب."),
+   use:TR("زينة ورمز للوجاهة، وتُصنع وتُباع في سوق ظهران الجنوب."),
+   fact:TR("يلبس أبو ظافر جنبيته في كل مناسبة، وأهداك واحدة تقديراً لسعيك في إكرام الضيف.")}
 ];
 const NPCS_D = {
-  abu:   {name:"أبو ظافر", role:"حكيم البلدة", pos:[-17.4,-43.0], end:[1.6,11.6], look:"abu"},
-  hasan: {name:"العم حسن", role:"تاجر السوق", pos:[-7.6,-44.4], look:"merchant"},
-  salem: {name:"سالم", role:"السقّاء", pos:[12.6,-24.6], look:"worker"},
-  naser: {name:"العم ناصر", role:"من أهل البلدة", pos:[-28.4,12.2], look:"elder"},
-  guard: {name:"أبو طلال", role:"صاحب القصر", pos:[10.6,14.4], look:"owner"}
+  abu:   {name:TR("أبو ظافر"), role:TR("حكيم البلدة"), pos:[-17.4,-43.0], end:[1.6,11.6], look:"abu"},
+  hasan: {name:TR("العم حسن"), role:TR("تاجر السوق"), pos:[-7.6,-44.4], look:"merchant"},
+  salem: {name:TR("سالم"), role:TR("السقّاء"), pos:[12.6,-24.6], look:"worker"},
+  naser: {name:TR("العم ناصر"), role:TR("من أهل البلدة"), pos:[-28.4,12.2], look:"elder"},
+  guard: {name:TR("أبو طلال"), role:TR("صاحب القصر"), pos:[10.6,14.4], look:"owner"}
 };
 const STEPS_D = [
-  {npc:"abu", obj:"{تحدّث|تحدّثي} مع أبي ظافر عند البوابة", lines:[
-    "أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله، {جيت|جيتِ} في وقتك.",
-    "الليلة عندنا ضيف عزيز، والضيف عندنا في ظهران له حقّه وقدره.",
-    "{شف|شوفي} وراك من جهة الشمال: ذاك جبل شثاث، حارس ظهران من قديم.",
-    "{أبغاك تجيب|أبغاكِ تجيبين} لي أربع حاجات: النجر من السوق، والقربة من البير، والمدهان من بيت العم ناصر غرب البلدة، والدلة من قصر آل زابن.",
-    "{امشِ|امشي} ورا الضو الذهبي، وإذا {خلّصت ألقاك|خلّصتِ ألقاكِ} في ساحة قصر آل زابن."]},
-  {npc:"hasan", item:0, obj:"{اذهب|اذهبي} إلى العم حسن في السوق", lines:[
-    "أرحبو! {حيّاك|حيّاكِ} في السوق. أبو ظافر {مرسلك|مرسلكِ}؟",
-    "هذا نجر نحاس ثقيل، ندقّ فيه البن المحمّس مع الهيل.",
-    "{خذه|خذيه}، ولا سمعوا الجيران صوت دقّه عرفوا إن عندكم ضيف."]},
-  {npc:"salem", item:1, obj:"{اذهب|اذهبي} إلى سالم عند البئر", lines:[
-    "السلام عليكم، أرحبو. هذي البير قلب البلدة، منها يشربون الناس وتنسقى المزارع.",
-    "عبّيت {لك|لكِ} القربة الحين. {علّقها|علّقيها} في الظل ويبقى ماها بارد."]},
-  {npc:"naser", item:2, obj:"{اذهب|اذهبي} إلى العم ناصر غرب البلدة", lines:[
-    "أرحبو يا {ولدي|بنتي}. {انتبه|انتبهي} في أزقّة البلدة، ضيّقة ومتعرّجة، وتظلّل الماشي من الشمس.",
-    "هذا المدهان، منحوت من الحجر، يحفظ الأكل حار لين يوصل المجلس."]},
-  {npc:"guard", item:3, obj:"{اذهب|اذهبي} إلى أبي طلال صاحب قصر آل زابن", lines:[
-    "أرحبو، {حيّاك|حيّاكِ} الله في قصرنا. هذا قصر آل زابن، بيت طين عمره فوق المية سنة، واليوم صار مزار للزوار.",
-    "الدلة جاهزة ومحمّسة، {شلّها|شلّيها} لأبو ظافر. {سبقك|سبقكِ} للساحة وهو {ينتظرك|ينتظركِ}."]},
-  {npc:"abu", item:4, at:"end", obj:"{عُد|عودي} إلى أبي ظافر في فناء قصر آل زابن", lines:[
-    "ما شاء الله يا {name}! النجر والقربة والمدهان والدلة، كلها كملت.",
-    "الكرم عندنا ما هو بالقهوة بس، الكرم في اللي يسعى يكرم ضيفه.",
-    "{خذ هذي الجنبية هدية مني، تنلبس في وسط الحزام، وهي زينة الرجال عندنا في الجنوب.|خذي هذي الجنبية هدية مني لأهل بيتك، تنلبس في وسط الحزام، وهي زينة الرجال عندنا في الجنوب.}"]}
+  {npc:"abu", obj:TR("{تحدّث|تحدّثي} مع أبي ظافر عند البوابة"), lines:[
+    TR("أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله، {جيت|جيتِ} في وقتك."),
+    TR("الليلة عندنا ضيف عزيز، والضيف عندنا في ظهران له حقّه وقدره."),
+    TR("{شف|شوفي} وراك من جهة الشمال: ذاك جبل شثاث، حارس ظهران من قديم."),
+    TR("{أبغاك تجيب|أبغاكِ تجيبين} لي أربع حاجات: النجر من السوق، والقربة من البير، والمدهان من بيت العم ناصر غرب البلدة، والدلة من قصر آل زابن."),
+    TR("{امشِ|امشي} ورا الضو الذهبي، وإذا {خلّصت ألقاك|خلّصتِ ألقاكِ} في ساحة قصر آل زابن.")]},
+  {npc:"hasan", item:0, obj:TR("{اذهب|اذهبي} إلى العم حسن في السوق"), lines:[
+    TR("أرحبو! {حيّاك|حيّاكِ} في السوق. أبو ظافر {مرسلك|مرسلكِ}؟"),
+    TR("هذا نجر نحاس ثقيل، ندقّ فيه البن المحمّس مع الهيل."),
+    TR("{خذه|خذيه}، ولا سمعوا الجيران صوت دقّه عرفوا إن عندكم ضيف.")]},
+  {npc:"salem", item:1, obj:TR("{اذهب|اذهبي} إلى سالم عند البئر"), lines:[
+    TR("السلام عليكم، أرحبو. هذي البير قلب البلدة، منها يشربون الناس وتنسقى المزارع."),
+    TR("عبّيت {لك|لكِ} القربة الحين. {علّقها|علّقيها} في الظل ويبقى ماها بارد.")]},
+  {npc:"naser", item:2, obj:TR("{اذهب|اذهبي} إلى العم ناصر غرب البلدة"), lines:[
+    TR("أرحبو يا {ولدي|بنتي}. {انتبه|انتبهي} في أزقّة البلدة، ضيّقة ومتعرّجة، وتظلّل الماشي من الشمس."),
+    TR("هذا المدهان، منحوت من الحجر، يحفظ الأكل حار لين يوصل المجلس.")]},
+  {npc:"guard", item:3, obj:TR("{اذهب|اذهبي} إلى أبي طلال صاحب قصر آل زابن"), lines:[
+    TR("أرحبو، {حيّاك|حيّاكِ} الله في قصرنا. هذا قصر آل زابن، بيت طين عمره فوق المية سنة، واليوم صار مزار للزوار."),
+    TR("الدلة جاهزة ومحمّسة، {شلّها|شلّيها} لأبو ظافر. {سبقك|سبقكِ} للساحة وهو {ينتظرك|ينتظركِ}.")]},
+  {npc:"abu", item:4, at:"end", obj:TR("{عُد|عودي} إلى أبي ظافر في فناء قصر آل زابن"), lines:[
+    TR("ما شاء الله يا {name}! النجر والقربة والمدهان والدلة، كلها كملت."),
+    TR("الكرم عندنا ما هو بالقهوة بس، الكرم في اللي يسعى يكرم ضيفه."),
+    TR("{خذ هذي الجنبية هدية مني، تنلبس في وسط الحزام، وهي زينة الرجال عندنا في الجنوب.|خذي هذي الجنبية هدية مني لأهل بيتك، تنلبس في وسط الحزام، وهي زينة الرجال عندنا في الجنوب.}")]}
 ];
 /* ---------- Haydan: «جولة في حيدان» — a guided walk to the landmarks known from the aerial image ---------- */
 // stops follow the locations the residents marked on the coding map (ترميز قرية حيدان)
 const HILL=[78,-31,13,11]; // the rocky hill crowned by Ibn Ajla's palace: x, z, radius, height
 const ITEMS_H = [
-  {key:"farm", name:"المزارع المسوّرة بالحجر", place:"بين النخيل والطريق", pos:[-22,3], r:2.6, goal:"{اذهب|اذهبي} إلى المزارع المسوّرة",
-   desc:"مزارع تحيط بها جدران من الحجر، بين النخيل في الشمال والطريق في الجنوب.",
-   use:"F2 مزارع مسوّرة بالحجر", fact:"ما كان يُزرع فيها، ومن يعتني بها اليوم."},
-  {key:"palm", name:"وادي العرين والنخيل", place:"شمال القرية", pos:[-20,-35], r:2.6, goal:"{اذهب|اذهبي} إلى وادي العرين",
-   desc:"يمرّ وادي العرين من شمال القرية، وهو الوادي نفسه الذي يمرّ ببلدة ظهران الجنوب التراثية. وعلى ضفافه مزارع وقرى، ونخيل وأشجار كثيفة.",
-   use:"V1 وادي العرين · F1 النخيل والأشجار", fact:"أنواع الأشجار والنخيل، وأسماء القرى على ضفافه."},
-  {key:"wall", name:"سور حيدان", place:"حول بيوت القرية", pos:[4,-8], r:2.6, goal:"{اذهب|اذهبي} إلى سور حيدان",
-   desc:"سور يحيط بالقرية كاملة، بعضه قائم وبعضه أثّرت فيه عوامل البيئة. وللسور بابان: باب الحوزة وباب السلام. وتُعرف حيدان بأنها دار أمان، فمن دخل سورها فهو آمن.",
-   use:"W1 سور حيدان · G1 باب الحوزة · G2 باب السلام", fact:"مسار السور كاملاً، وموقع البابين."},
-  {key:"mosque", name:"مسجد الصحابي معاذ بن جبل", place:"شمال القرية", pos:[22.5,-23], r:2.4, goal:"{اذهب|اذهبي} إلى مسجد معاذ بن جبل",
-   desc:"مسجد من الطين والحجر، وأعمدته وسقفه من خشب السدر والطلح والنخل. بحسب الرواية أقامه الصحابي معاذ بن جبل رضي الله عنه في السنة التاسعة للهجرة عند بعثه إلى اليمن. زاره أمير منطقة عسير ووجّه بإعادة تأهيله. وبجانب سوره من الجهة الشرقية مسحقة البارود: حجر مستدير كان يُسحق عليه البارود قديماً لتزويد أهل القرية بالذخيرة وحمايتها من التهديدات الخارجية.",
-   use:"M1 مسجد معاذ بن جبل", fact:"صور داخل المسجد."},
-  {key:"well", name:"بئر مسجد معاذ", place:"شمال القرية قرب الوادي", pos:[51.5,-36.6], r:2.4, goal:"{اذهب|اذهبي} إلى بئر المسجد",
-   desc:"بئر ملحقة بمسجد معاذ بن جبل، وهي جزء من موقعه التاريخي.",
-   use:"M2 بئر المسجد", fact:"عمق البئر وقصتها، وهل ما زال فيها ماء."},
-  {key:"house", name:"قصر ابن عجلة", place:"على قمة الجبل في شمال شرق القرية", pos:[74.5,-15.2], r:2.4, goal:"{اذهب|اذهبي} إلى باب قصر ابن عجلة",
-   desc:"قصر من أربعة طوابق على قمة جبل صخري، غرفه صغيرة فهو بمثابة حصن، ويُعدّ أعلى إطلالة في المحافظة؛ من نافذته تُرى القرية ونخيلها ووادي العرين. يُدخل إليه من بابه في الجهة الجنوبية، بين جدارين من الحجر وتحت سقف من الخشب. زاره أمير منطقة عسير.",
-   use:"P1 قصر ابن عجلة", fact:"قصة سعيد ابن عجلة بعد موافقة أسرته، وصور غرف القصر."},
-  {key:"key", name:"دار الفروق «سداح»", place:"جنوب غرب بيوت القرية", pos:[17,14.4], r:2.4, goal:"{اذهب|اذهبي} إلى دار الفروق «سداح»",
-   desc:"بيت مال القبيلة للأزمات: الحروب، وشحّ المطر، والديات. بابه بأربعة مفاتيح، لكل ربع من أرباع القبيلة مفتاح، ولا يُفتح إلا بحضورها كلها. والفروق متداول إلى اليوم. قريباً: مغامرة المفاتيح الأربعة.",
-   use:"D1 دار الفروق «سداح»", fact:"اسم كل ربع، وشكل الباب والمفاتيح."},
-  {key:"mosque", name:"مسجد بن عجلة", place:"جنوب القرية قرب الطريق", pos:[54,39], r:2.4, goal:"{اذهب|اذهبي} إلى مسجد بن عجلة",
-   desc:"مسجد يقع جنوب القرية قرب الطريق العام.",
-   use:"M3 مسجد بن عجلة", fact:"تاريخ المسجد، وصلته بقصر ابن عجلة."}
+  {key:"farm", name:TR("المزارع المسوّرة بالحجر"), place:TR("بين النخيل والطريق"), pos:[-22,3], r:2.6, goal:TR("{اذهب|اذهبي} إلى المزارع المسوّرة"),
+   desc:TR("مزارع تحيط بها جدران من الحجر، بين النخيل في الشمال والطريق في الجنوب."),
+   use:TR("F2 مزارع مسوّرة بالحجر"), fact:TR("ما كان يُزرع فيها، ومن يعتني بها اليوم.")},
+  {key:"palm", name:TR("وادي العرين والنخيل"), place:TR("شمال القرية"), pos:[-20,-35], r:2.6, goal:TR("{اذهب|اذهبي} إلى وادي العرين"),
+   desc:TR("يمرّ وادي العرين من شمال القرية، وهو الوادي نفسه الذي يمرّ ببلدة ظهران الجنوب التراثية. وعلى ضفافه مزارع وقرى، ونخيل وأشجار كثيفة."),
+   use:TR("V1 وادي العرين · F1 النخيل والأشجار"), fact:TR("أنواع الأشجار والنخيل، وأسماء القرى على ضفافه.")},
+  {key:"wall", name:TR("سور حيدان"), place:TR("حول بيوت القرية"), pos:[4,-8], r:2.6, goal:TR("{اذهب|اذهبي} إلى سور حيدان"),
+   desc:TR("سور يحيط بالقرية كاملة، بعضه قائم وبعضه أثّرت فيه عوامل البيئة. وللسور بابان: باب الحوزة وباب السلام. وتُعرف حيدان بأنها دار أمان، فمن دخل سورها فهو آمن."),
+   use:TR("W1 سور حيدان · G1 باب الحوزة · G2 باب السلام"), fact:TR("مسار السور كاملاً، وموقع البابين.")},
+  {key:"mosque", name:TR("مسجد الصحابي معاذ بن جبل"), place:TR("شمال القرية"), pos:[22.5,-23], r:2.4, goal:TR("{اذهب|اذهبي} إلى مسجد معاذ بن جبل"),
+   desc:TR("مسجد من الطين والحجر، وأعمدته وسقفه من خشب السدر والطلح والنخل. بحسب الرواية أقامه الصحابي معاذ بن جبل رضي الله عنه في السنة التاسعة للهجرة عند بعثه إلى اليمن. زاره أمير منطقة عسير ووجّه بإعادة تأهيله. وبجانب سوره من الجهة الشرقية مسحقة البارود: حجر مستدير كان يُسحق عليه البارود قديماً لتزويد أهل القرية بالذخيرة وحمايتها من التهديدات الخارجية."),
+   use:TR("M1 مسجد معاذ بن جبل"), fact:TR("صور داخل المسجد.")},
+  {key:"well", name:TR("بئر مسجد معاذ"), place:TR("شمال القرية قرب الوادي"), pos:[51.5,-36.6], r:2.4, goal:TR("{اذهب|اذهبي} إلى بئر المسجد"),
+   desc:TR("بئر ملحقة بمسجد معاذ بن جبل، وهي جزء من موقعه التاريخي."),
+   use:TR("M2 بئر المسجد"), fact:TR("عمق البئر وقصتها، وهل ما زال فيها ماء.")},
+  {key:"house", name:TR("قصر ابن عجلة"), place:TR("على قمة الجبل في شمال شرق القرية"), pos:[74.5,-15.2], r:2.4, goal:TR("{اذهب|اذهبي} إلى باب قصر ابن عجلة"),
+   desc:TR("قصر من أربعة طوابق على قمة جبل صخري، غرفه صغيرة فهو بمثابة حصن، ويُعدّ أعلى إطلالة في المحافظة؛ من نافذته تُرى القرية ونخيلها ووادي العرين. يُدخل إليه من بابه في الجهة الجنوبية، بين جدارين من الحجر وتحت سقف من الخشب. زاره أمير منطقة عسير."),
+   use:TR("P1 قصر ابن عجلة"), fact:TR("قصة سعيد ابن عجلة بعد موافقة أسرته، وصور غرف القصر.")},
+  {key:"key", name:TR("دار الفروق «سداح»"), place:TR("جنوب غرب بيوت القرية"), pos:[17,14.4], r:2.4, goal:TR("{اذهب|اذهبي} إلى دار الفروق «سداح»"),
+   desc:TR("بيت مال القبيلة للأزمات: الحروب، وشحّ المطر، والديات. بابه بأربعة مفاتيح، لكل ربع من أرباع القبيلة مفتاح، ولا يُفتح إلا بحضورها كلها. والفروق متداول إلى اليوم. قريباً: مغامرة المفاتيح الأربعة."),
+   use:TR("D1 دار الفروق «سداح»"), fact:TR("اسم كل ربع، وشكل الباب والمفاتيح.")},
+  {key:"mosque", name:TR("مسجد بن عجلة"), place:TR("جنوب القرية قرب الطريق"), pos:[54,39], r:2.4, goal:TR("{اذهب|اذهبي} إلى مسجد بن عجلة"),
+   desc:TR("مسجد يقع جنوب القرية قرب الطريق العام."),
+   use:TR("M3 مسجد بن عجلة"), fact:TR("تاريخ المسجد، وصلته بقصر ابن عجلة.")}
 ];
-const NPCS_H = { rawi:{name:"الراوي", role:"من أهل حيدان", pos:[-31,22], look:"elder"} };
+const NPCS_H = { rawi:{name:TR("الراوي"), role:TR("من أهل حيدان"), pos:[-31,22], look:"elder"} };
 const STEPS_H = [
-  {npc:"rawi", obj:"{تحدّث|تحدّثي} مع الراوي عند مدخل القرية", lines:[
-    "أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله في حيدان.",
-    "حيدان قرية قديمة يحيطها سور، ومن دخل السور فهو آمن. هذي عادة أهلها من قديم.",
-    "{تعال|تعالي} {أوريك|أوريكِ} معالمها: المزارع ووادي العرين، والسور، ومسجد معاذ بن جبل وبئره، وقصر ابن عجلة فوق الجبل، ودار الفروق «سداح»، ومسجد بن عجلة.",
-    "{امشِ|امشي} ورا الضو الذهبي، وكل ما {توصل|توصلين} معلم {تعرف|تعرفين} قصته."]},
+  {npc:"rawi", obj:TR("{تحدّث|تحدّثي} مع الراوي عند مدخل القرية"), lines:[
+    TR("أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله في حيدان."),
+    TR("حيدان قرية قديمة يحيطها سور، ومن دخل السور فهو آمن. هذي عادة أهلها من قديم."),
+    TR("{تعال|تعالي} {أوريك|أوريكِ} معالمها: المزارع ووادي العرين، والسور، ومسجد معاذ بن جبل وبئره، وقصر ابن عجلة فوق الجبل، ودار الفروق «سداح»، ومسجد بن عجلة."),
+    TR("{امشِ|امشي} ورا الضو الذهبي، وكل ما {توصل|توصلين} معلم {تعرف|تعرفين} قصته.")]},
   {visit:0},{visit:1},{visit:2},{visit:3},{visit:4},{visit:5},{visit:6},{visit:7}
 ];
 /* ---------- Al-Talha: «جولة في الطلحة», from the residents' survey ---------- */
 const ITEMS_T = [
-  {key:"house", name:"بيوت الطلحة القديمة", place:"قلب القرية", pos:[-4,8], r:2.6, goal:"{ادخل|ادخلي} بيوت الطلحة القديمة",
-   desc:"قلب القرية القديم: بيوت متلاصقة من الحجر والطين، تهدّم كثير منها وبقيت جدرانه، وبينها أشجار، وحولها اليوم البيوت الحديثة.",
-   use:"قديماً سكن الأهالي، واليوم أطلال وبيوت قديمة.", fact:"أسماء البيوت وأسرها، وصور الأبواب والنوافذ."},
-  {key:"farm", name:"مزارع الطلحة", place:"شرق القرية القديمة", pos:[44,-8], r:2.6, goal:"{اذهب|اذهبي} إلى مزارع الطلحة",
-   desc:"مزارع تحيط بها جدران من الحجر شرق القرية القديمة، بعضها مزروع أخضر وبعضها ينتظر موسمه.",
-   use:"الزراعة.", fact:"ما يُزرع فيها ومواسمه."},
-  {key:"well", name:"القصر الطيني في البستان", place:"وسط بستان على بئر سلوة، قرب القصر الأثري", pos:[60,-25.4], r:2.4, goal:"{اذهب|اذهبي} إلى القصر الطيني في البستان",
-   desc:"قصر طيني من دورين منفصلين وقبو، وسط بستان على بئر سلوة. بناه صاحبه عام 1390هـ بعد عودته من العمل في أرامكو، ويُعد أحدث بيت طيني في الطلحة. أساسه من الحجر ثم الطين، وسقفه من خشب النظار الجيد النادر. وكانت على جدرانه نقوش ملوّنة بأيدي الجدّات، ثم طُلي حديثاً بالأبيض.",
-   use:"قديماً سكن للأسرة، واليوم مهجور ومتهالك.", fact:"صور النقوش القديمة إن وُجدت."},
-  {key:"house", name:"القصر الأثري بالطلحة", place:"شمال شرق القرية القديمة، قرب شعب سعد", pos:[22,-48.8], r:2.4, goal:"{اذهب|اذهبي} إلى القصر الأثري",
-   desc:"قصر أثري يُقدَّر عمره بأكثر من 150 عاماً، من ثلاثة طوابق إلى خمسة بحسب الروايات، بُني من الحجر والطين والخشب وسعف النخل، وعلى جدرانه القط العسيري. كان بيتاً للسكن والحماية وتخزين الطعام، وهو اليوم متحف أثري مرمّم يرى فيه الجيل الجديد تراث الطلحة وظهران الجنوب.",
-   use:"قديماً سكن وحماية وتخزين، واليوم متحف سياحي.", fact:"قصصه الكثيرة التي تُروى لزوّاره."}
+  {key:"house", name:TR("بيوت الطلحة القديمة"), place:TR("قلب القرية"), pos:[-4,8], r:2.6, goal:TR("{ادخل|ادخلي} بيوت الطلحة القديمة"),
+   desc:TR("قلب القرية القديم: بيوت متلاصقة من الحجر والطين، تهدّم كثير منها وبقيت جدرانه، وبينها أشجار، وحولها اليوم البيوت الحديثة."),
+   use:TR("قديماً سكن الأهالي، واليوم أطلال وبيوت قديمة."), fact:TR("أسماء البيوت وأسرها، وصور الأبواب والنوافذ.")},
+  {key:"farm", name:TR("مزارع الطلحة"), place:TR("شرق القرية القديمة"), pos:[44,-8], r:2.6, goal:TR("{اذهب|اذهبي} إلى مزارع الطلحة"),
+   desc:TR("مزارع تحيط بها جدران من الحجر شرق القرية القديمة، بعضها مزروع أخضر وبعضها ينتظر موسمه."),
+   use:TR("الزراعة."), fact:TR("ما يُزرع فيها ومواسمه.")},
+  {key:"well", name:TR("القصر الطيني في البستان"), place:TR("وسط بستان على بئر سلوة، قرب القصر الأثري"), pos:[60,-25.4], r:2.4, goal:TR("{اذهب|اذهبي} إلى القصر الطيني في البستان"),
+   desc:TR("قصر طيني من دورين منفصلين وقبو، وسط بستان على بئر سلوة. بناه صاحبه عام 1390هـ بعد عودته من العمل في أرامكو، ويُعد أحدث بيت طيني في الطلحة. أساسه من الحجر ثم الطين، وسقفه من خشب النظار الجيد النادر. وكانت على جدرانه نقوش ملوّنة بأيدي الجدّات، ثم طُلي حديثاً بالأبيض."),
+   use:TR("قديماً سكن للأسرة، واليوم مهجور ومتهالك."), fact:TR("صور النقوش القديمة إن وُجدت.")},
+  {key:"house", name:TR("القصر الأثري بالطلحة"), place:TR("شمال شرق القرية القديمة، قرب شعب سعد"), pos:[22,-48.8], r:2.4, goal:TR("{اذهب|اذهبي} إلى القصر الأثري"),
+   desc:TR("قصر أثري يُقدَّر عمره بأكثر من 150 عاماً، من ثلاثة طوابق إلى خمسة بحسب الروايات، بُني من الحجر والطين والخشب وسعف النخل، وعلى جدرانه القط العسيري. كان بيتاً للسكن والحماية وتخزين الطعام، وهو اليوم متحف أثري مرمّم يرى فيه الجيل الجديد تراث الطلحة وظهران الجنوب."),
+   use:TR("قديماً سكن وحماية وتخزين، واليوم متحف سياحي."), fact:TR("قصصه الكثيرة التي تُروى لزوّاره.")}
 ];
-const NPCS_T = { rawi:{name:"الراوي", role:"من أهل الطلحة", pos:[-7.6,63.4], look:"elder"} };
+const NPCS_T = { rawi:{name:TR("الراوي"), role:TR("من أهل الطلحة"), pos:[-7.6,63.4], look:"elder"} };
 const STEPS_T = [
-  {npc:"rawi", obj:"{تحدّث|تحدّثي} مع الراوي عند مدخل القرية", lines:[
-    "أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله في الطلحة.",
-    "{تعال|تعالي} {أوريك|أوريكِ} قريتنا: البيوت القديمة، والمزارع، والقصر الطيني اللي في البستان، والقصر الأثري اللي صار متحف.",
-    "{امشِ|امشي} ورا الضو الذهبي، وكل ما {توصل|توصلين} معلم {تعرف|تعرفين} قصته."]},
+  {npc:"rawi", obj:TR("{تحدّث|تحدّثي} مع الراوي عند مدخل القرية"), lines:[
+    TR("أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله في الطلحة."),
+    TR("{تعال|تعالي} {أوريك|أوريكِ} قريتنا: البيوت القديمة، والمزارع، والقصر الطيني اللي في البستان، والقصر الأثري اللي صار متحف."),
+    TR("{امشِ|امشي} ورا الضو الذهبي، وكل ما {توصل|توصلين} معلم {تعرف|تعرفين} قصته.")]},
   {visit:0},{visit:1},{visit:2},{visit:3}
 ];
 const ITEMS = HD ? (TL?ITEMS_T:ITEMS_H) : ITEMS_D, NPCS = HD ? (TL?NPCS_T:NPCS_H) : NPCS_D, STEPS = HD ? (TL?STEPS_T:STEPS_H) : STEPS_D;
 
 /* ---------- Town history from the residents' survey (استبيان توثيق المباني والمواقع التراثية) ---------- */
 const INFO_D = [
-  {name:"مبنى الجمارك والمالية", pos:[-34.5,-37], r:6.2, key:"house", place:"مقابل المسجد التاريخي والمدرسة الثانية",
-   desc:"بيت طيني من أربعة أدوار وحوش كبير، عمره نحو مائة وعشرين عاماً، بُني من الطين والأعشاب. سكنته أسرة من آل زاهر، وفي عام 1352هـ أُجِّر الحوش والغرف الأرضية لشعبة الجمارك والمالية.",
-   use:"قديماً سكن للأسرة وشعبة للجمارك والمالية، واليوم مبنى مرمّم غير مستخدم.", fact:"كان مقرّ شعبة الجمارك والمالية في البلدة."},
-  {name:"المدرسة الثانية", pos:[-38,-26.5], r:6.8, key:"house", place:"قرب المسجد التاريخي والجمارك",
-   desc:"لما ضاق مبنى المدرسة الأولى، استُعين ببيت طيني من ثلاثة أدوار فسُمّي المدرسة الثانية، وكان يديره الأستاذ محمد بن علي بن هاشل رحمه الله.",
-   use:"قديماً سكن ثم مدرسة ابتدائية لأبناء البلدة، واليوم مبنى تراثي مرمّم.", fact:"عمره أكثر من مائة عام."},
-  {name:"مبنى الإمارة", pos:[-7,-28], r:6.2, key:"house", place:"قرب المسجد التاريخي",
-   desc:"مبنى طيني كبير من سبعة أدوار، فيه غرف كثيرة ونوافذ صغيرة جداً لتكون مرصداً لحراس البلدة. أُجِّر للإمارة نحو عام 1353هـ ليكون سكناً للأمير ومقراً للعمل.",
-   use:"قديماً سكن ثم مقر لإدارة ظهران، واليوم مهجور.", fact:"عمره نحو مائة وخمسين عاماً."},
-  {name:"مبنى الشرطة", pos:[33.5,-24.5], r:6.2, key:"house", place:"قرب السوق الشعبي",
-   desc:"مبنى طيني من سبعة أدوار وحوش. أُجِّر للشرطة عام 1353هـ، وكان يستقبل المعاملات الأمنية من منطقة أبها في ذلك الوقت.",
-   use:"قديماً سكن ومبنى للشرطة، واليوم مرمّم غير مستخدم.", fact:"عمره أكثر من مائة عام."},
-  {name:"المستوصف الأول", pos:[-33.5,21], r:6.4, key:"house", place:"قرب المسجد التاريخي",
-   desc:"مبنى طيني من دورين يملكه آل رقصة من وادعة. افتُتح فيه مركز صحي عام 1370هـ: سكن أصحابه الدور العلوي، وأُجِّر الدور الأرضي والحوش للمستوصف.",
-   use:"قديماً سكن ومركز صحي، واليوم مرمّم غير مستخدم.", fact:"عمره نحو مائة عام."},
-  {name:"قصر آل زابن", pos:[8.5,19.4], r:6.4, key:"house", place:"على وادي العرين بضفاف المزارع",
-   desc:"بيت طيني تراثي من أربعة طوابق، عمره أكثر من مائة عام، وعلى جدرانه القط العسيري.",
-   use:"قديماً سكن عائلي، واليوم مزار سياحي تزوره الوفود.", fact:"مرمّم ويستقبل الزوار."},
-  {name:"المسجد التاريخي", pos:[-22,-25.5], r:7, key:"mosque", place:"وسط البلدة",
-   desc:"يقع وسط البلدة وتحيط به البيوت من كل الجهات، ويتكون من المسجد والحوش والمواضي والمنزالة. يُروى أن عمره أكثر من ألف عام، وكانت تُقام فيه صلاة الجمعة. ورُمّم ضمن مشروع الأمير محمد بن سلمان لتطوير المساجد التاريخية.",
-   use:"مسجد تاريخي يصلي فيه الناس إلى اليوم.", fact:"فيه نقوش أثرية، ومساحته نحو 290 متراً مربعاً."},
-  {name:"البئر «مشبعة»", pos:[9.4,-21.7], r:5.5, key:"well", place:"وسط البلدة",
-   desc:"بئر قديمة وسط البلدة تحيط بها البيوت من كل الجهات، عمقها أكثر من عشرين متراً، وعمرها أكثر من مائة عام.",
-   use:"قديماً بئر الماء للبلدة، واليوم مهجورة.", fact:"وفي وسط البلدة ساحة يجتمع فيها الأهالي للتشاور وتبادل الأحاديث، واستقبلت أمير منطقة عسير عدة مرات."},
-  {name:"الساحة التراثية", pos:[45,26.6], r:11, key:"farm", place:"على ضفاف وادي العرين ومزارعه",
-   desc:"كانت مزرعة طينية، وتبرّع بها صاحبها عام 1440هـ لتكون مسرحاً للاحتفالات والمناسبات. أُقيم فيها تدشين جمعية رحالة الجنوب بحضور أمير منطقة عسير، والاحتفاء بيوم التأسيس.",
-   use:"قديماً مزرعة، واليوم مسرح للاحتفالات والمناسبات.", fact:"مساحتها نحو 600 متر مربع."},
-  {name:"بيت آل فايع", pos:[-46,-16], r:6.2, key:"house", place:"غرب البلدة، قرب السوق الشعبي القديم",
-   desc:"مبنى طيني من خمسة أدوار وحوش كبير، سكنته أسرة آل فايع أجيالاً. وبحسب رواية الأهالي استُقبل فيه الوفدان السعودي واليمني لتوقيع اتفاقية الصلح النهائي لترسيم الحدود، نحو عام 1352هـ.",
-   use:"قديماً سكن عائلي، واليوم مرمّم غير مستخدم.", fact:"موقعه في اللعبة تقريبي، ويُحدَّد مع أهل البلدة."}
+  {name:TR("مبنى الجمارك والمالية"), pos:[-34.5,-37], r:6.2, key:"house", place:TR("مقابل المسجد التاريخي والمدرسة الثانية"),
+   desc:TR("بيت طيني من أربعة أدوار وحوش كبير، عمره نحو مائة وعشرين عاماً، بُني من الطين والأعشاب. سكنته أسرة من آل زاهر، وفي عام 1352هـ أُجِّر الحوش والغرف الأرضية لشعبة الجمارك والمالية."),
+   use:TR("قديماً سكن للأسرة وشعبة للجمارك والمالية، واليوم مبنى مرمّم غير مستخدم."), fact:TR("كان مقرّ شعبة الجمارك والمالية في البلدة.")},
+  {name:TR("المدرسة الثانية"), pos:[-38,-26.5], r:6.8, key:"house", place:TR("قرب المسجد التاريخي والجمارك"),
+   desc:TR("لما ضاق مبنى المدرسة الأولى، استُعين ببيت طيني من ثلاثة أدوار فسُمّي المدرسة الثانية، وكان يديره الأستاذ محمد بن علي بن هاشل رحمه الله."),
+   use:TR("قديماً سكن ثم مدرسة ابتدائية لأبناء البلدة، واليوم مبنى تراثي مرمّم."), fact:TR("عمره أكثر من مائة عام.")},
+  {name:TR("مبنى الإمارة"), pos:[-7,-28], r:6.2, key:"house", place:TR("قرب المسجد التاريخي"),
+   desc:TR("مبنى طيني كبير من سبعة أدوار، فيه غرف كثيرة ونوافذ صغيرة جداً لتكون مرصداً لحراس البلدة. أُجِّر للإمارة نحو عام 1353هـ ليكون سكناً للأمير ومقراً للعمل."),
+   use:TR("قديماً سكن ثم مقر لإدارة ظهران، واليوم مهجور."), fact:TR("عمره نحو مائة وخمسين عاماً.")},
+  {name:TR("مبنى الشرطة"), pos:[33.5,-24.5], r:6.2, key:"house", place:TR("قرب السوق الشعبي"),
+   desc:TR("مبنى طيني من سبعة أدوار وحوش. أُجِّر للشرطة عام 1353هـ، وكان يستقبل المعاملات الأمنية من منطقة أبها في ذلك الوقت."),
+   use:TR("قديماً سكن ومبنى للشرطة، واليوم مرمّم غير مستخدم."), fact:TR("عمره أكثر من مائة عام.")},
+  {name:TR("المستوصف الأول"), pos:[-33.5,21], r:6.4, key:"house", place:TR("قرب المسجد التاريخي"),
+   desc:TR("مبنى طيني من دورين يملكه آل رقصة من وادعة. افتُتح فيه مركز صحي عام 1370هـ: سكن أصحابه الدور العلوي، وأُجِّر الدور الأرضي والحوش للمستوصف."),
+   use:TR("قديماً سكن ومركز صحي، واليوم مرمّم غير مستخدم."), fact:TR("عمره نحو مائة عام.")},
+  {name:TR("قصر آل زابن"), pos:[8.5,19.4], r:6.4, key:"house", place:TR("على وادي العرين بضفاف المزارع"),
+   desc:TR("بيت طيني تراثي من أربعة طوابق، عمره أكثر من مائة عام، وعلى جدرانه القط العسيري."),
+   use:TR("قديماً سكن عائلي، واليوم مزار سياحي تزوره الوفود."), fact:TR("مرمّم ويستقبل الزوار.")},
+  {name:TR("المسجد التاريخي"), pos:[-22,-25.5], r:7, key:"mosque", place:TR("وسط البلدة"),
+   desc:TR("يقع وسط البلدة وتحيط به البيوت من كل الجهات، ويتكون من المسجد والحوش والمواضي والمنزالة. يُروى أن عمره أكثر من ألف عام، وكانت تُقام فيه صلاة الجمعة. ورُمّم ضمن مشروع الأمير محمد بن سلمان لتطوير المساجد التاريخية."),
+   use:TR("مسجد تاريخي يصلي فيه الناس إلى اليوم."), fact:TR("فيه نقوش أثرية، ومساحته نحو 290 متراً مربعاً.")},
+  {name:TR("البئر «مشبعة»"), pos:[9.4,-21.7], r:5.5, key:"well", place:TR("وسط البلدة"),
+   desc:TR("بئر قديمة وسط البلدة تحيط بها البيوت من كل الجهات، عمقها أكثر من عشرين متراً، وعمرها أكثر من مائة عام."),
+   use:TR("قديماً بئر الماء للبلدة، واليوم مهجورة."), fact:TR("وفي وسط البلدة ساحة يجتمع فيها الأهالي للتشاور وتبادل الأحاديث، واستقبلت أمير منطقة عسير عدة مرات.")},
+  {name:TR("الساحة التراثية"), pos:[45,26.6], r:11, key:"farm", place:TR("على ضفاف وادي العرين ومزارعه"),
+   desc:TR("كانت مزرعة طينية، وتبرّع بها صاحبها عام 1440هـ لتكون مسرحاً للاحتفالات والمناسبات. أُقيم فيها تدشين جمعية رحالة الجنوب بحضور أمير منطقة عسير، والاحتفاء بيوم التأسيس."),
+   use:TR("قديماً مزرعة، واليوم مسرح للاحتفالات والمناسبات."), fact:TR("مساحتها نحو 600 متر مربع.")},
+  {name:TR("بيت آل فايع"), pos:[-46,-16], r:6.2, key:"house", place:TR("غرب البلدة، قرب السوق الشعبي القديم"),
+   desc:TR("مبنى طيني من خمسة أدوار وحوش كبير، سكنته أسرة آل فايع أجيالاً. وبحسب رواية الأهالي استُقبل فيه الوفدان السعودي واليمني لتوقيع اتفاقية الصلح النهائي لترسيم الحدود، نحو عام 1352هـ."),
+   use:TR("قديماً سكن عائلي، واليوم مرمّم غير مستخدم."), fact:TR("موقعه في اللعبة تقريبي، ويُحدَّد مع أهل البلدة.")}
 ];
 const INFO_H = [
-  {name:"مسحقة البارود", pos:[28.75,-29.6], r:3.2, key:"stone", place:"بجانب سور مسجد معاذ من الجهة الشرقية",
-   desc:"حجر مستدير مسطّح كان يُستعمل في الماضي لسحق البارود، لتزويد أهل القرية بالذخيرة لمواجهة التهديدات الخارجية وحماية القرية.",
-   use:"قديماً سحق البارود، واليوم أثر قائم بجانب سور المسجد.", fact:"من رواية أهل حيدان."}
+  {name:TR("مسحقة البارود"), pos:[28.75,-29.6], r:3.2, key:"stone", place:TR("بجانب سور مسجد معاذ من الجهة الشرقية"),
+   desc:TR("حجر مستدير مسطّح كان يُستعمل في الماضي لسحق البارود، لتزويد أهل القرية بالذخيرة لمواجهة التهديدات الخارجية وحماية القرية."),
+   use:TR("قديماً سحق البارود، واليوم أثر قائم بجانب سور المسجد."), fact:TR("من رواية أهل حيدان.")}
 ];
 const INFO = TL ? [] : HD ? INFO_H : INFO_D;
 
@@ -672,7 +693,7 @@ const INFO = TL ? [] : HD ? INFO_H : INFO_D;
 const PLAYER={name:"",g:"m"};
 try{ const v=JSON.parse(localStorage.getItem("asirPlayer")||"null"); if(v&&typeof v.name==="string"){ PLAYER.name=v.name.slice(0,20); PLAYER.g=v.g==="f"?"f":"m"; } }catch(_){}
 function T(str){
-  const nm=PLAYER.name||(PLAYER.g==="f"?"بنتي":"ولدي");
+  const nm=PLAYER.name||(PLAYER.g==="f"?TR("بنتي"):TR("ولدي"));
   return str.replace(/\{name\}/g,nm).replace(/\{([^{}|]*)\|([^{}|]*)\}/g,(_,m,f)=>PLAYER.g==="f"?f:m);
 }
 
@@ -682,7 +703,7 @@ const MOBILE = matchMedia("(pointer:coarse)").matches || /Android|iPhone|iPad|iP
 const canvas = document.getElementById("c");
 let renderer;
 try { renderer = new THREE.WebGLRenderer({canvas, antialias:!MOBILE, powerPreference:"high-performance"}); }
-catch(e){ document.querySelector("#start .sub").textContent = "متصفحك لا يدعم العرض ثلاثي الأبعاد (WebGL). جرّب متصفحاً آخر أو جهاز كمبيوتر."; return; }
+catch(e){ document.querySelector("#start .sub").textContent = TR("متصفحك لا يدعم العرض ثلاثي الأبعاد (WebGL). جرّب متصفحاً آخر أو جهاز كمبيوتر."); return; }
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, MOBILE?1.25:1.6));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -974,7 +995,7 @@ function buildSign(sg){
   g.fillStyle=gr; g.fillRect(0,0,1024,256);
   g.strokeStyle="rgba(40,22,10,.35)"; g.lineWidth=2; for(let y=14;y<256;y+=22){ g.beginPath(); g.moveTo(0,y+Math.sin(y)*3); g.bezierCurveTo(340,y+6,680,y-6,1024,y+Math.cos(y)*3); g.stroke(); }
   g.strokeStyle="#c89b45"; g.lineWidth=12; g.strokeRect(14,14,996,228);
-  g.fillStyle="#f6f1e7"; g.textAlign="center"; g.textBaseline="middle"; g.direction="rtl";
+  g.fillStyle="#f6f1e7"; g.textAlign="center"; g.textBaseline="middle"; g.direction=LANG==="ar"?"rtl":"ltr";
   let fs=130; g.font=`700 ${fs}px "Reem Kufi", Tahoma, sans-serif`;
   while(g.measureText(sg.text).width>900&&fs>50){ fs-=6; g.font=`700 ${fs}px "Reem Kufi", Tahoma, sans-serif`; }
   g.fillText(sg.text,512,136);
@@ -989,11 +1010,11 @@ function buildSign(sg){
 }
 function label(t,x,y,z){ LABELS.push([t,x,y,z]); }
 if(!HD){
-house(-24.2,-46,5,5,4,{color:0xeed8c0,doorFace:0}); label("البوابة الشمالية",-18.7,9.5,-46.5);
+house(-24.2,-46,5,5,4,{color:0xeed8c0,doorFace:0}); label(TR("البوابة الشمالية"),-18.7,9.5,-46.5);
 sabat(-18.9,-46.6,-.2,1,true);
-{ const a=Math.atan2(-.2,1); for(const s2 of [-1,1]) SIGNS.push({p:[-18.9+Math.sin(a)*s2*1.78,3.5,-46.6+Math.cos(a)*s2*1.78],ry:a+(s2>0?0:Math.PI),width:3.4,text:"البوابة الشمالية",big:true}); }
-signFor(house(-34.5,-37,6,5,4,{doorFace:2}),"الجمارك"); label("الجمارك",-34.5,15.5,-37);
-signFor(house(-38,-26.5,8,6,3,{doorFace:2,horn:true}),"المدرسة الثانية"); label("المدرسة الثانية",-38,12,-26.5);
+{ const a=Math.atan2(-.2,1); for(const s2 of [-1,1]) SIGNS.push({p:[-18.9+Math.sin(a)*s2*1.78,3.5,-46.6+Math.cos(a)*s2*1.78],ry:a+(s2>0?0:Math.PI),width:3.4,text:TR("البوابة الشمالية"),big:true}); }
+signFor(house(-34.5,-37,6,5,4,{doorFace:2}),TR("الجمارك")); label(TR("الجمارك"),-34.5,15.5,-37);
+signFor(house(-38,-26.5,8,6,3,{doorFace:2,horn:true}),TR("المدرسة الثانية")); label(TR("المدرسة الثانية"),-38,12,-26.5);
 (function(){
   const x=-22,z=-25.5,w=10,d=7, sh=2.7, mh=2.3;
   put(I.base,x,sh/2,z,w,sh,d);
@@ -1001,25 +1022,25 @@ signFor(house(-38,-26.5,8,6,3,{doorFace:2,horn:true}),"المدرسة الثان
   roofTop(x,sh+mh,z,w-.25,d-.25,true);
   for(let i=-1;i<=1;i++){ windowOn(x+i*3,sh+1.1,z+d/2-.1,0,.9); windowOn(x+i*3,sh+1.1,z-d/2+.1,1,.9); }
   doorOn(x+w/2+.05,z+1.5,2,0); windowOn(x+w/2-.1,sh+1.1,z-1.5,2,.9);
-  signAt(x,z+1.5,2,w/2+.12,2.62,2.0,"المسجد التاريخي",false); signAt(x+1.2,z,0,d/2+.1,1.95,4.2,"المسجد التاريخي",true);
+  signAt(x,z+1.5,2,w/2+.12,2.62,2.0,TR("المسجد التاريخي"),false); signAt(x+1.2,z,0,d/2+.1,1.95,4.2,TR("المسجد التاريخي"),true);
   for(let i=-2;i<=2;i++) put(I.spout,x+i*2.2,sh+mh-.55,z+d/2+.35,.14,.14,.8);
   const plq=new THREE.Mesh(boxGeo,MAT.white); plq.scale.set(1.3,.8,.05); plq.position.set(x-2.2,sh+.6,z+d/2+.03); scene.add(plq);
   addCol(x-w/2,x+w/2,z-d/2,z+d/2,sh+mh); occ.push({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2});
-  label("المسجد التاريخي",x,8.6,z);
+  label(TR("المسجد التاريخي"),x,8.6,z);
 })();
-signFor(house(-7,-28,6.4,6.4,7,{doorFace:0,qatt:true}),"مبنى الإمارة"); label("مبنى الإمارة",-7,23,-28);
-house(-11,-13.2,7,6,2,{baseH:2.4,doorFace:3,horn:true}); label("بيت حجري طيني",-11,9.5,-13.2);
-signFor(house(24,-32,9,6,2,{doorFace:3,horn:true}),"المدرسة الأولى"); label("المدرسة الأولى",24,9,-32);
-signFor(house(33.5,-24.5,6.4,6.4,7,{doorFace:3}),"مبنى الشرطة"); label("مبنى الشرطة",33.5,23,-24.5);
-signFor(house(-33.5,21,9,5,2,{baseH:.4,doorFace:2,qatt:true}),"المستوصف الأول"); label("المستوصف الأول",-33.5,8.6,21);
-signFor(house(8.5,19.4,7,7,4,{doorFace:1,color:0xe8c9a6,qatt:true}),"قصر آل زابن"); house(1.2,20.8,5,5,4,{doorFace:1});
-label("قصر آل زابن",6,16,19.4);
-signFor(house(-46,-16,6,6,5,{doorFace:2}),"بيت آل فايع"); label("بيت آل فايع",-46,17,-16);
+signFor(house(-7,-28,6.4,6.4,7,{doorFace:0,qatt:true}),TR("مبنى الإمارة")); label(TR("مبنى الإمارة"),-7,23,-28);
+house(-11,-13.2,7,6,2,{baseH:2.4,doorFace:3,horn:true}); label(TR("بيت حجري طيني"),-11,9.5,-13.2);
+signFor(house(24,-32,9,6,2,{doorFace:3,horn:true}),TR("المدرسة الأولى")); label(TR("المدرسة الأولى"),24,9,-32);
+signFor(house(33.5,-24.5,6.4,6.4,7,{doorFace:3}),TR("مبنى الشرطة")); label(TR("مبنى الشرطة"),33.5,23,-24.5);
+signFor(house(-33.5,21,9,5,2,{baseH:.4,doorFace:2,qatt:true}),TR("المستوصف الأول")); label(TR("المستوصف الأول"),-33.5,8.6,21);
+signFor(house(8.5,19.4,7,7,4,{doorFace:1,color:0xe8c9a6,qatt:true}),TR("قصر آل زابن")); house(1.2,20.8,5,5,4,{doorFace:1});
+label(TR("قصر آل زابن"),6,16,19.4);
+signFor(house(-46,-16,6,6,5,{doorFace:2}),TR("بيت آل فايع")); label(TR("بيت آل فايع"),-46,17,-16);
 (function(){
   const flag=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1),new THREE.MeshStandardMaterial({color:0x1f7a3a,side:THREE.DoubleSide})); flag.position.set(9.4,14.6,19.4); scene.add(flag);
   const pole=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,3,6),MAT.white); pole.position.set(8.6,14,19.4); scene.add(pole);
 })();
-signFor(house(-48,32,7,7,5,{doorFace:2}),"قصر آل دوبان"); label("قصر آل دوبان",-48,18,32);
+signFor(house(-48,32,7,7,5,{doorFace:2}),TR("قصر آل دوبان")); label(TR("قصر آل دوبان"),-48,18,32);
 (function(){
   const [x,z]=L1;
   const drum=new THREE.Mesh(new THREE.CylinderGeometry(1.75,1.85,1.05,28),MAT.mud); drum.position.set(x,.52,z); drum.castShadow=drum.receiveShadow=true; scene.add(drum);
@@ -1034,7 +1055,7 @@ signFor(house(-48,32,7,7,5,{doorFace:2}),"قصر آل دوبان"); label("قص�
   const bar=new THREE.Mesh(new THREE.CylinderGeometry(.07,.08,4.4,7),MAT.wood); bar.position.set(x-.1,3.05,z-.15); bar.rotation.z=Math.PI/2+.17; bar.rotation.y=.2; scene.add(bar);
   [p1,p2,bar,fork].forEach(m=>m.castShadow=true);
   addCol(x-1.95,x+1.95,z-1.95,z+1.95,1.1); addCol(x-2.3,x-1.9,z+.1,z+.5,3); occ.push({x0:x-8,x1:x+8,z0:z-7,z1:z+7});
-  label("البئر",x,5.6,z);
+  label(TR("البئر"),x,5.6,z);
 })();
 // the heritage square: the town's centre for celebrations — round green lawn, small stands on its north side
 (function(){
@@ -1060,7 +1081,7 @@ signFor(house(-48,32,7,7,5,{doorFace:2}),"قصر آل دوبان"); label("قص�
   }
   for(let k=0;k<=12;k++){ const ang=a0+(a1-a0)*k/12, rc=rIn+tiers*step*.55, cx2=x+Math.cos(ang)*rc, cz2=z-Math.sin(ang)*rc; addCol(cx2-1.6,cx2+1.6,cz2-1.6,cz2+1.6,tiers*th); }
   occ.push({x0:x-15,x1:x+15,z0:z-15,z1:z+11});
-  label("الساحة التراثية",x,5,z);
+  label(TR("الساحة التراثية"),x,5,z);
 })();
 occ.push({x0:30,x1:47,z0:0,z1:14});
 occ.push({x0:2,x1:10,z0:7,z1:14.5});
@@ -1102,7 +1123,7 @@ for(let x=-6;x<=34;x+=8.5) for(let z=31;z<=58;z+=7){
   put(I.ruin,x,.35,z-3.3,8.4,.7,.5,0,0,0xd9c0aa);
 }
 for(let x=-58;x<=-16;x+=8.5) for(let z=52;z<=60;z+=7){ put(I.plain,x,.06,z,7.6,.12,6.1,0,0,[0x4f9a2c,0x63ad36,0x469024][(rnd()*3)|0]); put(I.ruin,x,.35,z-3.3,8.4,.7,.5,0,0,0xd9c0aa); }
-label("المزارع",14,5,44);
+label(TR("المزارع"),14,5,44);
 }
 const trunkGeo=new THREE.CylinderGeometry(.16,.26,1,7); trunkGeo.translate(0,.5,0);
 const frondGeo=new THREE.BoxGeometry(.7,.04,3.3); frondGeo.translate(0,0,1.65);
@@ -1139,12 +1160,12 @@ function buildTalha(){
   const roadMat=new THREE.MeshStandardMaterial({color:0x5a5754,roughness:.95});
   TALHA_ROADS.forEach(l=>roadRibbon(l,roadMat,3.2));
   // the heritage palace (now a museum): a tall mud tower with the Asiri qatt
-  signFor(house(22,-42,8,8,4,{qatt:true,color:0xd9b48e,doorFace:1,horn:true,baseH:1.6}),"القصر الأثري بالطلحة"); label("القصر الأثري بالطلحة",22,17,-42);
+  signFor(house(22,-42,8,8,4,{qatt:true,color:0xd9b48e,doorFace:1,horn:true,baseH:1.6}),TR("القصر الأثري بالطلحة")); label(TR("القصر الأثري بالطلحة"),22,17,-42);
   // the mud palace in the orchard, on the well of Salwa: two storeys, painted white
-  (function(){ const x=60,z=-31; signFor(house(x,z,9,7,2,{color:0xf0ece4,doorFace:0,baseH:1.2}),"القصر الطيني في البستان"); label("القصر الطيني في البستان",x,10,z);
+  (function(){ const x=60,z=-31; signFor(house(x,z,9,7,2,{color:0xf0ece4,doorFace:0,baseH:1.2}),TR("القصر الطيني في البستان")); label(TR("القصر الطيني في البستان"),x,10,z);
     const wx=50.5, wz=-27; const ring=new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.45,.9,22,1,true),MAT.stone); ring.material.side=THREE.DoubleSide; ring.position.set(wx,.45,wz); scene.add(ring);
     const water=new THREE.Mesh(new THREE.CircleGeometry(1.25,22),new THREE.MeshStandardMaterial({color:0x1d2a2c,roughness:.2})); water.rotation.x=-Math.PI/2; water.position.set(wx,.3,wz); scene.add(water);
-    addCol(wx-1.5,wx+1.5,wz-1.5,wz+1.5,1); occ.push({x0:wx-2.5,x1:wx+2.5,z0:wz-2.5,z1:wz+2.5}); label("بئر سلوة",wx,4,wz);
+    addCol(wx-1.5,wx+1.5,wz-1.5,wz+1.5,1); occ.push({x0:wx-2.5,x1:wx+2.5,z0:wz-2.5,z1:wz+2.5}); label(TR("بئر سلوة"),wx,4,wz);
     for(let i=0;i<16;i++){ const a=R(0,6.28), r=R(7,13), tx=x+Math.cos(a)*r, tz=z+Math.sin(a)*r; if(nearStop(tx,tz,3)||Math.hypot(tx-wx,tz-wz)<3) continue; tree(tx,tz,R(1,1.5)); }
     occ.push({x0:x-14,x1:x+14,z0:z-14,z1:z+14}); })();
   // walled fields east of the old village
@@ -1152,7 +1173,7 @@ function buildTalha(){
   for(let x=47;x<=82;x+=9) for(let z=-70;z<=14;z+=7.5){ if(overlapsOcc(x-4.5,x+4.5,z-3.7,z+3.7,0)) continue;
     put(I.plain,x,.06,z,8.4,.12,6.8,0,0,FIELD[(rnd()*FIELD.length)|0]); const hh=R(.6,1);
     put(I.base,x,hh/2,z-3.6,9,hh,.5); put(I.base,x-4.4,hh/2,z,.5,hh,6.8); }
-  label("مزارع الطلحة",64,5,-8);
+  label(TR("مزارع الطلحة"),64,5,-8);
   // the old core: houses of stone and mud, many fallen, trees between them
   for(let gx=-42;gx<=30;gx+=5.4) for(let gz=-58;gz<=48;gz+=5.4){
     const x=gx+R(-1,1), z=gz+R(-1,1); if(!inPoly(x,z,TALHA_FOOT)) continue;
@@ -1163,7 +1184,7 @@ function buildTalha(){
     if(r<.38) ruin(x,z,w,d); else if(r<.46){ if(!nearStop(x,z,3)) tree(x,z,R(1.1,1.7)); }
     else house(x,z,w,d,r<.8?1:(r<.95?2:3),{color:STONE_MUDS[(rnd()*STONE_MUDS.length)|0],baseH:R(.8,2)});
   }
-  label("الطلحة القديمة",-6,12,-6);
+  label(TR("الطلحة القديمة"),-6,12,-6);
   // newer homes around the ring road
   const NEW=[0xf1eee8,0xe8e2d6,0xdcd4c4,0xf4f1ec];
   for(let i=0;i<(MOBILE?40:80);i++){ const x=R(-84,84), z=R(-74,76);
@@ -1171,7 +1192,7 @@ function buildTalha(){
     const w=R(8,13), d=R(8,12), h=R(3.5,7); if(overlapsOcc(x-w/2,x+w/2,z-d/2,z+d/2,2)) continue;
     put(I.plain,x,h/2,z,w,h,d,0,0,NEW[(rnd()*NEW.length)|0]); put(I.plain,x,h+.35,z,w+.2,.7,d+.2,0,0,0xffffff);
     addCol(x-w/2,x+w/2,z-d/2,z+d/2,h); occ.push({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2}); }
-  label("قرية الطلحة",0,24,-10);
+  label(TR("قرية الطلحة"),0,24,-10);
 }
 function buildHaydan(){
   if(HD) MAT.pink.color.set(0xf2ede4); // white window frames, as in the residents' photos of Haydan
@@ -1194,11 +1215,11 @@ function buildHaydan(){
   // the valley (V1): a pale sandy bed with scattered stones along the north
   const bed=new THREE.Mesh(new THREE.PlaneGeometry(190,15),new THREE.MeshStandardMaterial({color:0xcfbf9d,roughness:1})); bed.rotation.x=-Math.PI/2; bed.position.set(-10,.025,-41); bed.receiveShadow=true; scene.add(bed);
   for(let i=0;i<(MOBILE?40:90);i++){ const x=R(-100,85), z=R(-48,-34); if(nearStop(x,z,3)) continue; const s=R(.3,1.1); put(I.base,x,s*.35,z,s*R(1,1.6),s*.7,s*R(.8,1.3),R(0,3)); }
-  label("وادي العرين",-40,5,-42);
+  label(TR("وادي العرين"),-40,5,-42);
   // palms and trees (F1) on the valley bank
   for(let i=0;i<(MOBILE?34:70);i++){ const x=R(-85,12), z=R(-31,-11); if(nearStop(x,z,3.2)) continue; palm(x,z); }
   for(let i=0;i<(MOBILE?12:26);i++){ const x=R(-85,10), z=R(-30,-12); if(nearStop(x,z,3.2)) continue; tree(x,z,R(1,1.6)); }
-  label("النخيل والأشجار",-45,11,-22);
+  label(TR("النخيل والأشجار"),-45,11,-22);
   // stone-walled farms (F2) between the palms and the road
   const FARM=[0x4f9a2c,0x63ad36,0x76b440,0xa08a5c,0x469024];
   for(let x=-62;x<=6;x+=9.5) for(let z=-7;z<=15;z+=8.5){
@@ -1208,7 +1229,7 @@ function buildHaydan(){
     put(I.base,x,hh/2,z-3.9,9.2,hh,.55); put(I.base,x,hh/2,z+3.9,9.2,hh,.55);
     put(I.base,x-4.45,hh/2,z,.55,hh,7.2); if(rnd()<.6) put(I.base,x+4.45,hh/2,z-1.8,.55,hh,3.6);
   }
-  label("المزارع المسوّرة بالحجر",-28,4.5,6);
+  label(TR("المزارع المسوّرة بالحجر"),-28,4.5,6);
   // the village wall (W1): follows the houses, some parts standing and some worn down; gaps where the lanes pass
   const C=[48,-3]; const ring=HAYDAN_FOOT.map(([x,z])=>{ const dx=x-C[0], dz=z-C[1], L=Math.hypot(dx,dz); return [x+dx/L*4,z+dz/L*4]; });
   for(let i=0;i<ring.length;i++){
@@ -1221,15 +1242,15 @@ function buildHaydan(){
       put(I.base,x,h/2,z,.85,h,L/n+.05,ang); if(h>.9) addCol(x-.6,x+.6,z-.6,z+.6,h);
     }
   }
-  label("سور حيدان",6,6,-16);
+  label(TR("سور حيدان"),6,6,-16);
   // the mosque of Ibn Ajla (M3), south of the houses by the road
   (function(){ const x=54,z=34,w=7.4,d=5, sh=2.6, mh=2.2;
     put(I.base,x,sh/2,z,w,sh,d); put(I.ruin,x,sh+mh/2,z,w-.25,mh,d-.25,0,0,0xe7d6bd); roofTop(x,sh+mh,z,w-.25,d-.25,true);
     doorOn(x,z+d/2+.05,0,0); windowOn(x-2.4,sh+1.1,z+d/2-.1,0,.9); windowOn(x+2.4,sh+1.1,z+d/2-.1,0,.9);
     windowOn(x-w/2+.1,sh+1.1,z,3,.9); windowOn(x+w/2-.1,sh+1.1,z,2,.9);
-    signAt(x,z,0,d/2+.12,2.62,2.2,"مسجد بن عجلة",false); signAt(x,z,0,d/2+.1,sh+mh-.7,4,"مسجد بن عجلة",true);
+    signAt(x,z,0,d/2+.12,2.62,2.2,TR("مسجد بن عجلة"),false); signAt(x,z,0,d/2+.1,sh+mh-.7,4,TR("مسجد بن عجلة"),true);
     addCol(x-w/2,x+w/2,z-d/2,z+d/2,sh+mh); occ.push({x0:x-w/2-1,x1:x+w/2+1,z0:z-d/2-1,z1:z+d/2+1});
-    label("مسجد بن عجلة",x,9,z); })();
+    label(TR("مسجد بن عجلة"),x,9,z); })();
   // ---- landmarks the residents located on the coding map ----
   const [HX,HZ,HR,HH]=HILL;
   // the rocky hill (dark weathered rock, as in the photos)
@@ -1256,7 +1277,7 @@ function buildHaydan(){
     windowAt(x-5.2,top+3.6,z+1.2+2.2,0); windowAt(x-7.3,top+3.6,z+1.2,-Math.PI/2);
     const pole=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,3,6),MAT.white); pole.position.set(x+2,top+H+1.9,z-2); scene.add(pole);
     const flag=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1),new THREE.MeshStandardMaterial({color:0x1f7a3a,side:THREE.DoubleSide})); flag.position.set(x+2.8,top+H+2.9,z-2); scene.add(flag);
-    label("قصر ابن عجلة",x,top+H+5,z);
+    label(TR("قصر ابن عجلة"),x,top+H+5,z);
   })();
   // its south gate: a passage between stone walls under a timber roof, a lantern, and the blue-and-yellow door
   (function(){ const gx=74.5, gz=HZ+HR*.8;
@@ -1268,7 +1289,7 @@ function buildHaydan(){
     const tx=new THREE.CanvasTexture(cv); tx.encoding=THREE.sRGBEncoding;
     const door=new THREE.Mesh(new THREE.PlaneGeometry(1.25,2.3),new THREE.MeshStandardMaterial({map:tx,roughness:.8})); door.position.set(gx,1.15,gz+.05); scene.add(door);
     const lamp=new THREE.Mesh(new THREE.BoxGeometry(.22,.32,.22),new THREE.MeshStandardMaterial({color:0x2c4f8f,emissive:0xffc76a,emissiveIntensity:.6})); lamp.position.set(gx+.35,2.85,gz+.6); scene.add(lamp);
-    signAt(gx,gz+3.3,0,.02,3.85,2.6,"قصر ابن عجلة",true);
+    signAt(gx,gz+3.3,0,.02,3.85,2.6,TR("قصر ابن عجلة"),true);
   })();
   // the mosque of the Companion Mu'adh ibn Jabal (M1): low mud-and-stone walls, white roof edge with small white merlons, a pebbled courtyard
   (function(){ const x=22.5, z=-29, w=9.5, d=6.5, h=3.4;
@@ -1279,11 +1300,11 @@ function buildHaydan(){
     put(I.hole,x-1.6,2.2,z+d/2+.04,.35,.45,.05); put(I.hole,x-3.4,2.2,z+d/2+.04,.35,.45,.05); put(I.hole,x+w/2+.04,2.2,z,.05,.45,.35);
     const yard=new THREE.Mesh(new THREE.PlaneGeometry(w+1,4.6),new THREE.MeshStandardMaterial({map:gravelTex,color:0xefe3cf,roughness:1})); yard.rotation.x=-Math.PI/2; yard.position.set(x,.05,z+d/2+2.4); yard.receiveShadow=true; scene.add(yard);
     addCol(x-w/2,x+w/2,z-d/2,z+d/2,h); occ.push({x0:x-w/2-1.5,x1:x+w/2+3.5,z0:z-d/2-1,z1:z+d/2+5});
-    signAt(x,z,0,d/2+.12,2.85,3.6,"مسجد معاذ بن جبل",false);
-    label("مسجد الصحابي معاذ بن جبل",x,8,z);
+    signAt(x,z,0,d/2+.12,2.85,3.6,TR("مسجد معاذ بن جبل"),false);
+    label(TR("مسجد الصحابي معاذ بن جبل"),x,8,z);
     // the powder-grinding stone (مسحقة البارود) by its east wall
     const st=new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.15,.35,9),new THREE.MeshStandardMaterial({color:0x55524e,roughness:.95,flatShading:true}));
-    st.position.set(x+w/2+1.5,.17,z-.6); st.castShadow=st.receiveShadow=true; scene.add(st); label("مسحقة البارود",x+w/2+1.5,2.6,z-.6);
+    st.position.set(x+w/2+1.5,.17,z-.6); st.castShadow=st.receiveShadow=true; scene.add(st); label(TR("مسحقة البارود"),x+w/2+1.5,2.6,z-.6);
   })();
   // the mosque's well (M2)
   (function(){ const x=51.5, z=-40;
@@ -1293,7 +1314,7 @@ function buildHaydan(){
     for(const s of [-1,1]){ const post=new THREE.Mesh(new THREE.CylinderGeometry(.09,.11,2.8,7),MAT.wood); post.position.set(x+s*1.8,1.4,z); post.castShadow=true; scene.add(post); }
     const bar=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,3.9,7),MAT.wood); bar.rotation.z=Math.PI/2; bar.position.set(x,2.75,z); scene.add(bar);
     addCol(x-1.8,x+1.8,z-1.8,z+1.8,1.1); occ.push({x0:x-3,x1:x+3,z0:z-3,z1:z+3});
-    label("بئر مسجد معاذ",x,5,z);
+    label(TR("بئر مسجد معاذ"),x,5,z);
   })();
   // Dar al-Furuq «Sadah» (D1): a weathered two-storey mud tower with a deep vertical crack
   (function(){ const x=17, z=9.6, w=6, d=5, h=6.4;
@@ -1301,8 +1322,8 @@ function buildHaydan(){
     put(I.hole,x-.7,3.6,z+d/2+.03,.32,4.4,.05); put(I.hole,x+1.6,4.6,z+d/2+.03,.4,.5,.05); put(I.hole,x-2,4.8,z+d/2+.03,.35,.45,.05);
     put(I.door,x+1.5,1.05,z+d/2+.05,1,2,.08,0,0,0x5a3a22);
     addCol(x-w/2,x+w/2,z-d/2,z+d/2,h); occ.push({x0:x-w/2-1,x1:x+w/2+1,z0:z-d/2-1,z1:z+d/2+3});
-    signAt(x,z,0,d/2+.12,2.75,2.8,"دار الفروق «سداح»",false);
-    label("دار الفروق «سداح»",x,9.5,z);
+    signAt(x,z,0,d/2+.12,2.75,2.8,TR("دار الفروق «سداح»"),false);
+    label(TR("دار الفروق «سداح»"),x,9.5,z);
   })();
   // the houses (B): stone bases, mud upper floors, many old ones fallen
   for(let gx=10;gx<=88;gx+=5.6) for(let gz=-34;gz<=28;gz+=5.6){
@@ -1314,8 +1335,8 @@ function buildHaydan(){
     if(r<.26) ruin(x,z,w,d);
     else house(x,z,w,d,r<.62?1:(r<.9?2:3),{color:col,baseH:R(1.1,2.4)});
   }
-  label("بيوت القرية",50,14,-8);
-  label("قرية حيدان التراثية",30,22,-20);
+  label(TR("بيوت القرية"),50,14,-8);
+  label(TR("قرية حيدان التراثية"),30,22,-20);
 }
 
 function massif(x,z,rb,rt,h,sd){
@@ -1368,7 +1389,7 @@ function shathath(cx,cz){
   g.setIndex(idx); g.computeVertexNormals();
   const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,fog:false}));
   scene.add(m);
-  label("جبل شثاث · حارس ظهران الجنوب",cx,base+H+14,cz);
+  label(TR("جبل شثاث · حارس ظهران الجنوب"),cx,base+H+14,cz);
 }
 if(!HD) shathath(8,-305);
 
@@ -1442,9 +1463,9 @@ const lamps=[];
 /* ---------- Time of day: golden hour (default, as in the Sarat Abidah film) or bright midday ---------- */
 const TIMES={
   golden:{sun:[-70,34,42], sunC:0xffbf80, sunI:1.75, hemiS:0xffd6b0, hemiG:0x8a6448, hemiI:.55, fog:0xe9c7a0, exp:.94,
-    zen:[0.17,0.33,0.62], mid:[0.62,0.62,0.74], hor:[1.0,0.70,0.42], glow:[1.0,0.62,0.28], cloud:0xffd2b0, lamp:.95, win:.55, label:"الوقت: الغروب"},
+    zen:[0.17,0.33,0.62], mid:[0.62,0.62,0.74], hor:[1.0,0.70,0.42], glow:[1.0,0.62,0.28], cloud:0xffd2b0, lamp:.95, win:.55, label:TR("الوقت: الغروب")},
   noon:{sun:[-62,56,34], sunC:0xffdcae, sunI:1.6, hemiS:0xcfe0f5, hemiG:0x9a7a58, hemiI:.5, fog:0xdcd6c8, exp:1.0,
-    zen:[0.20,0.42,0.72], mid:[0.50,0.68,0.86], hor:[0.90,0.86,0.78], glow:[1.0,0.82,0.55], cloud:0xffffff, lamp:.12, win:0, label:"الوقت: النهار"}
+    zen:[0.20,0.42,0.72], mid:[0.50,0.68,0.86], hor:[0.90,0.86,0.78], glow:[1.0,0.82,0.55], cloud:0xffffff, lamp:.12, win:0, label:TR("الوقت: النهار")}
 };
 let timeMode="golden";
 function applyTime(k){ const T0=TIMES[k]; timeMode=k;
@@ -1464,7 +1485,7 @@ const labels=[];
 function roundRect(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
 function makeLabel(text,x,y,z){
   const cv=document.createElement("canvas"); cv.width=760; cv.height=170; const g=cv.getContext("2d");
-  g.font='700 58px "Reem Kufi", Tahoma, sans-serif'; g.textAlign="center"; g.textBaseline="middle"; g.direction="rtl";
+  g.font='700 58px "Reem Kufi", Tahoma, sans-serif'; g.textAlign="center"; g.textBaseline="middle"; g.direction=LANG==="ar"?"rtl":"ltr";
   const w=Math.min(660,g.measureText(text).width+80), x0=380-w/2, x1=380+w/2, t=34, h=104;
   // paper
   const pg=g.createLinearGradient(0,t,0,t+h); pg.addColorStop(0,"#f3e4c0"); pg.addColorStop(.5,"#ead6a8"); pg.addColorStop(1,"#d8bd88");
@@ -1597,7 +1618,7 @@ player.position.set(START[0],0,START[1]); scene.add(player);
 
 function nameSprite(text,sub){
   const cv=document.createElement("canvas"); cv.width=512; cv.height=150; const g=cv.getContext("2d");
-  g.textAlign="center"; g.direction="rtl"; g.textBaseline="middle";
+  g.textAlign="center"; g.direction=LANG==="ar"?"rtl":"ltr"; g.textBaseline="middle";
   g.fillStyle="rgba(28,19,14,.7)"; roundRect(g,56,14,400,122,30); g.fill();
   g.fillStyle="#f6f1e7"; g.font='700 50px "Reem Kufi", Tahoma, sans-serif'; g.fillText(text,256,58);
   g.fillStyle="#e3a83a"; g.font='500 30px "IBM Plex Sans Arabic", Tahoma, sans-serif'; g.fillText(sub,256,108);
@@ -1627,7 +1648,7 @@ if(!HD)(function(){ const x=-9.6,z=-43.6;
   parts.forEach(p=>{ const m=new THREE.Mesh(boxGeo,new THREE.MeshStandardMaterial({color:p[6],roughness:.9})); m.scale.set(p[3],p[4],p[5]); m.position.set(x+p[0],p[1],z+p[2]); m.castShadow=true; scene.add(m); });
   [0xb08850,0xcf6b33,0x7a8f3c].forEach((c,i)=>{ const s=new THREE.Mesh(new THREE.SphereGeometry(.26,8,6),new THREE.MeshStandardMaterial({color:c,roughness:1})); s.scale.y=.8; s.position.set(x-.8+i*.8,1.15,z); scene.add(s); });
   addCol(x-1.4,x+1.4,z-.8,z+.8,2.5);
-  buildSignLater({p:[x,2.95,z-.95],ry:Math.PI,width:2.4,text:"السوق",big:true});
+  buildSignLater({p:[x,2.95,z-.95],ry:Math.PI,width:2.4,text:TR("السوق"),big:true});
 })();
 
 /* ---------- Sound (generated with Web Audio, no files needed) ---------- */
@@ -1710,7 +1731,7 @@ const SFX=(function(){
 // Read dialogue aloud with the browser's Arabic voice (if the device has one)
 const VOICE=(function(){
   const ok=typeof window.speechSynthesis!=="undefined"; let voice=null, enabled=true;
-  function pick(){ if(!ok) return; const vs=speechSynthesis.getVoices(); voice=vs.find(v=>/^ar(-|_)SA/i.test(v.lang))||vs.find(v=>/^ar/i.test(v.lang))||null; }
+  function pick(){ if(!ok) return; const vs=speechSynthesis.getVoices(); voice= LANG==="ar" ? (vs.find(v=>/^ar(-|_)SA/i.test(v.lang))||vs.find(v=>/^ar/i.test(v.lang))||null) : (vs.find(v=>new RegExp("^"+LANG,"i").test(v.lang))||null); }
   if(ok){ pick(); speechSynthesis.onvoiceschanged=pick; }
   return {
     get available(){ return ok&&!!voice; },
@@ -1760,10 +1781,10 @@ function toggleAerial(){ aerial=!aerial; aerialBtn.setAttribute("aria-pressed",S
 aerialBtn.addEventListener("click",()=>{ toggleAerial(); canvas.focus(); });
 document.getElementById("timeBtn").addEventListener("click",()=>{ applyTime(timeMode==="golden"?"noon":"golden"); canvas.focus(); });
 const sndBtn=document.getElementById("sndBtn"), ttsBtn=document.getElementById("ttsBtn");
-sndBtn.addEventListener("click",()=>{ const o=SFX.toggle(); sndBtn.textContent=o?"الصوت: يعمل":"الصوت: متوقف"; sndBtn.setAttribute("aria-pressed",String(o)); canvas.focus(); });
+sndBtn.addEventListener("click",()=>{ const o=SFX.toggle(); sndBtn.textContent=o?TR("الصوت: يعمل"):TR("الصوت: متوقف"); sndBtn.setAttribute("aria-pressed",String(o)); canvas.focus(); });
 ttsBtn.addEventListener("click",()=>{
-  if(!VOICE.available){ ttsBtn.textContent="لا يوجد صوت عربي في هذا الجهاز"; ttsBtn.disabled=true; return; }
-  const o=VOICE.toggle(); ttsBtn.setAttribute("aria-pressed",String(o)); ttsBtn.textContent=o?"قراءة الحوار: تعمل":"قراءة الحوار بصوت"; canvas.focus(); });
+  if(!VOICE.available){ ttsBtn.textContent=TR("لا يوجد صوت عربي في هذا الجهاز"); ttsBtn.disabled=true; return; }
+  const o=VOICE.toggle(); ttsBtn.setAttribute("aria-pressed",String(o)); ttsBtn.textContent=o?TR("قراءة الحوار: تعمل"):TR("قراءة الحوار بصوت"); canvas.focus(); });
 
 /* ---------- Quest state ---------- */
 const $=id=>document.getElementById(id);
@@ -1771,12 +1792,12 @@ let stepIdx=0, collected=0, nearNpc=null, nearInfo=null, infoOpen=false, dlg=nul
 function curStep(){ return STEPS[stepIdx]; }
 function pendingItem(){ return artifacts.find(a=>a.given&&!a.got); }
 function currentTarget(){
-  const a=pendingItem(); if(a) return {x:a.it.pos[0],z:a.it.pos[1],label:a.it.goal?T(a.it.goal):T("{خذ|خذي} ")+a.it.name};
+  const a=pendingItem(); if(a) return {x:a.it.pos[0],z:a.it.pos[1],label:a.it.goal?T(a.it.goal):T(TR("{خذ|خذي} "))+a.it.name};
   const s=curStep(); if(!s||!s.npc) return null; const n=npcs[s.npc]; return {x:n.obj.position.x,z:n.obj.position.z,label:T(s.obj),npc:s.npc};
 }
 function refreshQuestUI(){
   const s=curStep(), a=pendingItem();
-  $("qObj").textContent = a ? (a.it.goal?T(a.it.goal):T("{خذ|خذي} ")+a.it.name+" من أمامك") : (s&&s.obj ? T(s.obj) : "اكتملت المهمة");
+  $("qObj").textContent = a ? (a.it.goal?T(a.it.goal):T(TR("{خذ|خذي} "))+a.it.name+TR(" من أمامك")) : (s&&s.obj ? T(s.obj) : TR("اكتملت المهمة"));
   $("cnt").textContent=`${AR(collected)} / ${AR(ITEMS.length)}`;
   Object.values(npcs).forEach(n=>n.bang.visible=false);
   if(!a && s && s.npc) npcs[s.npc].bang.visible=true;
@@ -1794,7 +1815,7 @@ function startDialog(){
 }
 function lineNumber(){ let n=0; for(const st of STEPS){ if(st===dlg.step) return n+dlg.line+1; n+=st.lines.length; } return 0; }
 function showLine(){ typeFull=T(dlg.step.lines[dlg.line]); typeShown=0; typeT=0; $("dText").textContent=""; if(!CLIPS.play(lineNumber())) VOICE.say(typeFull);
-  $("dNext").textContent = dlg.line<dlg.step.lines.length-1 ? "التالي" : (dlg.step.item!=null?"استلم":"حاضر"); $("dNext").focus(); }
+  $("dNext").textContent = dlg.line<dlg.step.lines.length-1 ? TR("التالي") : (dlg.step.item!=null?TR("استلم"):TR("حاضر")); $("dNext").focus(); }
 function advanceDialog(){
   if(typeShown<typeFull.length){ typeShown=typeFull.length; $("dText").textContent=typeFull; return; }
   if(dlg.line<dlg.step.lines.length-1){ dlg.line++; showLine(); return; }
@@ -1829,9 +1850,9 @@ function drawMini(){
   mg.restore();
 }
 function updateHint(){
-  const t=currentTarget(); if(!t){ $("hintText").textContent="اكتملت المهمة"; return; }
+  const t=currentTarget(); if(!t){ $("hintText").textContent=TR("اكتملت المهمة"); return; }
   const d=Math.hypot(t.x-player.position.x,t.z-player.position.z);
-  $("hintText").innerHTML=`${t.label} <small>· ${AR(Math.round(d))} م</small>`;
+  $("hintText").innerHTML=`${t.label} <small>· ${AR(Math.round(d))} ${TR("م")}</small>`;
   const tx=t.x-player.position.x, tz=t.z-player.position.z;
   const f=[-Math.sin(yaw),-Math.cos(yaw)], r=[Math.cos(yaw),-Math.sin(yaw)];
   $("arrow").style.transform=`rotate(${Math.atan2(tx*r[0]+tz*r[1],tx*f[0]+tz*f[1])}rad)`;
@@ -1845,9 +1866,9 @@ const tCam=new THREE.PerspectiveCamera(35,1,.1,50); tCam.position.set(0,1.1,3.4)
 let tModel=null;
 function showCard(a){
   state="card";
-  $("cEyebrow").textContent=`${HD?"معلم":"قطعة تراثية"} ${AR(collected)} من ${AR(ITEMS.length)}`;
+  $("cEyebrow").textContent=`${TR(HD?"معلم":"قطعة تراثية")} ${AR(collected)} ${TR("من")} ${AR(ITEMS.length)}`;
   $("cTitle").textContent=a.it.name;
-  $("cPlace").textContent=`${HD?"الموقع":"وُجدت عند"}: ${a.it.place}`;
+  $("cPlace").textContent=`${TR(HD?"الموقع":"وُجدت عند")}: ${a.it.place}`;
   $("cDesc").textContent=a.it.desc; $("cUse").textContent=a.it.use; $("cFact").textContent=a.it.fact;
   if(tModel) tScene.remove(tModel); tModel=buildModel(a.it.key); tModel.scale.setScalar(1.35); tScene.add(tModel);
   $("cardWrap").hidden=false; setTimeout(()=>$("cOk").focus(),50);
@@ -1855,22 +1876,22 @@ function showCard(a){
 /* ---------- Points: reading a building's history, and each heritage piece / landmark found ---------- */
 let points=0; const readSet=new Set(); let toastT=null;
 function updateScore(bump){ $("pts").textContent=AR(points);
-  $("readCnt").textContent = INFO.length ? `${HD?"قصص":"بيوت"} مقروءة ${AR(readSet.size)} / ${AR(INFO.length)}` : "";
+  $("readCnt").textContent = INFO.length ? `${TR(HD?"قصص مقروءة":"بيوت مقروءة")} ${AR(readSet.size)} / ${AR(INFO.length)}` : "";
   if(bump){ const sc=document.querySelector(".score"); sc.classList.remove("bump"); void sc.offsetWidth; sc.classList.add("bump"); } }
 function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2400); }
-function addPoints(n,msg){ points+=n; updateScore(true); toast(`+${AR(n)} نقطة · ${msg}`); }
+function addPoints(n,msg){ points+=n; updateScore(true); toast(`+${AR(n)} ${TR("نقطة")} · ${msg}`); }
 function showInfo(L){
-  if(!readSet.has(L.name)){ readSet.add(L.name); addPoints(10,"قرأت عن "+L.name);
-    if(INFO.length>1&&readSet.size===INFO.length) setTimeout(()=>addPoints(50,T("{قرأت|قرأتِ} تاريخ كل بيوت البلدة!")),2600); }
+  if(!readSet.has(L.name)){ readSet.add(L.name); addPoints(10,TR("قرأت عن ")+L.name);
+    if(INFO.length>1&&readSet.size===INFO.length) setTimeout(()=>addPoints(50,T(TR("{قرأت|قرأتِ} تاريخ كل بيوت البلدة!"))),2600); }
   state="card"; infoOpen=true; $("talk").hidden=true;
-  $("cEyebrow").textContent=TL?"من تاريخ القرية · رواية أهل الطلحة":HD?"من تاريخ القرية · رواية أهل حيدان":"من تاريخ البلدة · توثيق أهل البلدة";
-  $("cTitle").textContent=L.name; $("cPlace").textContent="الموقع: "+L.place;
-  $("cDesc").textContent=L.desc; $("cUseL").textContent="الاستخدام"; $("cUse").textContent=L.use; $("cFactL").textContent="معلومة"; $("cFact").textContent=L.fact;
+  $("cEyebrow").textContent=TL?TR("من تاريخ القرية · رواية أهل الطلحة"):HD?TR("من تاريخ القرية · رواية أهل حيدان"):TR("من تاريخ البلدة · توثيق أهل البلدة");
+  $("cTitle").textContent=L.name; $("cPlace").textContent=TR("الموقع: ")+L.place;
+  $("cDesc").textContent=L.desc; $("cUseL").textContent=TR("الاستخدام"); $("cUse").textContent=L.use; $("cFactL").textContent=TR("معلومة"); $("cFact").textContent=L.fact;
   if(tModel) tScene.remove(tModel); tModel=buildModel(L.key); tModel.scale.setScalar(1.35); tScene.add(tModel);
-  $("cOk").textContent="متابعة الجولة"; $("cardWrap").hidden=false; SFX.chime(); setTimeout(()=>$("cOk").focus(),50);
+  $("cOk").textContent=TR("متابعة الجولة"); $("cardWrap").hidden=false; SFX.chime(); setTimeout(()=>$("cOk").focus(),50);
 }
 $("cOk").addEventListener("click",()=>{ if(infoOpen){ infoOpen=false; nearInfo=null; $("cardWrap").hidden=true; state="play"; canvas.focus(); return; } $("cardWrap").hidden=true; if(collected===ITEMS.length) showWin(); else { state="play"; canvas.focus(); } });
-function showWin(){ state="win"; SFX.win(); $("winPts").textContent=`مجموع نقاطك: ${AR(points)}`+(INFO.length?` · ${HD?"قصص":"بيوت"} قرأت تاريخها: ${AR(readSet.size)} من ${AR(INFO.length)}`:""); $("winEyebrow").textContent=HD?T("{أحسنت|أحسنتِ} يا {name}، {أكملت|أكملتِ} جولة حيدان"):T("{أحسنت|أحسنتِ} يا {name}، اكتملت المهمة وأُكرم الضيف"); const gg=$("gotGrid"); gg.innerHTML=""; ITEMS.forEach(it=>{ const d=document.createElement("div"); d.textContent=it.name; gg.appendChild(d); }); $("win").hidden=false; setTimeout(()=>$("again").focus(),50); }
+function showWin(){ state="win"; SFX.win(); $("winPts").textContent=`${TR("مجموع نقاطك")}: ${AR(points)}`+(INFO.length?` · ${TR(HD?"قصص قرأت تاريخها":"بيوت قرأت تاريخها")}: ${AR(readSet.size)} ${TR("من")} ${AR(INFO.length)}`:""); $("winEyebrow").textContent=HD?T(TR("{أحسنت|أحسنتِ} يا {name}، {أكملت|أكملتِ} جولة حيدان")):T(TR("{أحسنت|أحسنتِ} يا {name}، اكتملت المهمة وأُكرم الضيف")); const gg=$("gotGrid"); gg.innerHTML=""; ITEMS.forEach(it=>{ const d=document.createElement("div"); d.textContent=it.name; gg.appendChild(d); }); $("win").hidden=false; setTimeout(()=>$("again").focus(),50); }
 function placeAbu(end){ if(!npcs.abu) return; const n=npcs.abu, p=end?n.end:n.pos; n.obj.position.set(p[0],0,p[1]); setNpcCollider("abu"); }
 function reset(){
   collected=0; stepIdx=0; nearNpc=null; points=0; readSet.clear(); updateScore(false);
@@ -1930,7 +1951,7 @@ let introT=0, introDone=false;
 const INTRO_LEN=25;
 const camCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(30,170,290),new THREE.Vector3(-150,110,170),new THREE.Vector3(-120,50,70),new THREE.Vector3(-55,26,40),new THREE.Vector3(10,20,-62),new THREE.Vector3(Math.sin(.5)*105-5,52,Math.cos(.5)*105-4)]);
 const lookCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(8,140,-305),new THREE.Vector3(0,40,-120),new THREE.Vector3(0,8,0),new THREE.Vector3(10,6,-10),new THREE.Vector3(-18,8,-30),new THREE.Vector3(-5,2,-4)]);
-const CAPS=[[1,5.2,"في جنوب الجزيرة، بين الجبال والوديان"],[6.2,10.6,"قرى من طين وحجر، عمرها مئات السنين"],[11.6,16,"يحرسها جبل شثاث، ويسقيها وادي العرين"],[17,20.6,"وأهلها يستقبلون الضيف بكلمة واحدة…"],[21.2,25,"أرحبو",true]];
+const CAPS=[[1,5.2,TR("في جنوب الجزيرة، بين الجبال والوديان")],[6.2,10.6,TR("قرى من طين وحجر، عمرها مئات السنين")],[11.6,16,TR("يحرسها جبل شثاث، ويسقيها وادي العرين")],[17,20.6,TR("وأهلها يستقبلون الضيف بكلمة واحدة…")],[21.2,25,TR("أرحبو"),true]];
 let capIdx=-1;
 function introCaption(t){ let k=-1; CAPS.forEach((c,i)=>{ if(t>=c[0]&&t<c[1]) k=i; }); if(k===capIdx) return; capIdx=k; const el=$("introCap");
   if(k<0){ el.classList.remove("show"); return; } el.classList.remove("show"); setTimeout(()=>{ el.textContent=CAPS[k][2]; el.classList.toggle("big",!!CAPS[k][3]); el.classList.add("show"); },k?350:0); }
@@ -1949,17 +1970,17 @@ function drawMap(){
   const svg=$("asirMap"); const NS="http://www.w3.org/2000/svg"; svg.innerHTML="";
   const el=(t,a)=>{ const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); return e; };
   svg.appendChild(el("path",{class:"sea",d:"M0 0 H44 L36 150 L29 230 L41 300 L81 326 L64 420 H0 Z"}));
-  const sea=el("text",{x:16,y:200,fill:"#cfe3ea","font-size":"11","text-anchor":"middle",transform:"rotate(-90 16 200)"}); sea.textContent="البحر الأحمر"; svg.appendChild(sea);
+  const sea=el("text",{x:16,y:200,fill:"#cfe3ea","font-size":"11","text-anchor":"middle",transform:"rotate(-90 16 200)"}); sea.textContent=TR("البحر الأحمر"); svg.appendChild(sea);
   svg.appendChild(el("path",{class:"land",d:"M"+AREA.map(p=>MX(p[0]).toFixed(1)+" "+MY(p[1]).toFixed(1)).join(" L")+" Z"}));
-  const yem=el("text",{x:300,y:405,fill:"rgba(246,241,231,.6)","font-size":"11"}); yem.textContent="اليمن"; svg.appendChild(yem);
+  const yem=el("text",{x:300,y:405,fill:"rgba(246,241,231,.6)","font-size":"11"}); yem.textContent=TR("اليمن"); svg.appendChild(yem);
   GOVS.slice().sort((a,b)=>(a[3]?1:0)-(b[3]?1:0)).forEach(g=>{
     const x=MX(g[1]), y=MY(g[2]), on=!!g[3];
-    const grp=el("g",{class:"pin"+(on?" on":" soon"),tabindex:"0",role:"button","aria-label":g[0]+(on?"":" (قريباً)")});
+    const grp=el("g",{class:"pin"+(on?" on":" soon"),tabindex:"0",role:"button","aria-label":TR(g[0])+(on?"":TR(" (قريباً)"))});
     if(on) grp.appendChild(el("circle",{class:"halo",cx:x,cy:y,r:7}));
     grp.appendChild(el("circle",{cx:x,cy:y,r:on?7:3.6}));
-    const L={"أبها":["middle",0,13],"أحد رفيدة":["middle",0,13],"رجال ألمع":["end",-6,3],"بارق":["end",-6,4],"المجاردة":["end",-6,3],"تنومة":["start",6,4],
-      "البرك":["middle",0,13],"الفرشة":["end",-6,4],"الحرجة":["start",6,0],"ظهران الجنوب":["start",13,5]}[g[0]]||["middle",0,-7];
-    const t=el("text",{x:x+L[1],y:y+L[2],"text-anchor":L[0]}); t.textContent=g[0]; grp.appendChild(t);
+    const Lc={"أبها":["middle",0,13],"أحد رفيدة":["middle",0,13],"رجال ألمع":["end",-6,3],"بارق":["end",-6,4],"المجاردة":["end",-6,3],"تنومة":["start",6,4],
+      "البرك":["middle",0,13],"الفرشة":["end",-6,4],"الحرجة":["start",6,0],"ظهران الجنوب":["start",13,5]}[g[0]]||["middle",0,-7]; const Lo=Lc;
+    const t=el("text",{x:x+Lo[1],y:y+Lo[2],"text-anchor":Lo[0]}); t.textContent=TR(g[0]); grp.appendChild(t);
     if(on){ grp.addEventListener("click",openVillages); grp.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openVillages(); } }); }
     else { grp.addEventListener("click",()=>openGov(g[0])); grp.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openGov(g[0]); } }); }
     svg.appendChild(grp);
@@ -1968,15 +1989,15 @@ function drawMap(){
 function showScreen(id){ ["title","mapScreen","villages","start","govScreen"].forEach(k=>$(k).hidden=k!==id); $("intro").hidden=true; }
 // governorates still to come: a short page each; villages will be added with the help of their people
 const GOV_INFO={
-  "أبها":{kind:"مدينة", name:"أبها ومراكزها", desc:"عاصمة منطقة عسير، على قمم جبال السروات، يحيط بها كثير من القرى التراثية."},
-  "سراة عبيدة":{desc:"في جنوب شرق منطقة عسير على مرتفعات السراة، وتشتهر بمزارعها وقراها التراثية."},
-  "رجال ألمع":{desc:"غرب أبها على منحدرات تهامة، وتشتهر بقرية رجال التراثية وقصورها الحجرية."}
+  "أبها":{kind:TR("مدينة"), name:TR("أبها ومراكزها"), desc:TR("عاصمة منطقة عسير، على قمم جبال السروات، يحيط بها كثير من القرى التراثية.")},
+  "سراة عبيدة":{desc:TR("في جنوب شرق منطقة عسير على مرتفعات السراة، وتشتهر بمزارعها وقراها التراثية.")},
+  "رجال ألمع":{desc:TR("غرب أبها على منحدرات تهامة، وتشتهر بقرية رجال التراثية وقصورها الحجرية.")}
 };
 function openGov(n){ const G=GOV_INFO[n]||{};
-  $("govKind").textContent=G.kind||"محافظة"; $("govName").textContent=G.name||n;
-  $("govDesc").textContent=G.desc||("إحدى محافظات منطقة عسير.");
-  $("govSoonTitle").textContent="قرى "+(G.name||n)+" التراثية";
-  $("govSoonText").textContent="نضيف قراها واحدة بعد أخرى قريباً بإذن الله، بمساعدة أهلها.";
+  $("govKind").textContent=G.kind||TR("محافظة"); $("govName").textContent=G.name||TR(n);
+  $("govDesc").textContent=G.desc||(TR("إحدى محافظات منطقة عسير."));
+  $("govSoonTitle").textContent=TR("قرى ")+(G.name||TR(n))+TR(" التراثية");
+  $("govSoonText").textContent=TR("نضيف قراها واحدة بعد أخرى قريباً بإذن الله، بمساعدة أهلها.");
   showScreen("govScreen"); setTimeout(()=>$("govBack").focus(),30); }
 function openMap(){ SFX.init(); MUSIC.start(); drawMap(); showScreen("mapScreen"); }
 function openVillages(){ showScreen("villages"); setTimeout(()=>$("pickTown").focus(),30); }
@@ -2001,23 +2022,23 @@ addEventListener("keydown",e=>{ if(e.code==="Escape"&&["play","dialog","card","c
 $("winMap").addEventListener("click",()=>{ $("win").hidden=true; $("hud").hidden=true; reset(); state="start"; openMap(); });
 
 if(TL){
-  $("start").querySelector("h1.town").innerHTML="قرية الطلحة <span>التراثية</span>";
-  $("start").querySelector(".sub").textContent="جولة في قرية الطلحة بظهران الجنوب: بيوتها القديمة من الحجر والطين، ومزارعها المسوّرة، والقصر الطيني في البستان على بئر سلوة، والقصر الأثري الذي صار متحفاً.";
-  $("go").textContent="ابدأ: جولة في الطلحة";
-  document.querySelector(".counter h2").firstChild.textContent="جولة في الطلحة ";
-  $("wTitle").textContent="بطاقة القرية: الطلحة";
-  $("wText").textContent="قرية في محافظة ظهران الجنوب، قصرها الأثري صار متحفاً يحكي تراثها، وحوله بيوت قديمة من الحجر والطين ومزارع مسوّرة. ونضيف قصصها كلما وصلتنا من أهلها.";
-  $("cUseL").textContent="الاستخدام"; $("cFactL").textContent="يُستكمل";
-  canvas.setAttribute("aria-label","مشهد ثلاثي الأبعاد لقرية الطلحة التراثية");
+  $("start").querySelector("h1.town").innerHTML=TR("قرية الطلحة <span>التراثية</span>");
+  $("start").querySelector(".sub").textContent=TR("جولة في قرية الطلحة بظهران الجنوب: بيوتها القديمة من الحجر والطين، ومزارعها المسوّرة، والقصر الطيني في البستان على بئر سلوة، والقصر الأثري الذي صار متحفاً.");
+  $("go").textContent=TR("ابدأ: جولة في الطلحة");
+  document.querySelector(".counter h2").firstChild.textContent=TR("جولة في الطلحة ");
+  $("wTitle").textContent=TR("بطاقة القرية: الطلحة");
+  $("wText").textContent=TR("قرية في محافظة ظهران الجنوب، قصرها الأثري صار متحفاً يحكي تراثها، وحوله بيوت قديمة من الحجر والطين ومزارع مسوّرة. ونضيف قصصها كلما وصلتنا من أهلها.");
+  $("cUseL").textContent=TR("الاستخدام"); $("cFactL").textContent=TR("يُستكمل");
+  canvas.setAttribute("aria-label",TR("مشهد ثلاثي الأبعاد لقرية الطلحة التراثية"));
 } else if(HD){
-  $("start").querySelector("h1.town").innerHTML="قرية حيدان <span>التراثية</span>";
-  $("start").querySelector(".sub").textContent="جولة في قرية حيدان بآل المؤنس في ظهران الجنوب: المزارع ووادي العرين، وسور حيدان، ومسجد الصحابي معاذ بن جبل وبئره، وقصر ابن عجلة على قمة الجبل، ودار الفروق «سداح»، ومسجد بن عجلة.";
-  $("go").textContent="ابدأ: جولة في حيدان";
-  document.querySelector(".counter h2").firstChild.textContent="جولة في حيدان ";
-  $("wTitle").textContent="بطاقة القرية: حيدان";
-  $("wText").textContent="قرية تراثية في آل المؤنس بمحافظة ظهران الجنوب، يحيطها سور له بابان، وتُعرف بأنها دار أمان. قريباً: مغامرة مفاتيح دار الفروق «سداح» الأربعة، ومجلس الشورى وقصة «راعي العليا».";
-  $("cUseL").textContent="الرمز"; $("cFactL").textContent="يُستكمل";
-  canvas.setAttribute("aria-label","مشهد ثلاثي الأبعاد لقرية حيدان التراثية");
+  $("start").querySelector("h1.town").innerHTML=TR("قرية حيدان <span>التراثية</span>");
+  $("start").querySelector(".sub").textContent=TR("جولة في قرية حيدان بآل المؤنس في ظهران الجنوب: المزارع ووادي العرين، وسور حيدان، ومسجد الصحابي معاذ بن جبل وبئره، وقصر ابن عجلة على قمة الجبل، ودار الفروق «سداح»، ومسجد بن عجلة.");
+  $("go").textContent=TR("ابدأ: جولة في حيدان");
+  document.querySelector(".counter h2").firstChild.textContent=TR("جولة في حيدان ");
+  $("wTitle").textContent=TR("بطاقة القرية: حيدان");
+  $("wText").textContent=TR("قرية تراثية في آل المؤنس بمحافظة ظهران الجنوب، يحيطها سور له بابان، وتُعرف بأنها دار أمان. قريباً: مغامرة مفاتيح دار الفروق «سداح» الأربعة، ومجلس الشورى وقصة «راعي العليا».");
+  $("cUseL").textContent=TR("الرمز"); $("cFactL").textContent=TR("يُستكمل");
+  canvas.setAttribute("aria-label",TR("مشهد ثلاثي الأبعاد لقرية حيدان التراثية"));
 }
 if(/^#(haydan|dhahran|talha)$/i.test(location.hash)){ introDone=true; showScreen("start"); }
 $("pname").value=PLAYER.name;
@@ -2076,8 +2097,8 @@ function step(dt){
   let ni=null;
   if(!nn) for(const L of INFO){ if(Math.hypot(L.pos[0]-player.position.x,L.pos[1]-player.position.z)<L.r){ ni=L; break; } }
   if(nn!==nearNpc||ni!==nearInfo){ nearNpc=nn; nearInfo=ni; $("talk").hidden=!(nn||ni);
-    if(nn){ $("talkName").textContent=npcs[nn].name; $("talkVerb").textContent=T("{تحدّث|تحدّثي}"); $("talkPrep").textContent="مع"; }
-    else if(ni){ $("talkName").textContent=ni.name+(readSet.has(ni.name)?" ✓":" (+١٠)"); $("talkVerb").textContent=T("{اقرأ|اقرئي}"); $("talkPrep").textContent="عن"; } }
+    if(nn){ $("talkName").textContent=npcs[nn].name; $("talkVerb").textContent=T(TR("{تحدّث|تحدّثي}")); $("talkPrep").textContent=TR("مع"); }
+    else if(ni){ $("talkName").textContent=ni.name+(readSet.has(ni.name)?" ✓":" (+"+AR(10)+")"); $("talkVerb").textContent=T(TR("{اقرأ|اقرئي}")); $("talkPrep").textContent=TR("عن"); } }
   // pick up items that were handed over
   artifacts.forEach(a=>{ if(a.given&&!a.got&&a.appear>.6&&Math.hypot(a.it.pos[0]-player.position.x,a.it.pos[1]-player.position.z)<(a.it.r||1.7)) collect(a); });
 }
@@ -2151,6 +2172,7 @@ function frame(){
     const farm=Math.max(cl((pz-18)/18), cl((-px-48)/12));
     SFX.ambience(dt,{souq:cl(1-(dSouq-3)/22), farm, well:cl(1-(Math.hypot(px-L1[0],pz-L1[1])-4)/12), village:.6*(1-farm*.5)}); }
   }
+  { const lb=document.querySelector(".langbar"); const hide=!(state==="start"||state==="win")||(state==="start"&&!$("intro").hidden&&$("intro").classList.contains("playing")); if(lb.hidden!==hide) lb.hidden=hide; }
   if(state!=="start"){ miniT+=dt; hintT+=dt; if(miniT>.05){drawMini();miniT=0;} if(hintT>.1){updateHint();hintT=0;} }
   skyDome.position.copy(camera.position);
   renderer.render(scene,camera);
