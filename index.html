@@ -293,9 +293,10 @@ button.vcard:hover{transform:translateY(-2px)}
 
 <div class="overlay dim" id="villages" hidden>
   <!-- illustrated map of Dhahran Al-Janoub: the old town in the west, the modern city in the middle, Haydan in the east -->
-  <svg class="vmap" viewBox="0 0 1720 760" preserveAspectRatio="xMidYMid slice" aria-hidden="false" role="group" aria-label="خريطة توضيحية لظهران الجنوب">
+  <svg class="vmap" viewBox="0 0 1720 760" preserveAspectRatio="xMidYMid slice" role="group" aria-label="خريطة توضيحية لقرى ظهران الجنوب التراثية">
+    <!-- north is up: Al-Talha far to the north along road 15; the old town and Haydan close together in the south, on Wadi Al-Arin -->
     <defs>
-      <pattern id="blocks" width="26" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-32)">
+      <pattern id="blocks" width="26" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)">
         <rect width="26" height="22" fill="#bfae95"/><rect x="2" y="2" width="10" height="8" fill="#e9e0d0"/><rect x="14" y="2" width="9" height="8" fill="#ddd2bf"/>
         <rect x="2" y="12" width="9" height="8" fill="#d8ccb8"/><rect x="13" y="12" width="10" height="8" fill="#ece4d6"/>
       </pattern>
@@ -303,59 +304,62 @@ button.vcard:hover{transform:translateY(-2px)}
         <rect width="14" height="14" fill="#a07e5c"/><rect x="1" y="1" width="6" height="6" fill="#e8d2b4"/><rect x="8" y="7" width="5" height="6" fill="#d9bc96"/><rect x="2" y="9" width="4" height="4" fill="#c99e77"/>
       </pattern>
       <pattern id="fields" width="18" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
-        <rect width="18" height="14" fill="#7f8a4a"/><rect x="1" y="1" width="16" height="5" fill="#93a055"/><rect x="1" y="8" width="16" height="5" fill="#a39a62"/>
+        <rect width="18" height="14" fill="#6f8a3c"/><rect x="1" y="1" width="16" height="5" fill="#86a64a"/><rect x="1" y="8" width="16" height="5" fill="#a39a62"/>
       </pattern>
-      <radialGradient id="veil" cx="50%" cy="52%" r="60%"><stop offset="0" stop-color="#1c130e" stop-opacity=".72"/><stop offset=".6" stop-color="#1c130e" stop-opacity=".45"/><stop offset="1" stop-color="#1c130e" stop-opacity=".2"/></radialGradient>
+      <radialGradient id="veil" cx="45%" cy="52%" r="62%"><stop offset="0" stop-color="#1c130e" stop-opacity=".72"/><stop offset=".6" stop-color="#1c130e" stop-opacity=".42"/><stop offset="1" stop-color="#1c130e" stop-opacity=".15"/></radialGradient>
     </defs>
-    <rect width="1720" height="760" fill="#c9b08a"/>
-    <!-- hills -->
-    <g fill="#ad9068" stroke="#9a7e58" stroke-width="2">
-      <path d="M1180 0 H1720 V260 C1640 300 1560 250 1500 200 C1430 150 1330 120 1260 60 Z"/>
-      <path d="M1180 540 C1200 450 1300 430 1370 470 C1440 510 1450 600 1400 650 C1340 700 1220 680 1190 620 Z"/>
-      <path d="M960 760 C990 690 1060 670 1120 700 C1160 720 1180 745 1190 760 Z"/>
-      <path d="M0 640 C60 600 120 640 150 700 L160 760 H0 Z"/>
+    <rect width="1720" height="760" fill="#c4a983"/>
+    <g transform="translate(-120 0)">
+    <!-- mountains all around (the whole area is rugged highland) -->
+    <g fill="#a98c66" stroke="#957955" stroke-width="2">
+      <path d="M0 0 H520 C470 90 380 150 260 170 C150 190 60 160 0 200 Z"/>
+      <path d="M560 0 H1240 C1220 70 1150 120 1060 130 C960 140 900 90 820 110 C720 136 640 90 560 0 Z"/>
+      <path d="M1480 0 H1720 V420 C1660 380 1640 300 1600 240 C1560 180 1520 120 1480 0 Z"/>
+      <path d="M40 330 C120 280 240 300 300 360 C340 410 300 480 220 500 C140 520 60 480 40 420 Z"/>
+      <path d="M700 300 C780 250 900 260 960 320 C1010 380 960 460 880 470 C790 480 700 430 690 370 Z"/>
+      <path d="M1180 380 C1220 330 1280 340 1300 390 C1310 430 1280 460 1240 460 C1200 458 1170 420 1180 380 Z"/>
     </g>
-    <g fill="none" stroke="#9a7e58" stroke-width="1.5" opacity=".7">
-      <path d="M1230 560 C1260 500 1330 495 1370 530"/><path d="M1250 600 C1280 545 1350 540 1385 580"/>
-      <path d="M1320 90 C1400 160 1500 190 1600 170"/><path d="M1380 60 C1460 110 1560 130 1680 110"/>
+    <g fill="none" stroke="#957955" stroke-width="1.5" opacity=".6">
+      <path d="M80 400 C140 350 230 360 270 410"/><path d="M740 360 C800 310 890 320 930 370"/><path d="M1540 60 C1580 150 1620 230 1700 300"/><path d="M620 60 C720 110 860 80 980 90"/>
     </g>
-    <!-- وادي العرين: passes the old town and Haydan, with farms and villages on its banks -->
-    <path d="M-30 640 C110 610 190 580 222 520 C262 440 200 230 320 120 C470 -10 880 -20 1080 40 C1210 80 1250 190 1285 290 C1320 380 1480 420 1750 360" fill="none" stroke="url(#fields)" stroke-width="96" stroke-linecap="round" opacity=".9"/>
-    <path d="M-30 640 C110 610 190 580 222 520 C262 440 200 230 320 120 C470 -10 880 -20 1080 40 C1210 80 1250 190 1285 290 C1320 380 1480 420 1750 360" fill="none" stroke="#7f8a4a" stroke-width="96" stroke-linecap="round" opacity=".25"/>
-    <path id="wadiLine" d="M-30 640 C110 610 190 580 222 520 C262 440 200 230 320 120 C470 -10 880 -20 1080 40 C1210 80 1250 190 1285 290 C1320 380 1480 420 1750 360" fill="none" stroke="#d8c7a2" stroke-width="16" stroke-linecap="round" opacity=".9"/>
-    <path d="M-30 640 C110 610 190 580 222 520 C262 440 200 230 320 120 C470 -10 880 -20 1080 40 C1210 80 1250 190 1285 290 C1320 380 1480 420 1750 360" fill="none" stroke="#bfa985" stroke-width="5" stroke-dasharray="3 9" opacity=".8"/>
-    <g fill="url(#towers)" stroke="#6b4a2e" stroke-width="1.5">
-      <ellipse cx="300" cy="215" rx="26" ry="18"/><ellipse cx="395" cy="95" rx="24" ry="16"/><ellipse cx="610" cy="58" rx="28" ry="15"/>
-      <ellipse cx="860" cy="70" rx="26" ry="15"/><ellipse cx="1150" cy="140" rx="22" ry="16"/><ellipse cx="1240" cy="215" rx="20" ry="14"/>
-      <ellipse cx="1500" cy="440" rx="28" ry="16"/><ellipse cx="1640" cy="350" rx="24" ry="15"/><ellipse cx="150" cy="650" rx="26" ry="16"/>
+    <!-- Wadi Al-Arin with its farms and villages, past the old town and Haydan -->
+    <path d="M-40 690 C200 720 420 690 640 700 C860 712 1060 668 1240 650 C1300 642 1330 640 1360 650 C1420 672 1460 712 1520 700 C1570 690 1590 660 1630 652 C1680 640 1720 610 1770 560" fill="none" stroke="url(#fields)" stroke-width="84" stroke-linecap="round" opacity=".9"/>
+    <path id="wadiLine" d="M-40 690 C200 720 420 690 640 700 C860 712 1060 668 1240 650 C1300 642 1330 640 1360 650 C1420 672 1460 712 1520 700 C1570 690 1590 660 1630 652 C1680 640 1720 610 1770 560" fill="none" stroke="#d8c7a2" stroke-width="14" stroke-linecap="round" opacity=".9"/>
+    <path d="M-40 690 C200 720 420 690 640 700 C860 712 1060 668 1240 650 C1300 642 1330 640 1360 650 C1420 672 1460 712 1520 700 C1570 690 1590 660 1630 652 C1680 640 1720 610 1770 560" fill="none" stroke="#bfa985" stroke-width="4" stroke-dasharray="3 9" opacity=".8"/>
+    <g fill="url(#towers)" stroke="#6b4a2e" stroke-width="1.5"><ellipse cx="220" cy="660" rx="24" ry="14"/><ellipse cx="520" cy="735" rx="26" ry="15"/><ellipse cx="900" cy="668" rx="24" ry="14"/><ellipse cx="1120" cy="700" rx="22" ry="14"/></g>
+    <text x="330" y="702" text-anchor="middle" font-family="Reem Kufi, Tahoma, sans-serif" font-size="26" font-weight="700" fill="#f6f1e7" stroke="#4d4428" stroke-width="4" paint-order="stroke">وادي العرين</text>
+    <!-- the modern town of Dhahran Al-Janoub around road 15 -->
+    <path d="M1380 450 C1450 420 1560 440 1620 500 C1650 540 1630 600 1580 620 C1520 600 1460 610 1420 600 C1380 580 1360 520 1380 450 Z" fill="url(#blocks)" opacity=".9"/>
+    <!-- road 15, from Al-Talha in the north down to the town -->
+    <path d="M1300 -20 C1330 80 1380 170 1420 250 C1450 310 1450 360 1440 420 C1430 500 1420 560 1380 620 C1360 660 1350 720 1340 780" fill="none" stroke="#3a3836" stroke-width="15" stroke-linecap="round"/>
+    <path d="M1300 -20 C1330 80 1380 170 1420 250 C1450 310 1450 360 1440 420 C1430 500 1420 560 1380 620 C1360 660 1350 720 1340 780" fill="none" stroke="#e9e2d4" stroke-width="2" stroke-dasharray="14 12"/>
+    <path d="M1440 470 C1520 450 1600 420 1720 400" fill="none" stroke="#5a5550" stroke-width="6" stroke-linecap="round" opacity=".85"/>
+    <g transform="translate(1462 330)"><rect x="-16" y="-14" width="32" height="28" rx="6" fill="#2f6e52" stroke="#f6f1e7" stroke-width="2"/><text y="6" text-anchor="middle" font-family="Tahoma, sans-serif" font-size="15" font-weight="700" fill="#fff">15</text></g>
+    <!-- the three villages -->
+    <ellipse cx="1350" cy="640" rx="46" ry="32" fill="url(#towers)" stroke="#6b4a2e" stroke-width="2"/>
+    <ellipse cx="1600" cy="652" rx="38" ry="28" fill="url(#towers)" stroke="#6b4a2e" stroke-width="2"/>
+    <ellipse cx="1392" cy="142" rx="36" ry="26" fill="url(#towers)" stroke="#6b4a2e" stroke-width="2"/>
+    <path d="M1430 120 h60 v40 h-60 Z M1440 170 h50 v30 h-50 Z" fill="url(#fields)" opacity=".85"/>
+    <path d="M1720 0 H1840 V760 H1720 Z" fill="#a98c66"/>
     </g>
-    <text x="0" y="0" transform="translate(262 190) rotate(-64)" text-anchor="middle" dominant-baseline="middle" font-family="Reem Kufi, Tahoma, sans-serif" font-size="26" font-weight="700" fill="#f6f1e7" stroke="#4d4428" stroke-width="4" paint-order="stroke">وادي العرين</text>
-    <!-- the modern city -->
-    <path d="M390 130 C560 80 820 70 1060 110 C1140 220 1150 380 1080 470 C1000 580 920 690 760 740 L440 760 C380 640 340 520 330 380 C330 280 350 190 390 130 Z" fill="url(#blocks)" opacity=".9"/>
-    <g stroke="#8d8273" stroke-width="5" fill="none" opacity=".8" stroke-linecap="round">
-      <path d="M520 150 C620 260 700 380 760 520"/><path d="M890 150 C800 300 700 420 640 560"/><path d="M430 300 C600 280 780 240 980 200"/><path d="M450 560 C620 520 780 470 990 430"/>
-    </g>
-    <!-- the main road -->
-    <path d="M150 280 C300 330 450 390 620 400 C760 410 880 520 960 600 C1060 690 1180 650 1290 720" fill="none" stroke="#3a3836" stroke-width="16" stroke-linecap="round"/>
-    <path d="M150 280 C300 330 450 390 620 400 C760 410 880 520 960 600 C1060 690 1180 650 1290 720" fill="none" stroke="#e9e2d4" stroke-width="2" stroke-dasharray="14 12"/>
-    <path d="M1150 30 C1200 90 1260 150 1300 230 C1340 300 1480 360 1620 460 L1720 540" fill="none" stroke="#5a5550" stroke-width="7" stroke-linecap="round" opacity=".85"/>
-    <!-- the old town and its farms (west) -->
-    <ellipse cx="250" cy="500" rx="78" ry="56" fill="url(#towers)" stroke="#6b4a2e" stroke-width="2"/>
-    <!-- Haydan (east) -->
-    <path d="M1290 250 C1330 230 1380 240 1400 270 C1410 300 1380 330 1340 330 C1300 330 1280 300 1290 250 Z" fill="url(#towers)" stroke="#6b4a2e" stroke-width="2"/>
-    <!-- veil so the cards stay readable -->
     <rect width="1720" height="760" fill="url(#veil)"/>
-    <g transform="translate(70 70)" fill="rgba(246,241,231,.75)" font-family="Tahoma, sans-serif"><path d="M0 -26 L9 6 L0 0 L-9 6 Z"/><text y="28" text-anchor="middle" font-size="18" font-weight="700">ش</text></g>
+    <g transform="translate(70 70)" fill="rgba(246,241,231,.8)" font-family="Tahoma, sans-serif"><path d="M0 -26 L9 6 L0 0 L-9 6 Z"/><text y="28" text-anchor="middle" font-size="18" font-weight="700">ش</text></g>
     <!-- pins -->
+    <g transform="translate(-120 0)">
     <g class="vpin" id="pinTown" tabindex="0" role="button" aria-label="بلدة ظهران الجنوب التراثية">
-      <circle class="vhalo" cx="250" cy="500" r="12"/><circle class="dot" cx="250" cy="500" r="12"/>
-      <rect class="pill" x="120" y="408" width="262" height="46" rx="23"/><text x="251" y="439" text-anchor="middle">بلدة ظهران الجنوب</text>
+      <circle class="vhalo" cx="1350" cy="640" r="12"/><circle class="dot" cx="1350" cy="640" r="12"/>
+      <rect class="pill" x="1282" y="672" width="262" height="46" rx="23"/><text x="1413" y="703" text-anchor="middle">بلدة ظهران الجنوب</text>
     </g>
     <g class="vpin" id="pinHaydan" tabindex="0" role="button" aria-label="قرية حيدان التراثية">
-      <circle class="vhalo" cx="1342" cy="285" r="12"/><circle class="dot" cx="1342" cy="285" r="12"/>
-      <rect class="pill" x="1252" y="192" width="180" height="46" rx="23"/><text x="1342" y="223" text-anchor="middle">قرية حيدان</text>
+      <circle class="vhalo" cx="1600" cy="652" r="12"/><circle class="dot" cx="1600" cy="652" r="12"/>
+      <rect class="pill" x="1515" y="564" width="170" height="46" rx="23"/><text x="1600" y="595" text-anchor="middle">قرية حيدان</text>
     </g>
-    <text x="1700" y="748" text-anchor="end" fill="rgba(246,241,231,.6)" font-size="14" font-family="Tahoma, sans-serif">خريطة توضيحية، والمواقع تقريبية</text>
+    <g class="vpin" id="pinTalha" tabindex="0" role="button" aria-label="قرية الطلحة التراثية">
+      <circle class="vhalo" cx="1392" cy="142" r="12"/><circle class="dot" cx="1392" cy="142" r="12"/>
+      <rect class="pill" x="1302" y="186" width="180" height="46" rx="23"/><text x="1392" y="217" text-anchor="middle">قرية الطلحة</text>
+    </g>
+    </g>
+    <text x="1700" y="748" text-anchor="end" fill="rgba(246,241,231,.6)" font-size="14" font-family="Tahoma, sans-serif">خريطة توضيحية، والمواقع تقريبية · الشمال إلى الأعلى</text>
   </svg>
   <div class="panel">
     <button class="back" id="backToMap">→ خريطة عسير</button>
@@ -1983,7 +1987,7 @@ function goVillage(v){ if(v===VILLAGE){ showScreen("start"); setTimeout(()=>$("g
 $("pickTown").addEventListener("click",()=>goVillage("dhahran"));
 $("pickHaydan").addEventListener("click",()=>goVillage("haydan"));
 $("pickTalha").addEventListener("click",()=>goVillage("talha"));
-[["pinTown","dhahran"],["pinHaydan","haydan"]].forEach(([id,v])=>{ const g=$(id); g.addEventListener("click",()=>goVillage(v)); g.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goVillage(v); } }); });
+[["pinTown","dhahran"],["pinHaydan","haydan"],["pinTalha","talha"]].forEach(([id,v])=>{ const g=$(id); g.addEventListener("click",()=>goVillage(v)); g.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goVillage(v); } }); });
 $("backToVillages").addEventListener("click",openVillages);
 // back button during play: leave the village and return to the village list (also the Escape key)
 function goBack(){
