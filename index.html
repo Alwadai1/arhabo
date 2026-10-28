@@ -330,7 +330,7 @@ button.vcard:hover{transform:translateY(-2px)}
       <li><b>الحركة</b>الأسهم أو W A S D، وعلى الجوال العصا أسفل الشاشة. Shift للجري.</li>
       <li><b>الكاميرا</b>اسحب بالفأرة أو بإصبعك يميناً ويساراً وأعلى وأسفل.</li>
       <li><b>الحديث</b>اقترب من الشخصية واضغط E أو زر «تحدّث».</li>
-      <li id="liInfo"><b>تاريخ البلدة</b>اقترب من أي مبنى عليه لوحة، واضغط «اقرأ عن» لتعرف تاريخه من توثيق أهل البلدة.</li>
+      <li id="liInfo"><b>التاريخ</b>اقترب من المباني والمعالم ذات اللوحات، واضغط «اقرأ عن» لتعرف تاريخها من رواية الأهالي.</li>
       <li><b>ساعدنا</b>هذه نسخة تجريبية. إن لاحظت بيتاً أو معلماً أو اسماً أو معلومة تحتاج تصحيحاً، أخبر من أرسل لك الرابط.</li>
     </ol>
     <form class="who" id="who" autocomplete="off">
@@ -496,8 +496,8 @@ const ITEMS_H = [
    desc:"سور يحيط بالقرية كاملة، بعضه قائم وبعضه أثّرت فيه عوامل البيئة. وللسور بابان: باب الحوزة وباب السلام. وتُعرف حيدان بأنها دار أمان، فمن دخل سورها فهو آمن.",
    use:"W1 سور حيدان · G1 باب الحوزة · G2 باب السلام", fact:"مسار السور كاملاً، وموقع البابين."},
   {key:"mosque", name:"مسجد الصحابي معاذ بن جبل", place:"شمال القرية", pos:[22.5,-23], r:2.4, goal:"{اذهب|اذهبي} إلى مسجد معاذ بن جبل",
-   desc:"مسجد من الطين والحجر، وأعمدته وسقفه من خشب السدر والطلح والنخل. بحسب الرواية أقامه الصحابي معاذ بن جبل رضي الله عنه في السنة التاسعة للهجرة عند بعثه إلى اليمن. زاره أمير منطقة عسير ووجّه بإعادة تأهيله. وبجانب سوره من الجهة الشرقية حجر مستدير يُعرف بمسحقة البارود.",
-   use:"M1 مسجد معاذ بن جبل", fact:"قصة مسحقة البارود، وصور داخل المسجد."},
+   desc:"مسجد من الطين والحجر، وأعمدته وسقفه من خشب السدر والطلح والنخل. بحسب الرواية أقامه الصحابي معاذ بن جبل رضي الله عنه في السنة التاسعة للهجرة عند بعثه إلى اليمن. زاره أمير منطقة عسير ووجّه بإعادة تأهيله. وبجانب سوره من الجهة الشرقية مسحقة البارود: حجر مستدير كان يُسحق عليه البارود قديماً لتزويد أهل القرية بالذخيرة وحمايتها من التهديدات الخارجية.",
+   use:"M1 مسجد معاذ بن جبل", fact:"صور داخل المسجد."},
   {key:"well", name:"بئر مسجد معاذ", place:"شمال القرية قرب الوادي", pos:[51.5,-36.6], r:2.4, goal:"{اذهب|اذهبي} إلى بئر المسجد",
    desc:"بئر ملحقة بمسجد معاذ بن جبل، وهي جزء من موقعه التاريخي.",
    use:"M2 بئر المسجد", fact:"عمق البئر وقصتها، وهل ما زال فيها ماء."},
@@ -555,7 +555,12 @@ const INFO_D = [
    desc:"مبنى طيني من خمسة أدوار وحوش كبير، سكنته أسرة آل فايع أجيالاً. وبحسب رواية الأهالي استُقبل فيه الوفدان السعودي واليمني لتوقيع اتفاقية الصلح النهائي لترسيم الحدود، نحو عام 1352هـ.",
    use:"قديماً سكن عائلي، واليوم مرمّم غير مستخدم.", fact:"موقعه في اللعبة تقريبي، ويُحدَّد مع أهل البلدة."}
 ];
-const INFO = HD ? [] : INFO_D;
+const INFO_H = [
+  {name:"مسحقة البارود", pos:[28.75,-29.6], r:3.2, key:"stone", place:"بجانب سور مسجد معاذ من الجهة الشرقية",
+   desc:"حجر مستدير مسطّح كان يُستعمل في الماضي لسحق البارود، لتزويد أهل القرية بالذخيرة لمواجهة التهديدات الخارجية وحماية القرية.",
+   use:"قديماً سحق البارود، واليوم أثر قائم بجانب سور المسجد.", fact:"من رواية أهل حيدان."}
+];
+const INFO = HD ? INFO_H : INFO_D;
 
 /* ---------- Player identity: name + gender, used in dialogue and the avatar ---------- */
 const PLAYER={name:"",g:"m"};
@@ -1296,6 +1301,8 @@ function buildModel(key){
     const b=new THREE.Mesh(boxGeo,mat(0x8b8478,0,.95)); b.scale.set(.94,.2,.64); b.position.y=.1; g.add(b);
     const dr=new THREE.Mesh(boxGeo,mat(0x5a3a22)); dr.scale.set(.16,.28,.02); dr.position.set(0,.3,.31); g.add(dr);
     for(let k=-2;k<=2;k++){ const c=new THREE.Mesh(new THREE.ConeGeometry(.05,.1,4),mat(0xf4efe6)); c.position.set(k*.18,.71,.3); g.add(c); }
+  } else if(key==="stone"){ const m=new THREE.Mesh(new THREE.CylinderGeometry(.5,.55,.18,9),mat(0x55524e,0,.95)); m.position.y=.3; g.add(m);
+    const k=new THREE.Mesh(new THREE.DodecahedronGeometry(.13),mat(0x6d6a66,0,.9)); k.position.set(.42,.28,.2); g.add(k);
   } else if(key==="well"){ const st=mat(0x8b8478,0,.95);
     g.add(lathe([[.32,0],[.4,0],[.42,.35],[.36,.38],[.33,.35]],st)); const w=new THREE.Mesh(new THREE.CircleGeometry(.33,20),mat(0x2a3a3c,.2,.3)); w.rotation.x=-Math.PI/2; w.position.y=.25; g.add(w);
     for(const s of [-1,1]){ const p=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.7,6),mat(0x5e3d24)); p.position.set(s*.45,.35,0); g.add(p); }
@@ -1622,7 +1629,7 @@ function showCard(a){
 }
 function showInfo(L){
   state="card"; infoOpen=true; $("talk").hidden=true;
-  $("cEyebrow").textContent="من تاريخ البلدة · توثيق أهل البلدة";
+  $("cEyebrow").textContent=HD?"من تاريخ القرية · رواية أهل حيدان":"من تاريخ البلدة · توثيق أهل البلدة";
   $("cTitle").textContent=L.name; $("cPlace").textContent="الموقع: "+L.place;
   $("cDesc").textContent=L.desc; $("cUseL").textContent="الاستخدام"; $("cUse").textContent=L.use; $("cFactL").textContent="معلومة"; $("cFact").textContent=L.fact;
   if(tModel) tScene.remove(tModel); tModel=buildModel(L.key); tModel.scale.setScalar(1.35); tScene.add(tModel);
@@ -1693,7 +1700,7 @@ if(HD){
   document.querySelector(".counter h2").firstChild.textContent="جولة في حيدان ";
   $("wTitle").textContent="بطاقة القرية: حيدان";
   $("wText").textContent="قرية تراثية في آل المؤنس بمحافظة ظهران الجنوب، يحيطها سور له بابان، وتُعرف بأنها دار أمان. قريباً: مغامرة مفاتيح دار الفروق «سداح» الأربعة، ومجلس الشورى وقصة «راعي العليا».";
-  $("cUseL").textContent="الرمز"; $("cFactL").textContent="يُستكمل"; $("liInfo").hidden=true;
+  $("cUseL").textContent="الرمز"; $("cFactL").textContent="يُستكمل";
   canvas.setAttribute("aria-label","مشهد ثلاثي الأبعاد لقرية حيدان التراثية");
 }
 if(/^#(haydan|dhahran)$/i.test(location.hash)) showScreen("start");
