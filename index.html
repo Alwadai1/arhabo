@@ -66,6 +66,16 @@ button:focus-visible{outline:3px solid var(--qatt-yellow);outline-offset:3px}
   border:2px solid var(--nura);box-shadow:0 4px 18px rgba(0,0,0,.35);background:#3b2a1e}
 .side{position:absolute;top:calc(env(safe-area-inset-top,0px) + 174px);left:max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:8px;width:150px;align-items:stretch}
 .side button{pointer-events:auto;background:var(--glass);color:var(--nura);border:1px solid var(--glass-line);border-radius:10px;padding:8px 10px;font:600 13px/1.2 var(--f-body)}
+.score{display:flex;align-items:baseline;gap:8px;border-top:1px solid var(--glass-line);padding-top:7px;font:600 13px/1 var(--f-body)}
+.score b{font:700 22px/1 var(--f-display);color:var(--qatt-yellow)}
+.score small{margin-inline-start:auto;color:rgba(246,241,231,.75);font-size:12px}
+.score.bump b{animation:bump .5s ease-out}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.45)}100%{transform:scale(1)}}
+.toast{position:absolute;top:calc(env(safe-area-inset-top,0px) + 68px);left:50%;transform:translateX(-50%) translateY(-8px);opacity:0;pointer-events:none;
+  background:linear-gradient(#f3e4c0,#dcc290);color:#4a2a12;border:2px solid #b8935a;border-radius:12px;padding:9px 18px;font:700 16px/1.3 var(--f-display);
+  box-shadow:0 8px 24px rgba(0,0,0,.35);transition:opacity .25s,transform .25s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.winpts{margin:0;font:700 20px/1.4 var(--f-display);color:var(--qatt-red)}
 .side .backBtn{background:rgba(184,57,43,.9);border-color:transparent}
 .side button[aria-pressed="true"]{background:var(--qatt-yellow);color:var(--ink);border-color:transparent}
 .tag{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);right:max(14px,env(safe-area-inset-right,0px));background:var(--qatt-red);color:var(--nura);
@@ -192,6 +202,7 @@ button.vcard:hover{transform:translateY(-2px)}
     <h2>ضيافة أبي ظافر <b id="cnt">٠ / ٥</b></h2>
     <p class="qobj" id="qObj">تحدّث مع أبي ظافر عند البوابة</p>
     <div class="slots" id="slots"></div>
+    <div class="score"><span>النقاط</span><b id="pts">٠</b><small id="readCnt"></small></div>
   </div>
   <button class="talk" id="talk" hidden><span id="talkVerb">تحدّث</span> <span id="talkPrep">مع</span> <span id="talkName"></span> <kbd>E</kbd></button>
   <div class="dlg" id="dlg" hidden>
@@ -199,6 +210,7 @@ button.vcard:hover{transform:translateY(-2px)}
     <p id="dText"></p>
     <button class="btn" id="dNext">التالي</button>
   </div>
+  <div class="toast" id="toast" aria-live="polite"></div>
   <div class="hint" id="hint"><span class="arrow" id="arrow"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1 L13 12 L7 9 L1 12 Z" fill="#1c130e"/></svg></span><span id="hintText">اتجه إلى الضوء الذهبي</span></div>
   <div class="keys">الحركة: W A S D أو الأسهم · الكاميرا: اسحب بالفأرة (يميناً ويساراً وأعلى وأسفل) أو Q و R و F · تحدّث: E · الجري: Shift · منظر جوي: M · رجوع: Esc</div>
   <div id="stick"><div id="knob"></div></div>
@@ -331,7 +343,7 @@ button.vcard:hover{transform:translateY(-2px)}
       <li><b>الحركة</b>الأسهم أو W A S D، وعلى الجوال العصا أسفل الشاشة. Shift للجري.</li>
       <li><b>الكاميرا</b>اسحب بالفأرة أو بإصبعك يميناً ويساراً وأعلى وأسفل.</li>
       <li><b>الحديث</b>اقترب من الشخصية واضغط E أو زر «تحدّث».</li>
-      <li id="liInfo"><b>التاريخ</b>اقترب من المباني والمعالم ذات اللوحات، واضغط «اقرأ عن» لتعرف تاريخها من رواية الأهالي.</li>
+      <li id="liInfo"><b>التاريخ</b>اقترب من المباني والمعالم ذات اللوحات، واضغط «اقرأ عن» لتعرف تاريخها من رواية الأهالي. لكل قصة ١٠ نقاط، و٥٠ نقطة إذا قرأتها كلها.</li>
       <li><b>ساعدنا</b>هذه نسخة تجريبية. إن لاحظت بيتاً أو معلماً أو اسماً أو معلومة تحتاج تصحيحاً، أخبر من أرسل لك الرابط.</li>
     </ol>
     <form class="who" id="who" autocomplete="off">
@@ -381,6 +393,7 @@ button.vcard:hover{transform:translateY(-2px)}
       <span class="eyebrow" id="winEyebrow">اكتملت المهمة: أُكرم الضيف</span>
       <h3 id="wTitle">بطاقة البلدة: ظهران الجنوب</h3>
       <p id="wText">محافظة في جنوب منطقة عسير قرب الحدود اليمنية. تتميّز بلدتها التراثية ببيوتها البرجية المبنية بمداميك الطين فوق أساس من الحجر، ونوافذها المؤطّرة بالأبيض، وأزقّتها الضيقة والمسقوفة التي تلتقي عند البئر، وساحتها التراثية للاحتفالات ومزارعها في الجنوب.</p>
+      <p class="winpts" id="winPts"></p>
       <div class="got-grid" id="gotGrid"></div>
       <div class="foot">
         <small>فكرة وتطوير: المهندس عبدالله محمد آل خرصان الوادعي<br>ملاحظاتك عن البلدة تهمّنا، أرسلها لمن شاركك الرابط.</small>
@@ -1692,7 +1705,16 @@ function showCard(a){
   if(tModel) tScene.remove(tModel); tModel=buildModel(a.it.key); tModel.scale.setScalar(1.35); tScene.add(tModel);
   $("cardWrap").hidden=false; setTimeout(()=>$("cOk").focus(),50);
 }
+/* ---------- Points: reading a building's history, and each heritage piece / landmark found ---------- */
+let points=0; const readSet=new Set(); let toastT=null;
+function updateScore(bump){ $("pts").textContent=AR(points);
+  $("readCnt").textContent = INFO.length ? `${HD?"قصص":"بيوت"} مقروءة ${AR(readSet.size)} / ${AR(INFO.length)}` : "";
+  if(bump){ const sc=document.querySelector(".score"); sc.classList.remove("bump"); void sc.offsetWidth; sc.classList.add("bump"); } }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2400); }
+function addPoints(n,msg){ points+=n; updateScore(true); toast(`+${AR(n)} نقطة · ${msg}`); }
 function showInfo(L){
+  if(!readSet.has(L.name)){ readSet.add(L.name); addPoints(10,"قرأت عن "+L.name);
+    if(INFO.length>1&&readSet.size===INFO.length) setTimeout(()=>addPoints(50,T("{قرأت|قرأتِ} تاريخ كل بيوت البلدة!")),2600); }
   state="card"; infoOpen=true; $("talk").hidden=true;
   $("cEyebrow").textContent=HD?"من تاريخ القرية · رواية أهل حيدان":"من تاريخ البلدة · توثيق أهل البلدة";
   $("cTitle").textContent=L.name; $("cPlace").textContent="الموقع: "+L.place;
@@ -1701,10 +1723,10 @@ function showInfo(L){
   $("cOk").textContent="متابعة الجولة"; $("cardWrap").hidden=false; SFX.chime(); setTimeout(()=>$("cOk").focus(),50);
 }
 $("cOk").addEventListener("click",()=>{ if(infoOpen){ infoOpen=false; nearInfo=null; $("cardWrap").hidden=true; state="play"; canvas.focus(); return; } $("cardWrap").hidden=true; if(collected===ITEMS.length) showWin(); else { state="play"; canvas.focus(); } });
-function showWin(){ state="win"; SFX.win(); $("winEyebrow").textContent=HD?T("{أحسنت|أحسنتِ} يا {name}، {أكملت|أكملتِ} جولة حيدان"):T("{أحسنت|أحسنتِ} يا {name}، اكتملت المهمة وأُكرم الضيف"); const gg=$("gotGrid"); gg.innerHTML=""; ITEMS.forEach(it=>{ const d=document.createElement("div"); d.textContent=it.name; gg.appendChild(d); }); $("win").hidden=false; setTimeout(()=>$("again").focus(),50); }
+function showWin(){ state="win"; SFX.win(); $("winPts").textContent=`مجموع نقاطك: ${AR(points)}`+(INFO.length?` · ${HD?"قصص":"بيوت"} قرأت تاريخها: ${AR(readSet.size)} من ${AR(INFO.length)}`:""); $("winEyebrow").textContent=HD?T("{أحسنت|أحسنتِ} يا {name}، {أكملت|أكملتِ} جولة حيدان"):T("{أحسنت|أحسنتِ} يا {name}، اكتملت المهمة وأُكرم الضيف"); const gg=$("gotGrid"); gg.innerHTML=""; ITEMS.forEach(it=>{ const d=document.createElement("div"); d.textContent=it.name; gg.appendChild(d); }); $("win").hidden=false; setTimeout(()=>$("again").focus(),50); }
 function placeAbu(end){ if(!npcs.abu) return; const n=npcs.abu, p=end?n.end:n.pos; n.obj.position.set(p[0],0,p[1]); setNpcCollider("abu"); }
 function reset(){
-  collected=0; stepIdx=0; nearNpc=null;
+  collected=0; stepIdx=0; nearNpc=null; points=0; readSet.clear(); updateScore(false);
   artifacts.forEach((a,i)=>{ a.got=false; a.given=false; a.root.visible=false; a.holder.scale.setScalar(1); a.collecting=0; a.ring.material.opacity=.85; $("slot"+i).classList.remove("got"); $("slot"+i).textContent=AR(i+1); });
   placeAbu(false);
   player.position.set(START[0],0,START[1]); player.rotation.y=START_ROT; yaw=START_ROT+Math.PI;
@@ -1778,7 +1800,7 @@ function commitPlayer(){ PLAYER.name=$("pname").value.replace(/[<>{}|]/g,"").tri
 $("go").addEventListener("click",()=>{ SFX.init(); commitPlayer(); $("start").hidden=true; $("hud").hidden=false; reset(); state="play"; canvas.focus(); });
 $("again").addEventListener("click",()=>{ SFX.init(); $("win").hidden=true; reset(); state="play"; canvas.focus(); });
 function collect(a){
-  a.got=true; collected++;
+  a.got=true; collected++; addPoints(20,a.it.name);
   const s=$("slot"+a.i); s.classList.add("got"); s.textContent="✓";
   a.collecting=0; stepIdx++;
   SFX.chime(); if(a.it.key==="najr") SFX.najr();
@@ -1825,7 +1847,7 @@ function step(dt){
   if(!nn) for(const L of INFO){ if(Math.hypot(L.pos[0]-player.position.x,L.pos[1]-player.position.z)<L.r){ ni=L; break; } }
   if(nn!==nearNpc||ni!==nearInfo){ nearNpc=nn; nearInfo=ni; $("talk").hidden=!(nn||ni);
     if(nn){ $("talkName").textContent=npcs[nn].name; $("talkVerb").textContent=T("{تحدّث|تحدّثي}"); $("talkPrep").textContent="مع"; }
-    else if(ni){ $("talkName").textContent=ni.name; $("talkVerb").textContent=T("{اقرأ|اقرئي}"); $("talkPrep").textContent="عن"; } }
+    else if(ni){ $("talkName").textContent=ni.name+(readSet.has(ni.name)?" ✓":" (+١٠)"); $("talkVerb").textContent=T("{اقرأ|اقرئي}"); $("talkPrep").textContent="عن"; } }
   // pick up items that were handed over
   artifacts.forEach(a=>{ if(a.given&&!a.got&&a.appear>.6&&Math.hypot(a.it.pos[0]-player.position.x,a.it.pos[1]-player.position.z)<(a.it.r||1.7)) collect(a); });
 }
