@@ -66,6 +66,7 @@ button:focus-visible{outline:3px solid var(--qatt-yellow);outline-offset:3px}
   border:2px solid var(--nura);box-shadow:0 4px 18px rgba(0,0,0,.35);background:#3b2a1e}
 .side{position:absolute;top:calc(env(safe-area-inset-top,0px) + 174px);left:max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:8px;width:150px;align-items:stretch}
 .side button{pointer-events:auto;background:var(--glass);color:var(--nura);border:1px solid var(--glass-line);border-radius:10px;padding:8px 10px;font:600 13px/1.2 var(--f-body)}
+.side .backBtn{background:rgba(184,57,43,.9);border-color:transparent}
 .side button[aria-pressed="true"]{background:var(--qatt-yellow);color:var(--ink);border-color:transparent}
 .tag{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);right:max(14px,env(safe-area-inset-right,0px));background:var(--qatt-red);color:var(--nura);
   font:600 12px/1 var(--f-body);padding:8px 12px;border-radius:999px}
@@ -180,6 +181,7 @@ button.vcard:hover{transform:translateY(-2px)}
 <div id="hud" hidden>
   <canvas id="mini" width="300" height="300" aria-label="خريطة مصغرة"></canvas>
   <div class="side">
+    <button id="backBtn" class="backBtn">→ رجوع للقرى</button>
     <button id="aerialBtn" aria-pressed="false">منظر جوي (M)</button>
     <button id="sndBtn" aria-pressed="true">الصوت: يعمل</button>
     <button id="ttsBtn" aria-pressed="true">قراءة الحوار: تعمل</button>
@@ -197,7 +199,7 @@ button.vcard:hover{transform:translateY(-2px)}
     <button class="btn" id="dNext">التالي</button>
   </div>
   <div class="hint" id="hint"><span class="arrow" id="arrow"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1 L13 12 L7 9 L1 12 Z" fill="#1c130e"/></svg></span><span id="hintText">اتجه إلى الضوء الذهبي</span></div>
-  <div class="keys">الحركة: W A S D أو الأسهم · الكاميرا: اسحب بالفأرة (يميناً ويساراً وأعلى وأسفل) أو Q و R و F · تحدّث: E · الجري: Shift · منظر جوي: M</div>
+  <div class="keys">الحركة: W A S D أو الأسهم · الكاميرا: اسحب بالفأرة (يميناً ويساراً وأعلى وأسفل) أو Q و R و F · تحدّث: E · الجري: Shift · منظر جوي: M · رجوع: Esc</div>
   <div id="stick"><div id="knob"></div></div>
   <div class="tag">نسخة تجريبية</div>
 </div>
@@ -1673,6 +1675,15 @@ $("pickTown").addEventListener("click",()=>goVillage("dhahran"));
 $("pickHaydan").addEventListener("click",()=>goVillage("haydan"));
 [["pinTown","dhahran"],["pinHaydan","haydan"]].forEach(([id,v])=>{ const g=$(id); g.addEventListener("click",()=>goVillage(v)); g.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goVillage(v); } }); });
 $("backToVillages").addEventListener("click",openVillages);
+// back button during play: leave the village and return to the village list (also the Escape key)
+function goBack(){
+  VOICE.stop(); CLIPS.stop(); dlg=null; infoOpen=false;
+  $("dlg").hidden=true; $("cardWrap").hidden=true; $("talk").hidden=true; $("hud").hidden=true;
+  if(aerial) toggleAerial();
+  reset(); state="start"; openVillages();
+}
+$("backBtn").addEventListener("click",goBack);
+addEventListener("keydown",e=>{ if(e.code==="Escape"&&["play","dialog","card","card-wait"].includes(state)){ e.preventDefault(); goBack(); } });
 $("winMap").addEventListener("click",()=>{ $("win").hidden=true; $("hud").hidden=true; reset(); state="start"; openMap(); });
 
 if(HD){
@@ -1702,7 +1713,7 @@ function collect(a){
   if(STEPS[stepIdx] && STEPS[stepIdx].at==="end") placeAbu(true);
   activateVisit();
   refreshQuestUI();
-  state="card-wait"; setTimeout(()=>showCard(a),380);
+  state="card-wait"; setTimeout(()=>{ if(state==="card-wait") showCard(a); },380);
 }
 
 /* ---------- Movement ---------- */
