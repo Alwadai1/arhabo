@@ -128,6 +128,12 @@ button:focus-visible{outline:3px solid var(--qatt-yellow);outline-offset:3px}
 #asirMap .pin.on{cursor:pointer}
 #asirMap .pin.on circle{fill:var(--qatt-yellow);stroke:#1c130e;stroke-width:2}
 #asirMap .pin.on text{font:700 14px var(--f-display);fill:#1c130e;stroke:#f6e7c8}
+#govScreen{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 300' preserveAspectRatio='none'%3E%3Cpath d='M0 300 L0 190 L120 120 L210 170 L330 70 L450 160 L560 110 L680 180 L800 90 L930 150 L1040 100 L1200 170 L1200 300Z' fill='%233a281c'/%3E%3Cpath d='M0 300 L0 240 L160 190 L300 230 L460 180 L620 235 L780 195 L940 240 L1080 200 L1200 230 L1200 300Z' fill='%23281a12'/%3E%3C/svg%3E") bottom/100% 38% no-repeat,radial-gradient(ellipse at 70% 18%,rgba(255,170,90,.45),transparent 45%),linear-gradient(#5a3a28,#2a1c14 70%)}
+#govScreen .vcard.locked{background:rgba(246,241,231,.1);border:1px solid rgba(246,241,231,.22);color:rgba(246,241,231,.92)}
+#asirMap .pin.soon{cursor:pointer}
+#asirMap .pin.soon circle{fill:#8a6f55}
+#asirMap .pin.soon:hover circle,#asirMap .pin.soon:focus circle{fill:var(--qatt-yellow);r:6}
+#asirMap .pin.soon:hover text,#asirMap .pin.soon:focus text{font-weight:700;fill:#1c130e}
 #asirMap .pin.on:hover circle,#asirMap .pin.on:focus circle{fill:#f2c45c}
 #asirMap .halo{fill:none;stroke:var(--qatt-yellow);stroke-width:2;animation:halo 1.8s ease-out infinite}
 @keyframes halo{from{r:7;opacity:1}to{r:22;opacity:0}}
@@ -257,10 +263,31 @@ button.vcard:hover{transform:translateY(-2px)}
   <div class="mapwrap">
     <header class="mhead">
       <h2>خريطة منطقة عسير</h2>
-      <p>اختر محافظة. المحافظات المضيئة متاحة، والبقية قريباً.</p>
+      <p>اختر محافظة. المحافظة المضيئة متاحة الآن، واضغط أي محافظة أخرى لتعرف عنها.</p>
     </header>
     <svg id="asirMap" viewBox="0 0 420 420" role="img" aria-label="خريطة توضيحية لمحافظات منطقة عسير"></svg>
     <p class="mnote" id="mapTip">خريطة توضيحية، والمواقع تقريبية.</p>
+  </div>
+</div>
+
+<div class="overlay dim" id="govScreen" hidden>
+  <div class="panel">
+    <button class="back" id="govBack">→ خريطة عسير</button>
+    <span class="eyebrow2" id="govKind">محافظة</span>
+    <h2 class="gov" id="govName"></h2>
+    <p class="sub" id="govDesc"></p>
+    <div class="vgrid">
+      <div class="vcard locked" aria-disabled="true">
+        <span class="vtag">قريباً</span>
+        <b id="govSoonTitle">القرى التراثية</b>
+        <span id="govSoonText"></span>
+      </div>
+      <div class="vcard locked" aria-disabled="true">
+        <span class="vtag">ساعدنا</span>
+        <b>تعرف قرية تراثية هنا؟</b>
+        <span>صوّر بيوتها ومعالمها، واجمع قصصها من أهلها، وأرسلها لمن شاركك اللعبة لتُضاف.</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1833,22 +1860,36 @@ function drawMap(){
   const yem=el("text",{x:300,y:405,fill:"rgba(246,241,231,.6)","font-size":"11"}); yem.textContent="اليمن"; svg.appendChild(yem);
   GOVS.slice().sort((a,b)=>(a[3]?1:0)-(b[3]?1:0)).forEach(g=>{
     const x=MX(g[1]), y=MY(g[2]), on=!!g[3];
-    const grp=el("g",{class:"pin"+(on?" on":""),tabindex:on?"0":"-1",role:on?"button":"img","aria-label":g[0]+(on?"":" (قريباً)")});
+    const grp=el("g",{class:"pin"+(on?" on":" soon"),tabindex:"0",role:"button","aria-label":g[0]+(on?"":" (قريباً)")});
     if(on) grp.appendChild(el("circle",{class:"halo",cx:x,cy:y,r:7}));
     grp.appendChild(el("circle",{cx:x,cy:y,r:on?7:3.6}));
     const L={"أبها":["middle",0,13],"أحد رفيدة":["middle",0,13],"رجال ألمع":["end",-6,3],"بارق":["end",-6,4],"المجاردة":["end",-6,3],"تنومة":["start",6,4],
       "البرك":["middle",0,13],"الفرشة":["end",-6,4],"الحرجة":["start",6,0],"ظهران الجنوب":["start",13,5]}[g[0]]||["middle",0,-7];
     const t=el("text",{x:x+L[1],y:y+L[2],"text-anchor":L[0]}); t.textContent=g[0]; grp.appendChild(t);
     if(on){ grp.addEventListener("click",openVillages); grp.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openVillages(); } }); }
-    else grp.addEventListener("click",()=>{ $("mapTip").textContent="محافظة "+g[0]+": قريباً بإذن الله."; });
+    else { grp.addEventListener("click",()=>openGov(g[0])); grp.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openGov(g[0]); } }); }
     svg.appendChild(grp);
   });
 }
-function showScreen(id){ ["title","mapScreen","villages","start"].forEach(k=>$(k).hidden=k!==id); $("intro").hidden=true; }
+function showScreen(id){ ["title","mapScreen","villages","start","govScreen"].forEach(k=>$(k).hidden=k!==id); $("intro").hidden=true; }
+// governorates still to come: a short page each; villages will be added with the help of their people
+const GOV_INFO={
+  "أبها":{kind:"مدينة", name:"أبها ومراكزها", desc:"عاصمة منطقة عسير، على قمم جبال السروات، يحيط بها كثير من القرى التراثية."},
+  "الحرجة":{desc:"في جنوب شرق منطقة عسير، قرب الحدود اليمنية."},
+  "سراة عبيدة":{desc:"في جنوب شرق منطقة عسير على مرتفعات السراة، وتشتهر بمزارعها وقراها التراثية."},
+  "رجال ألمع":{desc:"غرب أبها على منحدرات تهامة، وتشتهر بقرية رجال التراثية وقصورها الحجرية."}
+};
+function openGov(n){ const G=GOV_INFO[n]||{};
+  $("govKind").textContent=G.kind||"محافظة"; $("govName").textContent=G.name||n;
+  $("govDesc").textContent=G.desc||("إحدى محافظات منطقة عسير.");
+  $("govSoonTitle").textContent="قرى "+(G.name||n)+" التراثية";
+  $("govSoonText").textContent="نضيف قراها واحدة بعد أخرى قريباً بإذن الله، بمساعدة أهلها.";
+  showScreen("govScreen"); setTimeout(()=>$("govBack").focus(),30); }
 function openMap(){ SFX.init(); MUSIC.start(); drawMap(); showScreen("mapScreen"); }
 function openVillages(){ showScreen("villages"); setTimeout(()=>$("pickTown").focus(),30); }
 $("toMap").addEventListener("click",openMap);
 $("backToMap").addEventListener("click",openMap);
+$("govBack").addEventListener("click",openMap);
 function goVillage(v){ if((v==="haydan")===HD){ showScreen("start"); setTimeout(()=>$("go").focus(),30); return; } location.hash=v; location.reload(); }
 $("pickTown").addEventListener("click",()=>goVillage("dhahran"));
 $("pickHaydan").addEventListener("click",()=>goVillage("haydan"));
