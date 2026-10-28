@@ -375,6 +375,12 @@ button.vcard:hover{transform:translateY(-2px)}
         <span>في آل المؤنس، يحيط بها سور حيدان ببابيه: باب الحوزة وباب السلام. فيها مسجد الصحابي معاذ بن جبل وبئره، ودار الفروق «سداح» بمفاتيحها الأربعة، وقصر ابن عجلة بطوابقه الأربعة.</span>
         <i>ابدأ جولة حيدان ←</i>
       </button>
+      <button class="vcard" id="pickTalha">
+        <span class="vtag">جديدة · تجريبية</span>
+        <b>قرية الطلحة التراثية</b>
+        <span>قصرها الأثري صار متحفاً يحكي تراثها، وحوله بيوت قديمة من الحجر والطين، ومزارع مسوّرة، وقصر طيني في بستان على بئر سلوة.</span>
+        <i>ابدأ جولة الطلحة ←</i>
+      </button>
       <div class="vcard locked" aria-disabled="true">
         <span class="vtag">قريباً</span>
         <b>قرى تراثية أخرى</b>
@@ -467,8 +473,9 @@ function rnd(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed 
 const R = (a,b) => a + (b-a)*rnd();
 
 /* ---------- Which village: #haydan in the address loads Haydan, anything else the Dhahran town ---------- */
-const VILLAGE = /haydan/i.test(location.hash) ? "haydan" : "dhahran";
-const HD = VILLAGE==="haydan";
+const VILLAGE = /haydan/i.test(location.hash) ? "haydan" : /talha/i.test(location.hash) ? "talha" : "dhahran";
+const HD = VILLAGE!=="dhahran";   // one of the smaller villages (Haydan or Al-Talha)
+const TL = VILLAGE==="talha";
 /* ---------- Plan from the team's aerial image (pixel coords -> metres) ---------- */
 const P = (xi,yi) => [(xi-650)*.11, (yi-450)*.14];
 const PATHS_D = [
@@ -490,8 +497,14 @@ const L1 = [9.4,-21.7], L3 = [45,26.6];
 const HAYDAN_FOOT = [[12,-30],[34,-34],[60,-30],[80,-18],[86,2],[80,22],[64,27],[40,25],[22,20],[12,4]];
 const HAYDAN_LANES = [[[2,0],[24,-2],[42,-4],[64,-1],[94,2]], [[30,-40],[34,-16],[38,6],[44,36]], [[58,-36],[60,-12],[62,10],[64,38]], [[18,14],[40,14],[60,16],[84,14]]];
 const HAYDAN_ROAD = [[-110,22],[-26,26],[22,40],[110,48]];
-const PATHS = HD ? HAYDAN_LANES : PATHS_D;
-const FOOT = HD ? HAYDAN_FOOT : FOOT_D;
+/* Al-Talha (الطلحة), from the residents' map screenshot: an old core of stone-and-mud houses, a ring of roads and newer homes,
+   walled fields to the east, the heritage palace (now a museum) on the north-east edge of the core */
+const TALHA_FOOT=[[-36.8,-48],[-6.4,-57.6],[22.4,-48],[28.8,-16],[25.6,24],[16,40],[-6.4,48],[-25.6,44.8],[-38.4,24],[-41.6,-16]];
+const TALHA_LANES=[[[-50,0],[-10,-4],[40,0]],[[-6,-66],[-4,-20],[0,20],[-4,62]],[[-34,-40],[8,-30],[28,-52]],[[-34,34],[0,30],[22,44]]];
+const TALHA_ROADS=[[[-50,-62],[-8,-70],[34,-62],[40,-16],[38,30],[24,52],[-8,60],[-50,52],[-56,-10],[-50,-62]],[[-88,62],[-50,52]],[[24,52],[88,58]]];
+const ROADS = TL ? TALHA_ROADS : [HAYDAN_ROAD];
+const PATHS = HD ? (TL?TALHA_LANES:HAYDAN_LANES) : PATHS_D;
+const FOOT = HD ? (TL?TALHA_FOOT:HAYDAN_FOOT) : FOOT_D;
 
 /* ---------- Story: «ضيافة أبي ظافر» ---------- */
 const ITEMS_D = [
@@ -586,7 +599,30 @@ const STEPS_H = [
     "{امشِ|امشي} ورا الضو الذهبي، وكل ما {توصل|توصلين} معلم {تعرف|تعرفين} قصته."]},
   {visit:0},{visit:1},{visit:2},{visit:3},{visit:4},{visit:5},{visit:6},{visit:7}
 ];
-const ITEMS = HD ? ITEMS_H : ITEMS_D, NPCS = HD ? NPCS_H : NPCS_D, STEPS = HD ? STEPS_H : STEPS_D;
+/* ---------- Al-Talha: «جولة في الطلحة», from the residents' survey ---------- */
+const ITEMS_T = [
+  {key:"house", name:"بيوت الطلحة القديمة", place:"قلب القرية", pos:[-4,8], r:2.6, goal:"{ادخل|ادخلي} بيوت الطلحة القديمة",
+   desc:"قلب القرية القديم: بيوت متلاصقة من الحجر والطين، تهدّم كثير منها وبقيت جدرانه، وبينها أشجار، وحولها اليوم البيوت الحديثة.",
+   use:"قديماً سكن الأهالي، واليوم أطلال وبيوت قديمة.", fact:"أسماء البيوت وأسرها، وصور الأبواب والنوافذ."},
+  {key:"farm", name:"مزارع الطلحة", place:"شرق القرية القديمة", pos:[44,-8], r:2.6, goal:"{اذهب|اذهبي} إلى مزارع الطلحة",
+   desc:"مزارع تحيط بها جدران من الحجر شرق القرية القديمة، بعضها مزروع أخضر وبعضها ينتظر موسمه.",
+   use:"الزراعة.", fact:"ما يُزرع فيها ومواسمه."},
+  {key:"well", name:"القصر الطيني في البستان", place:"وسط بستان على بئر سلوة، قرب القصر الأثري", pos:[60,-25.4], r:2.4, goal:"{اذهب|اذهبي} إلى القصر الطيني في البستان",
+   desc:"قصر طيني من دورين منفصلين وقبو، وسط بستان على بئر سلوة. بناه صاحبه عام 1390هـ بعد عودته من العمل في أرامكو، ويُعد أحدث بيت طيني في الطلحة. أساسه من الحجر ثم الطين، وسقفه من خشب النظار الجيد النادر. وكانت على جدرانه نقوش ملوّنة بأيدي الجدّات، ثم طُلي حديثاً بالأبيض.",
+   use:"قديماً سكن للأسرة، واليوم مهجور ومتهالك.", fact:"صور النقوش القديمة إن وُجدت."},
+  {key:"house", name:"القصر الأثري بالطلحة", place:"شمال شرق القرية القديمة، قرب شعب سعد", pos:[22,-48.8], r:2.4, goal:"{اذهب|اذهبي} إلى القصر الأثري",
+   desc:"قصر أثري يُقدَّر عمره بأكثر من 150 عاماً، من ثلاثة طوابق إلى خمسة بحسب الروايات، بُني من الحجر والطين والخشب وسعف النخل، وعلى جدرانه القط العسيري. كان بيتاً للسكن والحماية وتخزين الطعام، وهو اليوم متحف أثري مرمّم يرى فيه الجيل الجديد تراث الطلحة وظهران الجنوب.",
+   use:"قديماً سكن وحماية وتخزين، واليوم متحف سياحي.", fact:"قصصه الكثيرة التي تُروى لزوّاره."}
+];
+const NPCS_T = { rawi:{name:"الراوي", role:"من أهل الطلحة", pos:[-7.6,63.4], look:"elder"} };
+const STEPS_T = [
+  {npc:"rawi", obj:"{تحدّث|تحدّثي} مع الراوي عند مدخل القرية", lines:[
+    "أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله في الطلحة.",
+    "{تعال|تعالي} {أوريك|أوريكِ} قريتنا: البيوت القديمة، والمزارع، والقصر الطيني اللي في البستان، والقصر الأثري اللي صار متحف.",
+    "{امشِ|امشي} ورا الضو الذهبي، وكل ما {توصل|توصلين} معلم {تعرف|تعرفين} قصته."]},
+  {visit:0},{visit:1},{visit:2},{visit:3}
+];
+const ITEMS = HD ? (TL?ITEMS_T:ITEMS_H) : ITEMS_D, NPCS = HD ? (TL?NPCS_T:NPCS_H) : NPCS_D, STEPS = HD ? (TL?STEPS_T:STEPS_H) : STEPS_D;
 
 /* ---------- Town history from the residents' survey (استبيان توثيق المباني والمواقع التراثية) ---------- */
 const INFO_D = [
@@ -626,7 +662,7 @@ const INFO_H = [
    desc:"حجر مستدير مسطّح كان يُستعمل في الماضي لسحق البارود، لتزويد أهل القرية بالذخيرة لمواجهة التهديدات الخارجية وحماية القرية.",
    use:"قديماً سحق البارود، واليوم أثر قائم بجانب سور المسجد.", fact:"من رواية أهل حيدان."}
 ];
-const INFO = HD ? INFO_H : INFO_D;
+const INFO = TL ? [] : HD ? INFO_H : INFO_D;
 
 /* ---------- Player identity: name + gender, used in dialogue and the avatar ---------- */
 const PLAYER={name:"",g:"m"};
@@ -1078,8 +1114,61 @@ if(!HD){
 for(let i=0;i<(MOBILE?22:46);i++) palm(R(-82,-58),R(-44,46));
 for(let i=0;i<14;i++){ const x=R(-10,60), z=R(32,62); if(Math.hypot(x-L3[0],z-L3[1])<10) continue; palm(x,z); }
 [[2,-18],[16,-24],[-16,-34],[-30,0],[14,4],[-40,10],[36,-8],[40,16],[-4,30],[22,30],[-20,40],[-52,-30],[60,8]].forEach(t=>tree(t[0],t[1],R(.9,1.4)));
-} else buildHaydan();
+} else if(TL) buildTalha(); else buildHaydan();
 
+function roadRibbon(line,mat,half){
+  const pts=[]; for(let i=0;i<line.length-1;i++){ const [ax,az]=line[i],[bx,bz]=line[i+1]; const n=Math.ceil(Math.hypot(bx-ax,bz-az)/3);
+    for(let k=0;k<n;k++) pts.push([ax+(bx-ax)*k/n, az+(bz-az)*k/n]); } pts.push(line[line.length-1]);
+  for(let it=0;it<3;it++) for(let i=1;i<pts.length-1;i++) pts[i]=[(pts[i-1][0]+2*pts[i][0]+pts[i+1][0])/4,(pts[i-1][1]+2*pts[i][1]+pts[i+1][1])/4];
+  const pos=[], idx=[];
+  pts.forEach((p,i)=>{ const a=pts[Math.max(0,i-1)], b=pts[Math.min(pts.length-1,i+1)], dx=b[0]-a[0], dz=b[1]-a[1], L=Math.hypot(dx,dz)||1, nx=-dz/L*half, nz=dx/L*half;
+    pos.push(p[0]+nx,.04,p[1]+nz, p[0]-nx,.04,p[1]-nz); if(i){ const q=(i-1)*2; idx.push(q,q+2,q+1, q+1,q+2,q+3); } });
+  const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx); g.computeVertexNormals();
+  const m=new THREE.Mesh(g,mat); m.material.side=THREE.DoubleSide; m.receiveShadow=true; scene.add(m);
+}
+function buildTalha(){
+  MAT.pink.color.set(0xf2ede4);
+  const STONE_MUDS=[0xcdb79c,0xbfa98e,0xd4c0a5,0xb59d82,0xc8b294];
+  const nearStop=(x,z,r)=>ITEMS.some(it=>Math.hypot(it.pos[0]-x,it.pos[1]-z)<r);
+  ITEMS.forEach(it=>occ.push({x0:it.pos[0]-2.6,x1:it.pos[0]+2.6,z0:it.pos[1]-2.6,z1:it.pos[1]+2.6}));
+  Object.values(NPCS).forEach(n=>occ.push({x0:n.pos[0]-2.4,x1:n.pos[0]+2.4,z0:n.pos[1]-2.4,z1:n.pos[1]+2.4}));
+  const roadMat=new THREE.MeshStandardMaterial({color:0x5a5754,roughness:.95});
+  TALHA_ROADS.forEach(l=>roadRibbon(l,roadMat,3.2));
+  // the heritage palace (now a museum): a tall mud tower with the Asiri qatt
+  signFor(house(22,-42,8,8,4,{qatt:true,color:0xd9b48e,doorFace:1,horn:true,baseH:1.6}),"القصر الأثري بالطلحة"); label("القصر الأثري بالطلحة",22,17,-42);
+  // the mud palace in the orchard, on the well of Salwa: two storeys, painted white
+  (function(){ const x=60,z=-31; signFor(house(x,z,9,7,2,{color:0xf0ece4,doorFace:0,baseH:1.2}),"القصر الطيني في البستان"); label("القصر الطيني في البستان",x,10,z);
+    const wx=50.5, wz=-27; const ring=new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.45,.9,22,1,true),MAT.stone); ring.material.side=THREE.DoubleSide; ring.position.set(wx,.45,wz); scene.add(ring);
+    const water=new THREE.Mesh(new THREE.CircleGeometry(1.25,22),new THREE.MeshStandardMaterial({color:0x1d2a2c,roughness:.2})); water.rotation.x=-Math.PI/2; water.position.set(wx,.3,wz); scene.add(water);
+    addCol(wx-1.5,wx+1.5,wz-1.5,wz+1.5,1); occ.push({x0:wx-2.5,x1:wx+2.5,z0:wz-2.5,z1:wz+2.5}); label("بئر سلوة",wx,4,wz);
+    for(let i=0;i<16;i++){ const a=R(0,6.28), r=R(7,13), tx=x+Math.cos(a)*r, tz=z+Math.sin(a)*r; if(nearStop(tx,tz,3)||Math.hypot(tx-wx,tz-wz)<3) continue; tree(tx,tz,R(1,1.5)); }
+    occ.push({x0:x-14,x1:x+14,z0:z-14,z1:z+14}); })();
+  // walled fields east of the old village
+  const FIELD=[0x5aa232,0x6fae38,0x9a8360,0xa58e66,0x4f9a2c];
+  for(let x=47;x<=82;x+=9) for(let z=-70;z<=14;z+=7.5){ if(overlapsOcc(x-4.5,x+4.5,z-3.7,z+3.7,0)) continue;
+    put(I.plain,x,.06,z,8.4,.12,6.8,0,0,FIELD[(rnd()*FIELD.length)|0]); const hh=R(.6,1);
+    put(I.base,x,hh/2,z-3.6,9,hh,.5); put(I.base,x-4.4,hh/2,z,.5,hh,6.8); }
+  label("مزارع الطلحة",64,5,-8);
+  // the old core: houses of stone and mud, many fallen, trees between them
+  for(let gx=-42;gx<=30;gx+=5.4) for(let gz=-58;gz<=48;gz+=5.4){
+    const x=gx+R(-1,1), z=gz+R(-1,1); if(!inPoly(x,z,TALHA_FOOT)) continue;
+    let w=R(3.4,5.2), d=R(3.4,5.2), ok=false;
+    for(let k=0;k<3;k++){ if(rectPathDist(x-w/2,x+w/2,z-d/2,z+d/2)>=1.4&&!overlapsOcc(x-w/2,x+w/2,z-d/2,z+d/2,.5)){ ok=true; break; } w-=.7; d-=.7; if(w<2.8) break; }
+    if(!ok) continue;
+    const r=rnd();
+    if(r<.38) ruin(x,z,w,d); else if(r<.46){ if(!nearStop(x,z,3)) tree(x,z,R(1.1,1.7)); }
+    else house(x,z,w,d,r<.8?1:(r<.95?2:3),{color:STONE_MUDS[(rnd()*STONE_MUDS.length)|0],baseH:R(.8,2)});
+  }
+  label("الطلحة القديمة",-6,12,-6);
+  // newer homes around the ring road
+  const NEW=[0xf1eee8,0xe8e2d6,0xdcd4c4,0xf4f1ec];
+  for(let i=0;i<(MOBILE?40:80);i++){ const x=R(-84,84), z=R(-74,76);
+    if(Math.hypot(x/62,z/76)<1.05) continue; if(x>44&&z>-74&&z<18) continue; if(rectPathDist(x-6,x+6,z-6,z+6)<4) continue;
+    const w=R(8,13), d=R(8,12), h=R(3.5,7); if(overlapsOcc(x-w/2,x+w/2,z-d/2,z+d/2,2)) continue;
+    put(I.plain,x,h/2,z,w,h,d,0,0,NEW[(rnd()*NEW.length)|0]); put(I.plain,x,h+.35,z,w+.2,.7,d+.2,0,0,0xffffff);
+    addCol(x-w/2,x+w/2,z-d/2,z+d/2,h); occ.push({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2}); }
+  label("قرية الطلحة",0,24,-10);
+}
 function buildHaydan(){
   if(HD) MAT.pink.color.set(0xf2ede4); // white window frames, as in the residents' photos of Haydan
   const STONE_MUDS=[0xcdb79c,0xbfa98e,0xd4c0a5,0xb59d82,0xc8b294];
@@ -1089,8 +1178,8 @@ function buildHaydan(){
   Object.values(NPCS).forEach(n=>occ.push({x0:n.pos[0]-2.4,x1:n.pos[0]+2.4,z0:n.pos[1]-2.4,z1:n.pos[1]+2.4}));
   // the road (R1): asphalt along the south
   const roadMat=new THREE.MeshStandardMaterial({color:0x303033,roughness:.9});
-  { // one smooth ribbon along the road's centre line
-    const pts=[]; for(let i=0;i<HAYDAN_ROAD.length-1;i++){ const [ax,az]=HAYDAN_ROAD[i],[bx,bz]=HAYDAN_ROAD[i+1]; const n=Math.ceil(Math.hypot(bx-ax,bz-az)/3);
+  roadRibbon(HAYDAN_ROAD,roadMat,3.5);
+  if(false){ const pts=[]; for(let i=0;i<HAYDAN_ROAD.length-1;i++){ const [ax,az]=HAYDAN_ROAD[i],[bx,bz]=HAYDAN_ROAD[i+1]; const n=Math.ceil(Math.hypot(bx-ax,bz-az)/3);
       for(let k=0;k<n;k++) pts.push([ax+(bx-ax)*k/n, az+(bz-az)*k/n]); } pts.push(HAYDAN_ROAD[HAYDAN_ROAD.length-1]);
     for(let it=0;it<3;it++) for(let i=1;i<pts.length-1;i++) pts[i]=[(pts[i-1][0]+2*pts[i][0]+pts[i+1][0])/4,(pts[i-1][1]+2*pts[i][1]+pts[i+1][1])/4];
     const pos=[], idx=[];
@@ -1292,7 +1381,8 @@ if(!HD) shathath(8,-305);
       if(rnd()<.35) put(I.canopy,x+R(-w/2,w/2),.6,z-d/2,.7,.5,.7,R(0,3),0,0x4f8a2e);
     }
   }
-  if(HD){ terraces(-95,70,-74,-50); terraces(-95,-40,-46,-30); }
+  if(TL){ terraces(30,82,62,74); }
+  else if(HD){ terraces(-95,70,-74,-50); terraces(-95,-40,-46,-30); }
   else { terraces(-82,-50,50,74); terraces(52,82,30,74); terraces(-82,-66,-40,40); }
 })();
 
@@ -1498,7 +1588,7 @@ function makePerson(lk){
 }
 const player=new THREE.Group(); let playerModel=makePerson("player"); player.add(playerModel);
 function setAvatar(){ player.remove(playerModel); playerModel=makePerson(PLAYER.g==="f"?"player_f":"player"); player.add(playerModel); }
-const START=HD?[-32,25.4]:[-18.7,-56], START_ROT=HD?Math.PI:0;
+const START=TL?[-8,66]:HD?[-32,25.4]:[-18.7,-56], START_ROT=HD?Math.PI:0;
 player.position.set(START[0],0,START[1]); scene.add(player);
 
 function nameSprite(text,sub){
@@ -1721,7 +1811,7 @@ function drawMini(){
   const W=300, S=2.4; mg.clearRect(0,0,W,W); mg.save(); mg.beginPath(); mg.arc(W/2,W/2,W/2,0,7); mg.clip();
   mg.fillStyle="#8a6a48"; mg.fillRect(0,0,W,W);
   const cx=W/2-player.position.x*S, cz=W/2-player.position.z*S;
-  if(HD){ mg.strokeStyle="#4b4b4e"; mg.lineWidth=7*S; mg.lineCap="round"; mg.beginPath(); HAYDAN_ROAD.forEach((p,i)=>{ const X=cx+p[0]*S, Y=cz+p[1]*S; i?mg.lineTo(X,Y):mg.moveTo(X,Y); }); mg.stroke(); }
+  if(HD){ mg.strokeStyle="#4b4b4e"; mg.lineWidth=7*S; mg.lineCap="round"; ROADS.forEach(line=>{ mg.beginPath(); line.forEach((p,i)=>{ const X=cx+p[0]*S, Y=cz+p[1]*S; i?mg.lineTo(X,Y):mg.moveTo(X,Y); }); mg.stroke(); }); }
   else { mg.fillStyle="#4b4b4e"; mg.fillRect(0,cz-63.5*S,W,10*S); }
   mg.strokeStyle="#c9c0b2"; mg.lineWidth=2.6*S; mg.lineCap="round"; mg.lineJoin="round";
   PATHS.forEach(pl=>{ mg.beginPath(); pl.forEach((p,i)=>{ const X=cx+p[0]*S, Y=cz+p[1]*S; i?mg.lineTo(X,Y):mg.moveTo(X,Y); }); mg.stroke(); });
@@ -1769,7 +1859,7 @@ function showInfo(L){
   if(!readSet.has(L.name)){ readSet.add(L.name); addPoints(10,"قرأت عن "+L.name);
     if(INFO.length>1&&readSet.size===INFO.length) setTimeout(()=>addPoints(50,T("{قرأت|قرأتِ} تاريخ كل بيوت البلدة!")),2600); }
   state="card"; infoOpen=true; $("talk").hidden=true;
-  $("cEyebrow").textContent=HD?"من تاريخ القرية · رواية أهل حيدان":"من تاريخ البلدة · توثيق أهل البلدة";
+  $("cEyebrow").textContent=TL?"من تاريخ القرية · رواية أهل الطلحة":HD?"من تاريخ القرية · رواية أهل حيدان":"من تاريخ البلدة · توثيق أهل البلدة";
   $("cTitle").textContent=L.name; $("cPlace").textContent="الموقع: "+L.place;
   $("cDesc").textContent=L.desc; $("cUseL").textContent="الاستخدام"; $("cUse").textContent=L.use; $("cFactL").textContent="معلومة"; $("cFact").textContent=L.fact;
   if(tModel) tScene.remove(tModel); tModel=buildModel(L.key); tModel.scale.setScalar(1.35); tScene.add(tModel);
@@ -1889,9 +1979,10 @@ function openVillages(){ showScreen("villages"); setTimeout(()=>$("pickTown").fo
 $("toMap").addEventListener("click",openMap);
 $("backToMap").addEventListener("click",openMap);
 $("govBack").addEventListener("click",openMap);
-function goVillage(v){ if((v==="haydan")===HD){ showScreen("start"); setTimeout(()=>$("go").focus(),30); return; } location.hash=v; location.reload(); }
+function goVillage(v){ if(v===VILLAGE){ showScreen("start"); setTimeout(()=>$("go").focus(),30); return; } location.hash=v; location.reload(); }
 $("pickTown").addEventListener("click",()=>goVillage("dhahran"));
 $("pickHaydan").addEventListener("click",()=>goVillage("haydan"));
+$("pickTalha").addEventListener("click",()=>goVillage("talha"));
 [["pinTown","dhahran"],["pinHaydan","haydan"]].forEach(([id,v])=>{ const g=$(id); g.addEventListener("click",()=>goVillage(v)); g.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goVillage(v); } }); });
 $("backToVillages").addEventListener("click",openVillages);
 // back button during play: leave the village and return to the village list (also the Escape key)
@@ -1905,7 +1996,16 @@ $("backBtn").addEventListener("click",goBack);
 addEventListener("keydown",e=>{ if(e.code==="Escape"&&["play","dialog","card","card-wait"].includes(state)){ e.preventDefault(); goBack(); } });
 $("winMap").addEventListener("click",()=>{ $("win").hidden=true; $("hud").hidden=true; reset(); state="start"; openMap(); });
 
-if(HD){
+if(TL){
+  $("start").querySelector("h1.town").innerHTML="قرية الطلحة <span>التراثية</span>";
+  $("start").querySelector(".sub").textContent="جولة في قرية الطلحة بظهران الجنوب: بيوتها القديمة من الحجر والطين، ومزارعها المسوّرة، والقصر الطيني في البستان على بئر سلوة، والقصر الأثري الذي صار متحفاً.";
+  $("go").textContent="ابدأ: جولة في الطلحة";
+  document.querySelector(".counter h2").firstChild.textContent="جولة في الطلحة ";
+  $("wTitle").textContent="بطاقة القرية: الطلحة";
+  $("wText").textContent="قرية في محافظة ظهران الجنوب، قصرها الأثري صار متحفاً يحكي تراثها، وحوله بيوت قديمة من الحجر والطين ومزارع مسوّرة. ونضيف قصصها كلما وصلتنا من أهلها.";
+  $("cUseL").textContent="الاستخدام"; $("cFactL").textContent="يُستكمل";
+  canvas.setAttribute("aria-label","مشهد ثلاثي الأبعاد لقرية الطلحة التراثية");
+} else if(HD){
   $("start").querySelector("h1.town").innerHTML="قرية حيدان <span>التراثية</span>";
   $("start").querySelector(".sub").textContent="جولة في قرية حيدان بآل المؤنس في ظهران الجنوب: المزارع ووادي العرين، وسور حيدان، ومسجد الصحابي معاذ بن جبل وبئره، وقصر ابن عجلة على قمة الجبل، ودار الفروق «سداح»، ومسجد بن عجلة.";
   $("go").textContent="ابدأ: جولة في حيدان";
@@ -1915,7 +2015,7 @@ if(HD){
   $("cUseL").textContent="الرمز"; $("cFactL").textContent="يُستكمل";
   canvas.setAttribute("aria-label","مشهد ثلاثي الأبعاد لقرية حيدان التراثية");
 }
-if(/^#(haydan|dhahran)$/i.test(location.hash)){ introDone=true; showScreen("start"); }
+if(/^#(haydan|dhahran|talha)$/i.test(location.hash)){ introDone=true; showScreen("start"); }
 $("pname").value=PLAYER.name;
 function setG(g){ PLAYER.g=g; $("gm").setAttribute("aria-checked",String(g==="m")); $("gf").setAttribute("aria-checked",String(g==="f")); }
 setG(PLAYER.g);
@@ -1945,7 +2045,8 @@ function resolve(p){
       else { const ex=[p.x-c.x0,c.x1-p.x,p.z-c.z0,c.z1-p.z], m=Math.min(...ex);
         if(m===ex[0]) p.x=c.x0-r; else if(m===ex[1]) p.x=c.x1+r; else if(m===ex[2]) p.z=c.z0-r; else p.z=c.z1+r; } }
   }
-  if(HD){ p.x=Math.max(-95,Math.min(95,p.x)); p.z=Math.max(-50,Math.min(50,p.z)); }
+  if(TL){ p.x=Math.max(-86,Math.min(86,p.x)); p.z=Math.max(-76,Math.min(78,p.z)); }
+  else if(HD){ p.x=Math.max(-95,Math.min(95,p.x)); p.z=Math.max(-50,Math.min(50,p.z)); }
   else { p.x=Math.max(-80,Math.min(70,p.x)); p.z=Math.max(-62,Math.min(64,p.z)); }
 }
 let speed=0, walkT=0, stepPhase=0;
@@ -2014,11 +2115,12 @@ function frame(){
     sun.target.position.set(0,0,0); sun.position.set(...SUN_OFF);
     if(introT>=INTRO_LEN+.6) endIntro();
   } else if(state==="start"){
-    const ang=reduce?.5:t*.05+.5, ox=HD?20:-5, oz=HD?-2:-4; camera.position.set(Math.sin(ang)*105+ox,52,Math.cos(ang)*105+oz); camera.lookAt(ox,2,oz);
+    const ang=reduce?.5:t*.05+.5, ox=TL?10:HD?20:-5, oz=TL?-8:HD?-2:-4; camera.position.set(Math.sin(ang)*105+ox,52,Math.cos(ang)*105+oz); camera.lookAt(ox,2,oz);
     sun.target.position.set(0,0,0); sun.position.set(...SUN_OFF);
   } else if(aerial){
     // oblique view from the south, wide enough to keep Jabal Shithath in frame behind the town
-    if(HD){ camPos.set(player.position.x*.3+10,72,96); look.set(player.position.x*.3+10,0,-8); }
+    if(TL){ camPos.set(player.position.x*.3+5,80,105); look.set(player.position.x*.3+5,0,-12); }
+    else if(HD){ camPos.set(player.position.x*.3+10,72,96); look.set(player.position.x*.3+10,0,-8); }
     else { camPos.set(player.position.x*.25,82,128); look.set(player.position.x*.25,22,-120); }
     camera.position.lerp(camPos,Math.min(1,dt*3)); camera.lookAt(look);
   } else if(state==="dialog"&&dlg){
