@@ -190,7 +190,7 @@ button.vcard:hover{transform:translateY(-2px)}
     <p class="qobj" id="qObj">تحدّث مع أبي ظافر عند البوابة</p>
     <div class="slots" id="slots"></div>
   </div>
-  <button class="talk" id="talk" hidden><span id="talkVerb">تحدّث</span> مع <span id="talkName"></span> <kbd>E</kbd></button>
+  <button class="talk" id="talk" hidden><span id="talkVerb">تحدّث</span> <span id="talkPrep">مع</span> <span id="talkName"></span> <kbd>E</kbd></button>
   <div class="dlg" id="dlg" hidden>
     <div class="dhead"><b id="dName"></b><span id="dRole"></span></div>
     <p id="dText"></p>
@@ -328,6 +328,7 @@ button.vcard:hover{transform:translateY(-2px)}
       <li><b>الحركة</b>الأسهم أو W A S D، وعلى الجوال العصا أسفل الشاشة. Shift للجري.</li>
       <li><b>الكاميرا</b>اسحب بالفأرة أو بإصبعك يميناً ويساراً وأعلى وأسفل.</li>
       <li><b>الحديث</b>اقترب من الشخصية واضغط E أو زر «تحدّث».</li>
+      <li id="liInfo"><b>تاريخ البلدة</b>اقترب من أي مبنى عليه لوحة، واضغط «اقرأ عن» لتعرف تاريخه من توثيق أهل البلدة.</li>
       <li><b>ساعدنا</b>هذه نسخة تجريبية. إن لاحظت بيتاً أو معلماً أو اسماً أو معلومة تحتاج تصحيحاً، أخبر من أرسل لك الرابط.</li>
     </ol>
     <form class="who" id="who" autocomplete="off">
@@ -441,7 +442,7 @@ const ITEMS_D = [
   {key:"dallah", code:"P1", name:"الدلّة", place:"مدخل قصر آل زابن", pos:[8.6,12.2],
    desc:"إناء القهوة العربية بمقبضه الطويل ومنقاره المعقوف، وأول ما يُقدَّم للضيف في المجلس.",
    use:"إعداد القهوة وتقديمها: تُمسك الدلة باليسرى ويُقدَّم الفنجال باليمنى.",
-   fact:"قصر آل زابن أكبر مبنى تراثي في البلدة، ويطلّ على فناء واسع."},
+   fact:"قصر آل زابن بيت طيني من أربعة طوابق عمره أكثر من مائة عام، وصار اليوم مزاراً سياحياً."},
   {key:"janbiya", code:"P1", name:"الجنبية", place:"هدية أبي ظافر في فناء قصر آل زابن", pos:[3.4,10.4],
    desc:"خنجر بنصل معقوف وغمد مزخرف يُلبس في وسط الحزام، وما زال جزءاً من الزي الرجالي في المناسبات بالجنوب.",
    use:"زينة ورمز للوجاهة، وتُصنع وتُباع في سوق ظهران الجنوب.",
@@ -472,7 +473,7 @@ const STEPS_D = [
     "أرحبو يا {ولدي|بنتي}. {انتبه|انتبهي} في أزقّة البلدة، ضيّقة ومتعرّجة، وتظلّل الماشي من الشمس.",
     "هذا المدهان، منحوت من الحجر، يحفظ الأكل حار لين يوصل المجلس."]},
   {npc:"guard", item:3, obj:"{اذهب|اذهبي} إلى أبي طلال صاحب قصر آل زابن", lines:[
-    "أرحبو، {حيّاك|حيّاكِ} الله في قصرنا. هذا قصر آل زابن، من أكبر بيوت البلدة، أدواره كثيرة ونوافذه صغيرة.",
+    "أرحبو، {حيّاك|حيّاكِ} الله في قصرنا. هذا قصر آل زابن، بيت طين عمره فوق المية سنة، واليوم صار مزار للزوار.",
     "الدلة جاهزة ومحمّسة، {شلّها|شلّيها} لأبو ظافر. {سبقك|سبقكِ} للساحة وهو {ينتظرك|ينتظركِ}."]},
   {npc:"abu", item:4, at:"end", obj:"{عُد|عودي} إلى أبي ظافر في فناء قصر آل زابن", lines:[
     "ما شاء الله يا {name}! النجر والقربة والمدهان والدلة، كلها كملت.",
@@ -518,6 +519,41 @@ const STEPS_H = [
   {visit:0},{visit:1},{visit:2},{visit:3},{visit:4},{visit:5},{visit:6},{visit:7}
 ];
 const ITEMS = HD ? ITEMS_H : ITEMS_D, NPCS = HD ? NPCS_H : NPCS_D, STEPS = HD ? STEPS_H : STEPS_D;
+
+/* ---------- Town history from the residents' survey (استبيان توثيق المباني والمواقع التراثية) ---------- */
+const INFO_D = [
+  {name:"مبنى الجمارك والمالية", pos:[-34.5,-37], r:6.2, key:"house", place:"مقابل المسجد التاريخي والمدرسة الثانية",
+   desc:"بيت طيني من أربعة أدوار وحوش كبير، عمره نحو مائة وعشرين عاماً، بُني من الطين والأعشاب. سكنته أسرة من آل زاهر، وفي عام 1352هـ أُجِّر الحوش والغرف الأرضية لشعبة الجمارك والمالية.",
+   use:"قديماً سكن للأسرة وشعبة للجمارك والمالية، واليوم مبنى مرمّم غير مستخدم.", fact:"كان مقرّ شعبة الجمارك والمالية في البلدة."},
+  {name:"المدرسة الثانية", pos:[-38,-26.5], r:6.8, key:"house", place:"قرب المسجد التاريخي والجمارك",
+   desc:"لما ضاق مبنى المدرسة الأولى، استُعين ببيت طيني من ثلاثة أدوار فسُمّي المدرسة الثانية، وكان يديره الأستاذ محمد بن علي بن هاشل رحمه الله.",
+   use:"قديماً سكن ثم مدرسة ابتدائية لأبناء البلدة، واليوم مبنى تراثي مرمّم.", fact:"عمره أكثر من مائة عام."},
+  {name:"مبنى الإمارة", pos:[-7,-28], r:6.2, key:"house", place:"قرب المسجد التاريخي",
+   desc:"مبنى طيني كبير من سبعة أدوار، فيه غرف كثيرة ونوافذ صغيرة جداً لتكون مرصداً لحراس البلدة. أُجِّر للإمارة نحو عام 1353هـ ليكون سكناً للأمير ومقراً للعمل.",
+   use:"قديماً سكن ثم مقر لإدارة ظهران، واليوم مهجور.", fact:"عمره نحو مائة وخمسين عاماً."},
+  {name:"مبنى الشرطة", pos:[33.5,-24.5], r:6.2, key:"house", place:"قرب السوق الشعبي",
+   desc:"مبنى طيني من سبعة أدوار وحوش. أُجِّر للشرطة عام 1353هـ، وكان يستقبل المعاملات الأمنية من منطقة أبها في ذلك الوقت.",
+   use:"قديماً سكن ومبنى للشرطة، واليوم مرمّم غير مستخدم.", fact:"عمره أكثر من مائة عام."},
+  {name:"المستوصف الأول", pos:[-33.5,21], r:6.4, key:"house", place:"قرب المسجد التاريخي",
+   desc:"مبنى طيني من دورين يملكه آل رقصة من وادعة. افتُتح فيه مركز صحي عام 1370هـ: سكن أصحابه الدور العلوي، وأُجِّر الدور الأرضي والحوش للمستوصف.",
+   use:"قديماً سكن ومركز صحي، واليوم مرمّم غير مستخدم.", fact:"عمره نحو مائة عام."},
+  {name:"قصر آل زابن", pos:[8.5,19.4], r:6.4, key:"house", place:"على وادي العرين بضفاف المزارع",
+   desc:"بيت طيني تراثي من أربعة طوابق، عمره أكثر من مائة عام، وعلى جدرانه القط العسيري.",
+   use:"قديماً سكن عائلي، واليوم مزار سياحي تزوره الوفود.", fact:"مرمّم ويستقبل الزوار."},
+  {name:"المسجد التاريخي", pos:[-22,-25.5], r:7, key:"mosque", place:"وسط البلدة",
+   desc:"يقع وسط البلدة وتحيط به البيوت من كل الجهات، ويتكون من المسجد والحوش والمواضي والمنزالة. يُروى أن عمره أكثر من ألف عام، وكانت تُقام فيه صلاة الجمعة. ورُمّم ضمن مشروع الأمير محمد بن سلمان لتطوير المساجد التاريخية.",
+   use:"مسجد تاريخي يصلي فيه الناس إلى اليوم.", fact:"فيه نقوش أثرية، ومساحته نحو 290 متراً مربعاً."},
+  {name:"البئر «مشبعة»", pos:[9.4,-21.7], r:5.5, key:"well", place:"وسط البلدة",
+   desc:"بئر قديمة وسط البلدة تحيط بها البيوت من كل الجهات، عمقها أكثر من عشرين متراً، وعمرها أكثر من مائة عام.",
+   use:"قديماً بئر الماء للبلدة، واليوم مهجورة.", fact:"وفي وسط البلدة ساحة يجتمع فيها الأهالي للتشاور وتبادل الأحاديث، واستقبلت أمير منطقة عسير عدة مرات."},
+  {name:"الساحة التراثية", pos:[45,26.6], r:11, key:"farm", place:"على ضفاف وادي العرين ومزارعه",
+   desc:"كانت مزرعة طينية، وتبرّع بها صاحبها عام 1440هـ لتكون مسرحاً للاحتفالات والمناسبات. أُقيم فيها تدشين جمعية رحالة الجنوب بحضور أمير منطقة عسير، والاحتفاء بيوم التأسيس.",
+   use:"قديماً مزرعة، واليوم مسرح للاحتفالات والمناسبات.", fact:"مساحتها نحو 600 متر مربع."},
+  {name:"بيت آل فايع", pos:[-46,-16], r:6.2, key:"house", place:"غرب البلدة، قرب السوق الشعبي القديم",
+   desc:"مبنى طيني من خمسة أدوار وحوش كبير، سكنته أسرة آل فايع أجيالاً. وبحسب رواية الأهالي استُقبل فيه الوفدان السعودي واليمني لتوقيع اتفاقية الصلح النهائي لترسيم الحدود، نحو عام 1352هـ.",
+   use:"قديماً سكن عائلي، واليوم مرمّم غير مستخدم.", fact:"موقعه في اللعبة تقريبي، ويُحدَّد مع أهل البلدة."}
+];
+const INFO = HD ? [] : INFO_D;
 
 /* ---------- Player identity: name + gender, used in dialogue and the avatar ---------- */
 const PLAYER={name:"",g:"m"};
@@ -843,7 +879,7 @@ house(-24.2,-46,5,5,4,{color:0xeed8c0,doorFace:0}); label("البوابة الش
 sabat(-18.9,-46.6,-.2,1,true);
 { const a=Math.atan2(-.2,1); for(const s2 of [-1,1]) SIGNS.push({p:[-18.9+Math.sin(a)*s2*1.78,3.5,-46.6+Math.cos(a)*s2*1.78],ry:a+(s2>0?0:Math.PI),width:3.4,text:"البوابة الشمالية",big:true}); }
 signFor(house(-34.5,-37,6,5,4,{doorFace:2}),"الجمارك"); label("الجمارك",-34.5,15.5,-37);
-signFor(house(-38,-26.5,8,6,2,{doorFace:2,horn:true}),"المدرسة الثانية"); label("المدرسة الثانية",-38,9,-26.5);
+signFor(house(-38,-26.5,8,6,3,{doorFace:2,horn:true}),"المدرسة الثانية"); label("المدرسة الثانية",-38,12,-26.5);
 (function(){
   const x=-22,z=-25.5,w=10,d=7, sh=2.7, mh=2.3;
   put(I.base,x,sh/2,z,w,sh,d);
@@ -857,16 +893,17 @@ signFor(house(-38,-26.5,8,6,2,{doorFace:2,horn:true}),"المدرسة الثان
   addCol(x-w/2,x+w/2,z-d/2,z+d/2,sh+mh); occ.push({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2});
   label("المسجد التاريخي",x,8.6,z);
 })();
-signFor(house(-7,-28,6,6,5,{doorFace:0,qatt:true}),"مبنى الإمارة"); label("مبنى الإمارة",-7,17.5,-28);
+signFor(house(-7,-28,6.4,6.4,7,{doorFace:0,qatt:true}),"مبنى الإمارة"); label("مبنى الإمارة",-7,23,-28);
 house(-11,-13.2,7,6,2,{baseH:2.4,doorFace:3,horn:true}); label("بيت حجري طيني",-11,9.5,-13.2);
 signFor(house(24,-32,9,6,2,{doorFace:3,horn:true}),"المدرسة الأولى"); label("المدرسة الأولى",24,9,-32);
-signFor(house(33.5,-24.5,6,6,5,{doorFace:3}),"مبنى الشرطة"); label("مبنى الشرطة",33.5,17.5,-24.5);
-signFor(house(-33.5,21,9,5,1,{baseH:.4,doorFace:2,qatt:true}),"المستوصف الأول"); label("المستوصف الأول",-33.5,6,21);
-signFor(house(8.5,19.4,7,7,6,{doorFace:1,color:0xe8c9a6}),"قصر آل زابن"); house(1.2,20.8,5,5,4,{doorFace:1});
-label("قصر آل زابن",6,21.5,19.4);
+signFor(house(33.5,-24.5,6.4,6.4,7,{doorFace:3}),"مبنى الشرطة"); label("مبنى الشرطة",33.5,23,-24.5);
+signFor(house(-33.5,21,9,5,2,{baseH:.4,doorFace:2,qatt:true}),"المستوصف الأول"); label("المستوصف الأول",-33.5,8.6,21);
+signFor(house(8.5,19.4,7,7,4,{doorFace:1,color:0xe8c9a6,qatt:true}),"قصر آل زابن"); house(1.2,20.8,5,5,4,{doorFace:1});
+label("قصر آل زابن",6,16,19.4);
+signFor(house(-46,-16,6,6,5,{doorFace:2}),"بيت آل فايع"); label("بيت آل فايع",-46,17,-16);
 (function(){
-  const flag=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1),new THREE.MeshStandardMaterial({color:0x1f7a3a,side:THREE.DoubleSide})); flag.position.set(9.4,22.9,19.4); scene.add(flag);
-  const pole=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,3,6),MAT.white); pole.position.set(8.6,22.3,19.4); scene.add(pole);
+  const flag=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1),new THREE.MeshStandardMaterial({color:0x1f7a3a,side:THREE.DoubleSide})); flag.position.set(9.4,14.6,19.4); scene.add(flag);
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,3,6),MAT.white); pole.position.set(8.6,14,19.4); scene.add(pole);
 })();
 signFor(house(-48,32,7,7,5,{doorFace:2}),"قصر آل دوبان"); label("قصر آل دوبان",-48,18,32);
 (function(){
@@ -1470,6 +1507,7 @@ addEventListener("keydown",e=>{ keys[e.code]=true;
   if(state==="play"&&["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code)) e.preventDefault();
   if(e.code==="KeyM"&&state==="play") toggleAerial();
   if((e.code==="KeyE"||e.code==="Enter")&&state==="play"&&nearNpc){ e.preventDefault(); startDialog(); }
+  else if((e.code==="KeyE"||e.code==="Enter")&&state==="play"&&nearInfo){ e.preventDefault(); showInfo(nearInfo); }
   else if(state==="dialog"&&(e.code==="KeyE"||((e.code==="Space"||e.code==="Enter")&&!(e.target&&e.target.tagName==="BUTTON")))){ e.preventDefault(); advanceDialog(); } });
 addEventListener("keyup",e=>{keys[e.code]=false;});
 let yaw=Math.PI, pitch=.36, dragging=null;
@@ -1495,7 +1533,7 @@ ttsBtn.addEventListener("click",()=>{
 
 /* ---------- Quest state ---------- */
 const $=id=>document.getElementById(id);
-let stepIdx=0, collected=0, nearNpc=null, dlg=null;
+let stepIdx=0, collected=0, nearNpc=null, nearInfo=null, infoOpen=false, dlg=null;
 function curStep(){ return STEPS[stepIdx]; }
 function pendingItem(){ return artifacts.find(a=>a.given&&!a.got); }
 function currentTarget(){
@@ -1532,7 +1570,7 @@ function advanceDialog(){
   refreshQuestUI();
 }
 $("dNext").addEventListener("click",advanceDialog);
-$("talk").addEventListener("click",()=>{ if(state==="play") startDialog(); });
+$("talk").addEventListener("click",()=>{ if(state!=="play") return; if(nearNpc) startDialog(); else if(nearInfo) showInfo(nearInfo); });
 
 // a "visit" step shows its landmark marker; reaching it opens the landmark card
 function activateVisit(){ const s=curStep(); if(s&&s.visit!=null){ const a=artifacts[s.visit]; if(!a.given){ a.given=true; a.root.visible=true; a.appear=0; } } }
@@ -1580,7 +1618,15 @@ function showCard(a){
   if(tModel) tScene.remove(tModel); tModel=buildModel(a.it.key); tModel.scale.setScalar(1.35); tScene.add(tModel);
   $("cardWrap").hidden=false; setTimeout(()=>$("cOk").focus(),50);
 }
-$("cOk").addEventListener("click",()=>{ $("cardWrap").hidden=true; if(collected===ITEMS.length) showWin(); else { state="play"; canvas.focus(); } });
+function showInfo(L){
+  state="card"; infoOpen=true; $("talk").hidden=true;
+  $("cEyebrow").textContent="من تاريخ البلدة · توثيق أهل البلدة";
+  $("cTitle").textContent=L.name; $("cPlace").textContent="الموقع: "+L.place;
+  $("cDesc").textContent=L.desc; $("cUseL").textContent="الاستخدام"; $("cUse").textContent=L.use; $("cFactL").textContent="معلومة"; $("cFact").textContent=L.fact;
+  if(tModel) tScene.remove(tModel); tModel=buildModel(L.key); tModel.scale.setScalar(1.35); tScene.add(tModel);
+  $("cOk").textContent="متابعة الجولة"; $("cardWrap").hidden=false; SFX.chime(); setTimeout(()=>$("cOk").focus(),50);
+}
+$("cOk").addEventListener("click",()=>{ if(infoOpen){ infoOpen=false; nearInfo=null; $("cardWrap").hidden=true; state="play"; canvas.focus(); return; } $("cardWrap").hidden=true; if(collected===ITEMS.length) showWin(); else { state="play"; canvas.focus(); } });
 function showWin(){ state="win"; SFX.win(); $("winEyebrow").textContent=HD?T("{أحسنت|أحسنتِ} يا {name}، {أكملت|أكملتِ} جولة حيدان"):T("{أحسنت|أحسنتِ} يا {name}، اكتملت المهمة وأُكرم الضيف"); const gg=$("gotGrid"); gg.innerHTML=""; ITEMS.forEach(it=>{ const d=document.createElement("div"); d.textContent=it.name; gg.appendChild(d); }); $("win").hidden=false; setTimeout(()=>$("again").focus(),50); }
 function placeAbu(end){ if(!npcs.abu) return; const n=npcs.abu, p=end?n.end:n.pos; n.obj.position.set(p[0],0,p[1]); setNpcCollider("abu"); }
 function reset(){
@@ -1636,7 +1682,7 @@ if(HD){
   document.querySelector(".counter h2").firstChild.textContent="جولة في حيدان ";
   $("wTitle").textContent="بطاقة القرية: حيدان";
   $("wText").textContent="قرية تراثية في آل المؤنس بمحافظة ظهران الجنوب، يحيطها سور له بابان، وتُعرف بأنها دار أمان. قريباً: مغامرة مفاتيح دار الفروق «سداح» الأربعة، ومجلس الشورى وقصة «راعي العليا».";
-  $("cUseL").textContent="الرمز"; $("cFactL").textContent="يُستكمل";
+  $("cUseL").textContent="الرمز"; $("cFactL").textContent="يُستكمل"; $("liInfo").hidden=true;
   canvas.setAttribute("aria-label","مشهد ثلاثي الأبعاد لقرية حيدان التراثية");
 }
 if(/^#(haydan|dhahran)$/i.test(location.hash)) showScreen("start");
@@ -1678,7 +1724,7 @@ function step(dt){
   if(keys.KeyW||keys.ArrowUp) iy+=1; if(keys.KeyS||keys.ArrowDown) iy-=1;
   if(keys.KeyD||keys.ArrowRight) ix+=1; if(keys.KeyA||keys.ArrowLeft) ix-=1;
   if(keys.KeyR) pitch=Math.max(-.4,pitch-1.2*dt); if(keys.KeyF) pitch=Math.min(1.15,pitch+1.2*dt);
-  if(keys.KeyQ) yaw+=1.8*dt; if(keys.KeyE&&!nearNpc) yaw-=1.8*dt;
+  if(keys.KeyQ) yaw+=1.8*dt; if(keys.KeyE&&!nearNpc&&!nearInfo) yaw-=1.8*dt;
   ix+=joy.x; iy+=joy.y;
   const m=Math.min(1,Math.hypot(ix,iy));
   const run=keys.ShiftLeft||keys.ShiftRight||(joy.id!==null&&Math.hypot(joy.x,joy.y)>.9);
@@ -1692,7 +1738,11 @@ function step(dt){
   // talk prompt
   const s=curStep(); let nn=null;
   if(s && s.npc && !pendingItem()){ const n=npcs[s.npc]; if(Math.hypot(n.obj.position.x-player.position.x,n.obj.position.z-player.position.z)<2.8) nn=s.npc; }
-  if(nn!==nearNpc){ nearNpc=nn; $("talk").hidden=!nn; if(nn){ $("talkName").textContent=npcs[nn].name; $("talkVerb").textContent=T("{تحدّث|تحدّثي}"); } }
+  let ni=null;
+  if(!nn) for(const L of INFO){ if(Math.hypot(L.pos[0]-player.position.x,L.pos[1]-player.position.z)<L.r){ ni=L; break; } }
+  if(nn!==nearNpc||ni!==nearInfo){ nearNpc=nn; nearInfo=ni; $("talk").hidden=!(nn||ni);
+    if(nn){ $("talkName").textContent=npcs[nn].name; $("talkVerb").textContent=T("{تحدّث|تحدّثي}"); $("talkPrep").textContent="مع"; }
+    else if(ni){ $("talkName").textContent=ni.name; $("talkVerb").textContent=T("{اقرأ|اقرئي}"); $("talkPrep").textContent="عن"; } }
   // pick up items that were handed over
   artifacts.forEach(a=>{ if(a.given&&!a.got&&a.appear>.6&&Math.hypot(a.it.pos[0]-player.position.x,a.it.pos[1]-player.position.z)<(a.it.r||1.7)) collect(a); });
 }
