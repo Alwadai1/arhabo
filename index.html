@@ -1,0 +1,1660 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}body{margin:0}</style>
+<title>أرحبو · Arhabo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* Layout: full-bleed 3D scene; HUD pinned to corners; modal heritage card framed by an Asir "qatt" triangle band */
+:root{
+  --ink:#1c130e;
+  --nura:#f6f1e7;
+  --qatt-red:#b8392b;
+  --qatt-green:#2f6e52;
+  --qatt-yellow:#e3a83a;
+  --qatt-blue:#2c5d8a;
+  --pink:#c4467c;
+  --glass:rgba(28,19,14,.72);
+  --glass-line:rgba(246,241,231,.18);
+  --muted:#6b5546;
+  --f-display:"Reem Kufi","Noto Kufi Arabic",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;overflow:hidden;background:#2a1c14;color:var(--nura);font-family:var(--f-body)}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+.qatt{height:12px;background:
+  linear-gradient(135deg,var(--qatt-red) 25%,transparent 25%) -6px 0/12px 12px,
+  linear-gradient(225deg,var(--qatt-green) 25%,transparent 25%) -6px 0/12px 12px,
+  linear-gradient(315deg,var(--qatt-yellow) 25%,transparent 25%) 0 0/12px 12px,
+  linear-gradient(45deg,var(--qatt-blue) 25%,transparent 25%) 0 0/12px 12px,var(--nura)}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--qatt-yellow);outline-offset:3px}
+
+#hud{position:fixed;inset:0;pointer-events:none;direction:rtl}
+#hud[hidden]{display:none!important}
+.counter{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:max(14px,env(safe-area-inset-right,0px));
+  background:var(--glass);border:1px solid var(--glass-line);border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:8px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.counter h2{margin:0;font:700 17px/1.1 var(--f-display);display:flex;gap:10px;align-items:baseline;justify-content:space-between}
+.counter h2 b{font:700 22px/1 var(--f-display);color:var(--qatt-yellow)}
+.slots{display:flex;gap:6px}
+.slot{width:34px;height:34px;border-radius:8px;border:1px dashed rgba(246,241,231,.35);display:grid;place-items:center;font:600 13px/1 var(--f-body);color:rgba(246,241,231,.5)}
+.slot.got{border:1px solid var(--qatt-yellow);background:rgba(227,168,58,.2);color:var(--nura)}
+.hint{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;
+  background:var(--glass);border:1px solid var(--glass-line);border-radius:999px;padding:8px 16px 8px 10px;font-size:14px;white-space:nowrap;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.arrow{width:26px;height:26px;border-radius:50%;background:var(--qatt-yellow);display:grid;place-items:center;transition:transform .08s linear}
+.arrow svg{display:block}
+.hint small{color:rgba(246,241,231,.7);font-size:12px}
+.qlabel{font:600 11px/1 var(--f-body);color:var(--qatt-yellow);letter-spacing:.3px}
+.qobj{margin:0;font-size:13.5px;line-height:1.5;max-width:230px;color:rgba(246,241,231,.92)}
+.talk{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 64px);transform:translateX(-50%);pointer-events:auto;background:var(--qatt-yellow);color:var(--ink);border:0;border-radius:999px;padding:12px 22px;font:700 17px/1 var(--f-display);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.talk kbd{font:600 12px/1 var(--f-body);background:rgba(28,19,14,.15);border-radius:5px;padding:3px 6px;margin-inline-start:6px}
+.dlg{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:min(720px,calc(100% - 32px));pointer-events:auto;
+  background:var(--nura);color:var(--ink);border-radius:16px;padding:16px 20px 14px;box-shadow:0 20px 60px rgba(0,0,0,.45);display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:end;border-top:6px solid var(--qatt-red)}
+.dlg .dhead{grid-column:1/-1;display:flex;gap:10px;align-items:baseline}
+.dlg .dhead b{font:700 20px/1 var(--f-display)}
+.dlg .dhead span{font-size:13px;color:var(--muted)}
+.dlg p{margin:0;font-size:17px;line-height:1.75;min-height:3.5em}
+.dlg .btn{padding:11px 20px;font-size:16px}
+@media (pointer:coarse){.talk kbd{display:none}.talk{left:auto;transform:none;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 40px);padding:16px 24px}.tag{display:none}}
+@media (max-width:520px){.qobj{font-size:12px;max-width:170px}.dlg{grid-template-columns:1fr}.dlg p{font-size:15.5px}}
+#mini{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:max(14px,env(safe-area-inset-left,0px));width:150px;height:150px;border-radius:50%;
+  border:2px solid var(--nura);box-shadow:0 4px 18px rgba(0,0,0,.35);background:#3b2a1e}
+.side{position:absolute;top:calc(env(safe-area-inset-top,0px) + 174px);left:max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:8px;width:150px;align-items:stretch}
+.side button{pointer-events:auto;background:var(--glass);color:var(--nura);border:1px solid var(--glass-line);border-radius:10px;padding:8px 10px;font:600 13px/1.2 var(--f-body)}
+.side button[aria-pressed="true"]{background:var(--qatt-yellow);color:var(--ink);border-color:transparent}
+.tag{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);right:max(14px,env(safe-area-inset-right,0px));background:var(--qatt-red);color:var(--nura);
+  font:600 12px/1 var(--f-body);padding:8px 12px;border-radius:999px}
+.keys{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);left:50%;transform:translateX(-50%);font-size:12px;color:rgba(246,241,231,.8);
+  background:var(--glass);padding:6px 12px;border-radius:999px;white-space:nowrap}
+#stick{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);left:max(26px,env(safe-area-inset-left,0px));width:120px;height:120px;border-radius:50%;
+  background:rgba(28,19,14,.45);border:2px solid rgba(246,241,231,.35);pointer-events:auto;touch-action:none;display:none}
+#knob{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:var(--nura);opacity:.85}
+@media (pointer:coarse){#stick{display:block}.keys{display:none}}
+
+.overlay{position:fixed;inset:0;display:grid;place-items:center;padding-block:calc(env(safe-area-inset-top,0px) + 16px) calc(env(safe-area-inset-bottom,0px) + 16px);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));direction:rtl;overflow:auto}
+.overlay[hidden]{display:none!important}
+.dim{background:radial-gradient(ellipse at center,rgba(28,19,14,.3),rgba(28,19,14,.82))}
+#start .panel{max-width:660px;width:100%;display:flex;flex-direction:column;gap:18px}
+#start h1{margin:0;font:700 clamp(46px,9vw,84px)/1 var(--f-display);text-shadow:0 4px 30px rgba(0,0,0,.45)}
+#start h1 span{color:var(--qatt-yellow)}
+.overlay .panel{max-width:660px;width:100%;display:flex;flex-direction:column;gap:18px}
+#title h1,#start h1{margin:0;font:700 clamp(46px,9vw,84px)/1 var(--f-display);text-shadow:0 4px 30px rgba(0,0,0,.45)}
+#start h1.town{font-size:clamp(34px,6vw,56px);line-height:1.15}
+#title h1 span,#start h1 span{color:var(--qatt-yellow)}
+#title .credit{margin:-6px 0 0;font:600 15px/1.5 var(--f-body);color:var(--qatt-yellow)}
+#title .sub,#villages .sub{margin:0;font-size:17px;line-height:1.7;max-width:50ch;color:rgba(246,241,231,.92)}
+.back{align-self:flex-start;background:transparent;color:rgba(246,241,231,.85);border:1px solid var(--glass-line);border-radius:999px;padding:7px 14px;font:600 13px/1 var(--f-body)}
+.back:hover{background:var(--glass)}
+.mapwrap{width:min(720px,100%);display:flex;flex-direction:column;gap:10px;align-items:stretch}
+.mhead h2{margin:0;font:700 34px/1.1 var(--f-display)}
+.mhead p,.mnote{margin:4px 0 0;color:rgba(246,241,231,.8);font-size:14px}
+.mnote{font-size:12px}
+#asirMap{direction:ltr;width:100%;height:auto;max-height:68vh;background:rgba(28,19,14,.55);border:1px solid var(--glass-line);border-radius:16px}
+#asirMap .land{fill:#b98d5f;stroke:#f6f1e7;stroke-width:1.5;stroke-opacity:.6}
+#asirMap .sea{fill:#3d6f8a}
+#asirMap .pin circle{fill:#6b5a4a;stroke:#f6f1e7;stroke-width:1}
+#asirMap .pin text{fill:#2a1c14;font:600 9.5px var(--f-body);paint-order:stroke;stroke:#e9d6bb;stroke-width:2.5px}
+#asirMap .pin.on{cursor:pointer}
+#asirMap .pin.on circle{fill:var(--qatt-yellow);stroke:#1c130e;stroke-width:2}
+#asirMap .pin.on text{font:700 14px var(--f-display);fill:#1c130e;stroke:#f6e7c8}
+#asirMap .pin.on:hover circle,#asirMap .pin.on:focus circle{fill:#f2c45c}
+#asirMap .halo{fill:none;stroke:var(--qatt-yellow);stroke-width:2;animation:halo 1.8s ease-out infinite}
+@keyframes halo{from{r:7;opacity:1}to{r:22;opacity:0}}
+#villages{background:#2a1c14}
+#villages .vmap{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+#villages .panel{position:relative;z-index:1}
+.vmap .vpin{cursor:pointer}
+.vmap .vpin .dot{fill:var(--qatt-yellow);stroke:#1c130e;stroke-width:3}
+.vmap .vpin:hover .dot,.vmap .vpin:focus .dot{fill:#f2c45c}
+.vmap .vpin .pill{fill:rgba(28,19,14,.82)}
+.vmap .vpin text{fill:#f6f1e7;font:700 22px var(--f-display)}
+.vmap .vhalo{fill:none;stroke:var(--qatt-yellow);stroke-width:3;animation:vhalo 2s ease-out infinite}
+@keyframes vhalo{from{r:12;opacity:1}to{r:44;opacity:0}}
+@media (prefers-reduced-motion:reduce){.vmap .vhalo{animation:none}}
+@media (prefers-reduced-motion:reduce){#asirMap .halo{animation:none}}
+.eyebrow2{font:600 13px/1 var(--f-body);color:var(--qatt-yellow)}
+.gov{margin:-10px 0 0;font:700 clamp(38px,7vw,60px)/1.05 var(--f-display)}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.vcard{display:flex;flex-direction:column;gap:8px;text-align:right;background:var(--nura);color:var(--ink);border:0;border-radius:14px;padding:16px;font:400 14px/1.6 var(--f-body)}
+.vcard b{font:700 20px/1.25 var(--f-display)}
+.vcard i{font-style:normal;font-weight:700;color:var(--qatt-red)}
+.vcard .vtag{align-self:flex-start;background:var(--qatt-green);color:#fff;border-radius:999px;padding:3px 10px;font:600 12px/1.4 var(--f-body)}
+button.vcard{cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+button.vcard:hover{transform:translateY(-2px)}
+.vcard.locked{background:rgba(246,241,231,.12);color:rgba(246,241,231,.8)}
+.vcard.locked .vtag{background:rgba(246,241,231,.25)}
+.who{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:end;background:var(--glass);border:1px solid var(--glass-line);border-radius:14px;padding:14px}
+.who label{grid-column:1/-1;font:600 14px/1 var(--f-display);color:var(--qatt-yellow)}
+.who input{min-width:0;font:500 18px/1.2 var(--f-body);padding:11px 14px;border-radius:10px;border:1px solid var(--glass-line);background:rgba(246,241,231,.95);color:var(--ink)}
+.who input:focus{outline:3px solid var(--qatt-yellow);outline-offset:1px}
+.seg{display:flex;border:1px solid var(--glass-line);border-radius:10px;overflow:hidden}
+.seg button{background:transparent;color:var(--nura);border:0;padding:11px 18px;font:600 16px/1.2 var(--f-body)}
+.seg button[aria-checked="true"]{background:var(--qatt-yellow);color:var(--ink)}
+@media (max-width:420px){.who{grid-template-columns:1fr}}
+.btn.ghost2{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+#start .credit{margin:-6px 0 0;font:600 15px/1.5 var(--f-body);color:var(--qatt-yellow)}
+#start .sub{margin:0;font-size:17px;line-height:1.7;max-width:50ch;color:rgba(246,241,231,.92)}
+#start ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+#start li{background:var(--glass);border:1px solid var(--glass-line);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.55}
+#start li b{display:block;font:600 14px/1.3 var(--f-display);color:var(--qatt-yellow);margin-bottom:2px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn{background:var(--qatt-yellow);color:var(--ink);border:0;border-radius:12px;padding:14px 26px;font:700 18px/1 var(--f-display)}
+.btn:hover{filter:brightness(1.07)}
+.note{font-size:12.5px;color:rgba(246,241,231,.72)}
+.card{width:min(520px,100%);background:var(--nura);color:var(--ink);border-radius:16px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5);animation:pop .45s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{transform:scale(.6) translateY(30px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.card{animation:none}}
+.card .body{padding:20px 22px 22px;display:flex;flex-direction:column;gap:14px}
+.card .eyebrow{font:600 12px/1 var(--f-body);color:var(--qatt-red)}
+.card h3{margin:0;font:700 34px/1.1 var(--f-display);text-wrap:balance}
+.card .row{display:flex;gap:16px;align-items:center}
+.card .thumb{flex:0 0 108px;height:108px;border-radius:12px;background:radial-gradient(circle at 50% 40%,#fff,#e8dcc6);display:grid;place-items:center}
+.card .thumb canvas{width:108px;height:108px}
+.card p{margin:0;font-size:15.5px;line-height:1.8}
+.card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;line-height:1.6;border-top:1px solid #e1d6c2;padding-top:12px}
+.card dt{color:var(--muted);font-weight:600}
+.card dd{margin:0}
+.card .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.card .foot small{color:var(--muted);font-size:11.5px}
+.card .btn{padding:12px 22px;font-size:16px}
+.code{display:inline-block;font:600 11px/1 ui-monospace,Consolas,monospace;background:#eadfcb;color:var(--ink);padding:3px 6px;border-radius:5px;direction:ltr}
+.got-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.got-grid div{background:#efe5d3;border-radius:10px;padding:8px 4px;text-align:center;font:600 12.5px/1.3 var(--f-display)}
+@media (max-width:520px){
+  #mini{width:104px;height:104px}.side{top:calc(env(safe-area-inset-top,0px) + 126px);width:104px}.side button{font-size:11.5px;padding:6px}
+  .counter{padding:8px 10px}.slot{width:26px;height:26px;font-size:11px}.counter h2{font-size:14px}
+  .hint{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 160px);font-size:13px}
+  .tag{font-size:10.5px;padding:6px 10px}
+  .card h3{font-size:28px}.card .thumb{flex-basis:84px;height:84px}.card .thumb canvas{width:84px;height:84px}
+}
+</style>
+
+<canvas id="c" tabindex="0" aria-label="مشهد ثلاثي الأبعاد لبلدة ظهران الجنوب التراثية"></canvas>
+
+<div id="hud" hidden>
+  <canvas id="mini" width="300" height="300" aria-label="خريطة مصغرة"></canvas>
+  <div class="side">
+    <button id="aerialBtn" aria-pressed="false">منظر جوي (M)</button>
+    <button id="sndBtn" aria-pressed="true">الصوت: يعمل</button>
+    <button id="ttsBtn" aria-pressed="true">قراءة الحوار: تعمل</button>
+  </div>
+  <div class="counter">
+    <span class="qlabel">المهمة</span>
+    <h2>ضيافة أبي ظافر <b id="cnt">٠ / ٥</b></h2>
+    <p class="qobj" id="qObj">تحدّث مع أبي ظافر عند البوابة</p>
+    <div class="slots" id="slots"></div>
+  </div>
+  <button class="talk" id="talk" hidden><span id="talkVerb">تحدّث</span> مع <span id="talkName"></span> <kbd>E</kbd></button>
+  <div class="dlg" id="dlg" hidden>
+    <div class="dhead"><b id="dName"></b><span id="dRole"></span></div>
+    <p id="dText"></p>
+    <button class="btn" id="dNext">التالي</button>
+  </div>
+  <div class="hint" id="hint"><span class="arrow" id="arrow"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1 L13 12 L7 9 L1 12 Z" fill="#1c130e"/></svg></span><span id="hintText">اتجه إلى الضوء الذهبي</span></div>
+  <div class="keys">الحركة: W A S D أو الأسهم · الكاميرا: اسحب بالفأرة (يميناً ويساراً وأعلى وأسفل) أو Q و R و F · تحدّث: E · الجري: Shift · منظر جوي: M</div>
+  <div id="stick"><div id="knob"></div></div>
+  <div class="tag">نسخة تجريبية</div>
+</div>
+
+<div class="overlay dim" id="title">
+  <div class="panel">
+    <div class="qatt" style="width:180px;border-radius:3px"></div>
+    <h1>أرحبو <span>Arhabo</span></h1>
+    <p class="credit" style="color:var(--nura);margin-top:-4px">حكايا القرى التراثية · Heritage Villages of Saudi Arabia</p>
+    <p class="credit">فكرة وتطوير: المهندس عبدالله محمد آل خرصان الوادعي</p>
+    <p class="sub">لعبة فيديو تفاعلية تأخذك في رحلة إلى قرى منطقة عسير وبلداتها التراثية. اختر محافظة من الخريطة، ثم اختر قرية، وابدأ المغامرة.</p>
+    <div class="actions"><button class="btn" id="toMap">ابدأ الرحلة</button></div>
+  </div>
+</div>
+
+<div class="overlay dim" id="mapScreen" hidden>
+  <div class="mapwrap">
+    <header class="mhead">
+      <h2>خريطة منطقة عسير</h2>
+      <p>اختر محافظة. المحافظات المضيئة متاحة، والبقية قريباً.</p>
+    </header>
+    <svg id="asirMap" viewBox="0 0 420 420" role="img" aria-label="خريطة توضيحية لمحافظات منطقة عسير"></svg>
+    <p class="mnote" id="mapTip">خريطة توضيحية، والمواقع تقريبية.</p>
+  </div>
+</div>
+
+<div class="overlay dim" id="villages" hidden>
+  <!-- illustrated map of Dhahran Al-Janoub: the old town in the west, the modern city in the middle, Haydan in the east -->
+  <svg class="vmap" viewBox="0 0 1720 760" preserveAspectRatio="xMidYMid slice" aria-hidden="false" role="group" aria-label="خريطة توضيحية لظهران الجنوب">
+    <defs>
+      <pattern id="blocks" width="26" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-32)">
+        <rect width="26" height="22" fill="#bfae95"/><rect x="2" y="2" width="10" height="8" fill="#e9e0d0"/><rect x="14" y="2" width="9" height="8" fill="#ddd2bf"/>
+        <rect x="2" y="12" width="9" height="8" fill="#d8ccb8"/><rect x="13" y="12" width="10" height="8" fill="#ece4d6"/>
+      </pattern>
+      <pattern id="towers" width="14" height="14" patternUnits="userSpaceOnUse">
+        <rect width="14" height="14" fill="#a07e5c"/><rect x="1" y="1" width="6" height="6" fill="#e8d2b4"/><rect x="8" y="7" width="5" height="6" fill="#d9bc96"/><rect x="2" y="9" width="4" height="4" fill="#c99e77"/>
+      </pattern>
+      <pattern id="fields" width="18" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+        <rect width="18" height="14" fill="#7f8a4a"/><rect x="1" y="1" width="16" height="5" fill="#93a055"/><rect x="1" y="8" width="16" height="5" fill="#a39a62"/>
+      </pattern>
+      <radialGradient id="veil" cx="50%" cy="52%" r="60%"><stop offset="0" stop-color="#1c130e" stop-opacity=".72"/><stop offset=".6" stop-color="#1c130e" stop-opacity=".45"/><stop offset="1" stop-color="#1c130e" stop-opacity=".2"/></radialGradient>
+    </defs>
+    <rect width="1720" height="760" fill="#c9b08a"/>
+    <!-- hills -->
+    <g fill="#ad9068" stroke="#9a7e58" stroke-width="2">
+      <path d="M1180 0 H1720 V260 C1640 300 1560 250 1500 200 C1430 150 1330 120 1260 60 Z"/>
+      <path d="M1180 540 C1200 450 1300 430 1370 470 C1440 510 1450 600 1400 650 C1340 700 1220 680 1190 620 Z"/>
+      <path d="M960 760 C990 690 1060 670 1120 700 C1160 720 1180 745 1190 760 Z"/>
+      <path d="M0 640 C60 600 120 640 150 700 L160 760 H0 Z"/>
+    </g>
+    <g fill="none" stroke="#9a7e58" stroke-width="1.5" opacity=".7">
+      <path d="M1230 560 C1260 500 1330 495 1370 530"/><path d="M1250 600 C1280 545 1350 540 1385 580"/>
+      <path d="M1320 90 C1400 160 1500 190 1600 170"/><path d="M1380 60 C1460 110 1560 130 1680 110"/>
+    </g>
+    <!-- وادي العرين: passes the old town and Haydan, with farms and villages on its banks -->
+    <path d="M-30 640 C110 610 190 580 222 520 C262 440 200 230 320 120 C470 -10 880 -20 1080 40 C1210 80 1250 190 1285 290 C1320 380 1480 420 1750 360" fill="none" stroke="url(#fields)" stroke-width="96" stroke-linecap="round" opacity=".9"/>
+    <path d="M-30 640 C110 610 190 580 222 520 C262 440 200 230 320 120 C470 -10 880 -20 1080 40 C1210 80 1250 190 1285 290 C1320 380 1480 420 1750 360" fill="none" stroke="#7f8a4a" stroke-width="96" stroke-linecap="round" opacity=".25"/>
+    <path id="wadiLine" d="M-30 640 C110 610 190 580 222 520 C262 440 200 230 320 120 C470 -10 880 -20 1080 40 C1210 80 1250 190 1285 290 C1320 380 1480 420 1750 360" fill="none" stroke="#d8c7a2" stroke-width="16" stroke-linecap="round" opacity=".9"/>
+    <path d="M-30 640 C110 610 190 580 222 520 C262 440 200 230 320 120 C470 -10 880 -20 1080 40 C1210 80 1250 190 1285 290 C1320 380 1480 420 1750 360" fill="none" stroke="#bfa985" stroke-width="5" stroke-dasharray="3 9" opacity=".8"/>
+    <g fill="url(#towers)" stroke="#6b4a2e" stroke-width="1.5">
+      <ellipse cx="300" cy="215" rx="26" ry="18"/><ellipse cx="395" cy="95" rx="24" ry="16"/><ellipse cx="610" cy="58" rx="28" ry="15"/>
+      <ellipse cx="860" cy="70" rx="26" ry="15"/><ellipse cx="1150" cy="140" rx="22" ry="16"/><ellipse cx="1240" cy="215" rx="20" ry="14"/>
+      <ellipse cx="1500" cy="440" rx="28" ry="16"/><ellipse cx="1640" cy="350" rx="24" ry="15"/><ellipse cx="150" cy="650" rx="26" ry="16"/>
+    </g>
+    <text x="0" y="0" transform="translate(262 190) rotate(-64)" text-anchor="middle" dominant-baseline="middle" font-family="Reem Kufi, Tahoma, sans-serif" font-size="26" font-weight="700" fill="#f6f1e7" stroke="#4d4428" stroke-width="4" paint-order="stroke">وادي العرين</text>
+    <!-- the modern city -->
+    <path d="M390 130 C560 80 820 70 1060 110 C1140 220 1150 380 1080 470 C1000 580 920 690 760 740 L440 760 C380 640 340 520 330 380 C330 280 350 190 390 130 Z" fill="url(#blocks)" opacity=".9"/>
+    <g stroke="#8d8273" stroke-width="5" fill="none" opacity=".8" stroke-linecap="round">
+      <path d="M520 150 C620 260 700 380 760 520"/><path d="M890 150 C800 300 700 420 640 560"/><path d="M430 300 C600 280 780 240 980 200"/><path d="M450 560 C620 520 780 470 990 430"/>
+    </g>
+    <!-- the main road -->
+    <path d="M150 280 C300 330 450 390 620 400 C760 410 880 520 960 600 C1060 690 1180 650 1290 720" fill="none" stroke="#3a3836" stroke-width="16" stroke-linecap="round"/>
+    <path d="M150 280 C300 330 450 390 620 400 C760 410 880 520 960 600 C1060 690 1180 650 1290 720" fill="none" stroke="#e9e2d4" stroke-width="2" stroke-dasharray="14 12"/>
+    <path d="M1150 30 C1200 90 1260 150 1300 230 C1340 300 1480 360 1620 460 L1720 540" fill="none" stroke="#5a5550" stroke-width="7" stroke-linecap="round" opacity=".85"/>
+    <!-- the old town and its farms (west) -->
+    <ellipse cx="250" cy="500" rx="78" ry="56" fill="url(#towers)" stroke="#6b4a2e" stroke-width="2"/>
+    <!-- Haydan (east) -->
+    <path d="M1290 250 C1330 230 1380 240 1400 270 C1410 300 1380 330 1340 330 C1300 330 1280 300 1290 250 Z" fill="url(#towers)" stroke="#6b4a2e" stroke-width="2"/>
+    <!-- veil so the cards stay readable -->
+    <rect width="1720" height="760" fill="url(#veil)"/>
+    <g transform="translate(70 70)" fill="rgba(246,241,231,.75)" font-family="Tahoma, sans-serif"><path d="M0 -26 L9 6 L0 0 L-9 6 Z"/><text y="28" text-anchor="middle" font-size="18" font-weight="700">ش</text></g>
+    <!-- pins -->
+    <g class="vpin" id="pinTown" tabindex="0" role="button" aria-label="بلدة ظهران الجنوب التراثية">
+      <circle class="vhalo" cx="250" cy="500" r="12"/><circle class="dot" cx="250" cy="500" r="12"/>
+      <rect class="pill" x="120" y="408" width="262" height="46" rx="23"/><text x="251" y="439" text-anchor="middle">بلدة ظهران الجنوب</text>
+    </g>
+    <g class="vpin" id="pinHaydan" tabindex="0" role="button" aria-label="قرية حيدان التراثية">
+      <circle class="vhalo" cx="1342" cy="285" r="12"/><circle class="dot" cx="1342" cy="285" r="12"/>
+      <rect class="pill" x="1252" y="192" width="180" height="46" rx="23"/><text x="1342" y="223" text-anchor="middle">قرية حيدان</text>
+    </g>
+    <text x="1700" y="748" text-anchor="end" fill="rgba(246,241,231,.6)" font-size="14" font-family="Tahoma, sans-serif">خريطة توضيحية، والمواقع تقريبية</text>
+  </svg>
+  <div class="panel">
+    <button class="back" id="backToMap">→ خريطة عسير</button>
+    <span class="eyebrow2">محافظة</span>
+    <h2 class="gov">ظهران الجنوب</h2>
+    <p class="sub">في أقصى جنوب منطقة عسير، على ضفاف وادي العرين، ويحرسها من الشمال جبل شثاث. اختر قرية تراثية لتبدأ المغامرة.</p>
+    <div class="vgrid">
+      <button class="vcard" id="pickTown">
+        <span class="vtag">متاحة</span>
+        <b>بلدة ظهران الجنوب التراثية</b>
+        <span>أكثر من 140 بيتاً من الطين والحجر، والسوق التاريخي، والمسجد التاريخي، وقصر آل زابن.</span>
+        <i>ابدأ المغامرة ←</i>
+      </button>
+      <button class="vcard" id="pickHaydan">
+        <span class="vtag">جديدة · تجريبية</span>
+        <b>قرية حيدان التراثية</b>
+        <span>في آل المؤنس، يحيط بها سور حيدان ببابيه: باب الحوزة وباب السلام. فيها مسجد الصحابي معاذ بن جبل وبئره، ودار الفروق «سداح» بمفاتيحها الأربعة، وقصر ابن عجلة بطوابقه الأربعة.</span>
+        <i>ابدأ جولة حيدان ←</i>
+      </button>
+      <div class="vcard locked" aria-disabled="true">
+        <span class="vtag">قريباً</span>
+        <b>قرى تراثية أخرى</b>
+        <span>نضيف قرى المحافظة واحدة بعد أخرى بمساعدة أهلها.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay dim" id="start" hidden>
+  <div class="panel">
+    <button class="back" id="backToVillages">→ قرى ظهران الجنوب</button>
+    <div class="qatt" style="width:180px;border-radius:3px"></div>
+    <h1 class="town">بلدة ظهران الجنوب <span>التراثية</span></h1>
+    <p class="credit">فكرة وتطوير: المهندس عبدالله محمد آل خرصان الوادعي</p>
+    <p class="sub">جولة في بلدة ظهران الجنوب التراثية: أزقّتها وبيوتها، والبئر والقصر والسوق، وجبل شثاث في الأفق. ساعد أبا ظافر في تجهيز ضيافة ضيفه، وتعرّف على أدوات أهل البلدة في الماضي.</p>
+    <ol>
+      <li><b>الحركة</b>الأسهم أو W A S D، وعلى الجوال العصا أسفل الشاشة. Shift للجري.</li>
+      <li><b>الكاميرا</b>اسحب بالفأرة أو بإصبعك يميناً ويساراً وأعلى وأسفل.</li>
+      <li><b>الحديث</b>اقترب من الشخصية واضغط E أو زر «تحدّث».</li>
+      <li><b>ساعدنا</b>هذه نسخة تجريبية. إن لاحظت بيتاً أو معلماً أو اسماً أو معلومة تحتاج تصحيحاً، أخبر من أرسل لك الرابط.</li>
+    </ol>
+    <form class="who" id="who" autocomplete="off">
+      <label for="pname">اسمك في اللعبة</label>
+      <input id="pname" maxlength="20" placeholder="اكتب اسمك" inputmode="text">
+      <div class="seg" role="radiogroup" aria-label="الجنس">
+        <button type="button" role="radio" id="gm" aria-checked="true">ذكر</button>
+        <button type="button" role="radio" id="gf" aria-checked="false">أنثى</button>
+      </div>
+    </form>
+    <div class="actions">
+      <button class="btn" id="go">ابدأ: ضيافة أبي ظافر</button>
+      <span class="note">على الجوال: حرّك الشخصية بالعصا أسفل اليسار، واسحب على الشاشة لتدوير الكاميرا ورفعها وخفضها. الوضع الأفقي أفضل.</span>
+    </div>
+  </div>
+</div>
+
+<div class="overlay dim" id="cardWrap" hidden>
+  <article class="card" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+    <div class="qatt"></div>
+    <div class="body">
+      <span class="eyebrow" id="cEyebrow">قطعة تراثية ١ من ٥</span>
+      <div class="row">
+        <div class="thumb"><canvas id="thumb" width="216" height="216"></canvas></div>
+        <div style="min-width:0;display:flex;flex-direction:column;gap:6px">
+          <h3 id="cTitle">الدلّة</h3>
+          <span style="color:var(--muted);font-size:13.5px" id="cPlace"></span>
+        </div>
+      </div>
+      <p id="cDesc"></p>
+      <dl>
+        <dt id="cUseL">الاستخدام</dt><dd id="cUse"></dd>
+        <dt id="cFactL">معلومة</dt><dd id="cFact"></dd>
+      </dl>
+      <div class="foot">
+        <small>معلومات تجريبية، صحّحها لنا إن وجدت خطأ.</small>
+        <button class="btn" id="cOk">متابعة الجولة</button>
+      </div>
+    </div>
+  </article>
+</div>
+
+<div class="overlay dim" id="win" hidden>
+  <article class="card" role="dialog" aria-modal="true" aria-labelledby="wTitle">
+    <div class="qatt"></div>
+    <div class="body">
+      <span class="eyebrow" id="winEyebrow">اكتملت المهمة: أُكرم الضيف</span>
+      <h3 id="wTitle">بطاقة البلدة: ظهران الجنوب</h3>
+      <p id="wText">محافظة في جنوب منطقة عسير قرب الحدود اليمنية. تتميّز بلدتها التراثية ببيوتها البرجية المبنية بمداميك الطين فوق أساس من الحجر، ونوافذها المؤطّرة بالأبيض، وأزقّتها الضيقة والمسقوفة التي تلتقي عند البئر، وساحتها التراثية للاحتفالات ومزارعها في الجنوب.</p>
+      <div class="got-grid" id="gotGrid"></div>
+      <div class="foot">
+        <small>فكرة وتطوير: المهندس عبدالله محمد آل خرصان الوادعي<br>ملاحظاتك عن البلدة تهمّنا، أرسلها لمن شاركك الرابط.</small>
+        <span class="actions"><button class="btn" id="again">جولة جديدة</button><button class="btn ghost2" id="winMap">خريطة عسير</button></span>
+      </div>
+    </div>
+  </article>
+</div>
+
+<script src="three.min.js"></script>
+<script>if(!window.THREE){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');}</script>
+<script>if(!window.THREE){document.addEventListener("DOMContentLoaded",function(){var s=document.querySelector("#title .sub");if(s)s.textContent="ملف three.min.js غير موجود بجانب ملف اللعبة، ولا يوجد اتصال بالإنترنت. اقرأ ملف «اقرأني» في نفس المجلد.";var b=document.getElementById("toMap");if(b)b.disabled=true;});}</script>
+<script>
+(function(){
+"use strict";
+const AR = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
+let seed = 20260308;
+function rnd(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
+const R = (a,b) => a + (b-a)*rnd();
+
+/* ---------- Which village: #haydan in the address loads Haydan, anything else the Dhahran town ---------- */
+const VILLAGE = /haydan/i.test(location.hash) ? "haydan" : "dhahran";
+const HD = VILLAGE==="haydan";
+/* ---------- Plan from the team's aerial image (pixel coords -> metres) ---------- */
+const P = (xi,yi) => [(xi-650)*.11, (yi-450)*.14];
+const PATHS_D = [
+  [[480,95],[460,160],[420,215],[380,240],[360,300],[380,380],[470,365],[515,295],[610,310],[640,430],[650,485],[715,495],[740,555]],
+  [[620,300],[735,300],[810,330],[870,320],[915,315],[950,350],[940,430]],
+  [[335,530],[410,540],[410,670],[380,740],[520,745],[580,710],[575,630]],
+  [[740,555],[640,560],[575,630]],
+  [[380,380],[350,470],[335,530]],
+  [[640,430],[800,420],[940,430]],
+  [[515,295],[560,180],[600,120]],
+  [[810,330],[800,230],[820,130]],
+  [[740,555],[880,560],[1000,520]],
+  [[335,530],[240,560],[200,650]]
+].map(pl => pl.map(p => P(p[0],p[1])));
+const FOOT_D = [[290,140],[620,130],[850,160],[960,280],[990,380],[930,470],[880,600],[760,620],[640,650],[600,780],[350,780],[200,730],[130,600],[170,400],[240,250]].map(p=>P(p[0],p[1]));
+const L1 = [9.4,-21.7], L3 = [45,26.6];
+/* Haydan (حيدان, آل المؤنس) from its aerial image: valley + palms north, stone-walled farms in the middle,
+   houses to the east inside the village wall, the road along the south, Ibn Ajla mosque by the road. */
+const HAYDAN_FOOT = [[12,-30],[34,-34],[60,-30],[80,-18],[86,2],[80,22],[64,27],[40,25],[22,20],[12,4]];
+const HAYDAN_LANES = [[[2,0],[24,-2],[42,-4],[64,-1],[94,2]], [[30,-40],[34,-16],[38,6],[44,36]], [[58,-36],[60,-12],[62,10],[64,38]], [[18,14],[40,14],[60,16],[84,14]]];
+const HAYDAN_ROAD = [[-110,22],[-26,26],[22,40],[110,48]];
+const PATHS = HD ? HAYDAN_LANES : PATHS_D;
+const FOOT = HD ? HAYDAN_FOOT : FOOT_D;
+
+/* ---------- Story: «ضيافة أبي ظافر» ---------- */
+const ITEMS_D = [
+  {key:"najr", code:"S1", name:"النِّجر", place:"السوق عند الطريق الشمالي", pos:[-5.2,-43.6],
+   desc:"هاون نحاسي ثقيل تُدقّ فيه حبوب القهوة المحمّصة والهيل.",
+   use:"دقّ البن قبل إعداد القهوة.",
+   fact:"كان صوت دقّ النجر يُعلم الجيران أن القهوة تُعدّ وأن المجلس مفتوح."},
+  {key:"gerba", code:"L1", name:"القِربة", place:"البئر المركزية", pos:[12.6,-18.8],
+   desc:"وعاء من جلد الماعز المدبوغ يُملأ من البئر ويُعلَّق في الظل، فيبقى الماء فيه بارداً لأن الماء يرشح ببطء من مسام الجلد ويتبخر.",
+   use:"حفظ الماء ونقله من البئر إلى البيوت، وحمله في الرعي والسفر.",
+   fact:"البئر في ساحة مفتوحة تحيط بها البيوت البرجية، ومنها تتفرع الأزقة شرقاً."},
+  {key:"midhaan", code:"A2", name:"المِدهان", place:"غرب البلدة عند الزقاق المتعرّج", pos:[-26.4,13.4],
+   desc:"قِدر من الحجر المنحوت يحفظ الحرارة طويلاً، وتُقدَّم فيه الأكلات الشعبية الجنوبية ساخنة.",
+   use:"طهي الطعام وتقديمه ساخناً للأسرة والضيوف.",
+   fact:"يُنحت المدهان يدوياً من حجر واحد، لذلك يعيش لأجيال."},
+  {key:"dallah", code:"P1", name:"الدلّة", place:"مدخل قصر آل زابن", pos:[8.6,12.2],
+   desc:"إناء القهوة العربية بمقبضه الطويل ومنقاره المعقوف، وأول ما يُقدَّم للضيف في المجلس.",
+   use:"إعداد القهوة وتقديمها: تُمسك الدلة باليسرى ويُقدَّم الفنجال باليمنى.",
+   fact:"قصر آل زابن أكبر مبنى تراثي في البلدة، ويطلّ على فناء واسع."},
+  {key:"janbiya", code:"P1", name:"الجنبية", place:"هدية أبي ظافر في فناء قصر آل زابن", pos:[3.4,10.4],
+   desc:"خنجر بنصل معقوف وغمد مزخرف يُلبس في وسط الحزام، وما زال جزءاً من الزي الرجالي في المناسبات بالجنوب.",
+   use:"زينة ورمز للوجاهة، وتُصنع وتُباع في سوق ظهران الجنوب.",
+   fact:"يلبس أبو ظافر جنبيته في كل مناسبة، وأهداك واحدة تقديراً لسعيك في إكرام الضيف."}
+];
+const NPCS_D = {
+  abu:   {name:"أبو ظافر", role:"حكيم البلدة", pos:[-17.4,-43.0], end:[1.6,11.6], look:"abu"},
+  hasan: {name:"العم حسن", role:"تاجر السوق", pos:[-7.6,-44.4], look:"merchant"},
+  salem: {name:"سالم", role:"السقّاء", pos:[12.6,-24.6], look:"worker"},
+  naser: {name:"العم ناصر", role:"من أهل البلدة", pos:[-28.4,12.2], look:"elder"},
+  guard: {name:"أبو طلال", role:"صاحب القصر", pos:[10.6,14.4], look:"owner"}
+};
+const STEPS_D = [
+  {npc:"abu", obj:"{تحدّث|تحدّثي} مع أبي ظافر عند البوابة", lines:[
+    "أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله، {جيت|جيتِ} في وقتك.",
+    "الليلة عندنا ضيف عزيز، والضيف عندنا في ظهران له حقّه وقدره.",
+    "{شف|شوفي} وراك من جهة الشمال: ذاك جبل شثاث، حارس ظهران من قديم.",
+    "{أبغاك تجيب|أبغاكِ تجيبين} لي أربع حاجات: النجر من السوق، والقربة من البير، والمدهان من بيت العم ناصر غرب البلدة، والدلة من قصر آل زابن.",
+    "{امشِ|امشي} ورا الضو الذهبي، وإذا {خلّصت ألقاك|خلّصتِ ألقاكِ} في ساحة قصر آل زابن."]},
+  {npc:"hasan", item:0, obj:"{اذهب|اذهبي} إلى العم حسن في السوق", lines:[
+    "أرحبو! {حيّاك|حيّاكِ} في السوق. أبو ظافر {مرسلك|مرسلكِ}؟",
+    "هذا نجر نحاس ثقيل، ندقّ فيه البن المحمّس مع الهيل.",
+    "{خذه|خذيه}، ولا سمعوا الجيران صوت دقّه عرفوا إن عندكم ضيف."]},
+  {npc:"salem", item:1, obj:"{اذهب|اذهبي} إلى سالم عند البئر", lines:[
+    "السلام عليكم، أرحبو. هذي البير قلب البلدة، منها يشربون الناس وتنسقى المزارع.",
+    "عبّيت {لك|لكِ} القربة الحين. {علّقها|علّقيها} في الظل ويبقى ماها بارد."]},
+  {npc:"naser", item:2, obj:"{اذهب|اذهبي} إلى العم ناصر غرب البلدة", lines:[
+    "أرحبو يا {ولدي|بنتي}. {انتبه|انتبهي} في أزقّة البلدة، ضيّقة ومتعرّجة، وتظلّل الماشي من الشمس.",
+    "هذا المدهان، منحوت من الحجر، يحفظ الأكل حار لين يوصل المجلس."]},
+  {npc:"guard", item:3, obj:"{اذهب|اذهبي} إلى أبي طلال صاحب قصر آل زابن", lines:[
+    "أرحبو، {حيّاك|حيّاكِ} الله في قصرنا. هذا قصر آل زابن، من أكبر بيوت البلدة، أدواره كثيرة ونوافذه صغيرة.",
+    "الدلة جاهزة ومحمّسة، {شلّها|شلّيها} لأبو ظافر. {سبقك|سبقكِ} للساحة وهو {ينتظرك|ينتظركِ}."]},
+  {npc:"abu", item:4, at:"end", obj:"{عُد|عودي} إلى أبي ظافر في فناء قصر آل زابن", lines:[
+    "ما شاء الله يا {name}! النجر والقربة والمدهان والدلة، كلها كملت.",
+    "الكرم عندنا ما هو بالقهوة بس، الكرم في اللي يسعى يكرم ضيفه.",
+    "{خذ هذي الجنبية هدية مني، تنلبس في وسط الحزام، وهي زينة الرجال عندنا في الجنوب.|خذي هذي الجنبية هدية مني لأهل بيتك، تنلبس في وسط الحزام، وهي زينة الرجال عندنا في الجنوب.}"]}
+];
+/* ---------- Haydan: «جولة في حيدان» — a guided walk to the landmarks known from the aerial image ---------- */
+const ITEMS_H = [
+  {key:"palm", code:"V1 · F1", name:"وادي العرين والنخيل", place:"شمال القرية", pos:[-20,-35], r:2.6, goal:"{اذهب|اذهبي} إلى وادي العرين",
+   desc:"يمرّ وادي العرين من شمال القرية، وهو الوادي نفسه الذي يمرّ ببلدة ظهران الجنوب التراثية. وعلى ضفافه مزارع وقرى، ونخيل وأشجار كثيفة كما تظهر في الصورة الجوية.",
+   use:"V1 وادي العرين · F1 النخيل والأشجار", fact:"أنواع الأشجار والنخيل، وأسماء القرى على ضفافه."},
+  {key:"farm", code:"F2", name:"المزارع المسوّرة بالحجر", place:"بين النخيل والطريق", pos:[-22,3], r:2.6, goal:"{اذهب|اذهبي} إلى المزارع المسوّرة",
+   desc:"مزارع تحيط بها جدران من الحجر، بين النخيل في الشمال والطريق في الجنوب.",
+   use:"F2 مزارع مسوّرة بالحجر", fact:"ما كان يُزرع فيها، ومن يعتني بها اليوم."},
+  {key:"wall", code:"W1", name:"سور حيدان", place:"حول بيوت القرية", pos:[4,-8], r:2.6, goal:"{اذهب|اذهبي} إلى سور حيدان",
+   desc:"سور يحيط بالقرية كاملة، بعضه قائم وبعضه أثّرت فيه عوامل البيئة. وللسور بابان: باب الحوزة وباب السلام. وتُعرف حيدان بأنها دار أمان، فمن دخل سورها فهو آمن.",
+   use:"W1 سور حيدان · G1 باب الحوزة · G2 باب السلام", fact:"مسار السور كاملاً، وموقع البابين."},
+  {key:"house", code:"B", name:"بيوت القرية", place:"داخل السور، في الجهة الشرقية", pos:[40,-3.6], r:2.4, goal:"{ادخل|ادخلي} بيوت القرية",
+   desc:"بيوت من الحجر والطين متلاصقة داخل السور. ومن بيوت حيدان قصر ابن عجلة بطوابقه الأربعة وغرفه الصغيرة، كأنه حصن، ويُعدّ أعلى إطلالة في المحافظة.",
+   use:"B بيوت القرية · P1 قصر ابن عجلة", fact:"موقع قصر ابن عجلة، وصور الواجهات والأبواب والنوافذ."},
+  {key:"mosque", code:"M3", name:"مسجد بن عجلة", place:"جنوب القرية قرب الطريق", pos:[54,39], r:2.4, goal:"{اذهب|اذهبي} إلى مسجد بن عجلة",
+   desc:"مسجد يقع جنوب القرية قرب الطريق العام. وفي حيدان أيضاً مسجد الصحابي معاذ بن جبل رضي الله عنه وبئره، ويُضاف إلى اللعبة عند تحديد موقعه.",
+   use:"M3 مسجد بن عجلة · M1 مسجد معاذ بن جبل · M2 بئر المسجد", fact:"تاريخ المسجد، وموقع مسجد معاذ بن جبل وبئره."}
+];
+const NPCS_H = { rawi:{name:"الراوي", role:"من أهل حيدان", pos:[-31,22], look:"elder"} };
+const STEPS_H = [
+  {npc:"rawi", obj:"{تحدّث|تحدّثي} مع الراوي عند مدخل القرية", lines:[
+    "أرحبو! أرحبو يا {name}، {حيّاك|حيّاكِ} الله في حيدان.",
+    "حيدان قرية قديمة يحيطها سور، ومن دخل السور فهو آمن. هذي عادة أهلها من قديم.",
+    "{تعال|تعالي} {أوريك|أوريكِ} معالمها: وادي العرين والنخل، والمزارع، والسور، والبيوت، ومسجد بن عجلة.",
+    "{امشِ|امشي} ورا الضو الذهبي، وكل ما {توصل|توصلين} معلم {تعرف|تعرفين} قصته."]},
+  {visit:0},{visit:1},{visit:2},{visit:3},{visit:4}
+];
+const ITEMS = HD ? ITEMS_H : ITEMS_D, NPCS = HD ? NPCS_H : NPCS_D, STEPS = HD ? STEPS_H : STEPS_D;
+
+/* ---------- Player identity: name + gender, used in dialogue and the avatar ---------- */
+const PLAYER={name:"",g:"m"};
+try{ const v=JSON.parse(localStorage.getItem("asirPlayer")||"null"); if(v&&typeof v.name==="string"){ PLAYER.name=v.name.slice(0,20); PLAYER.g=v.g==="f"?"f":"m"; } }catch(_){}
+function T(str){
+  const nm=PLAYER.name||(PLAYER.g==="f"?"بنتي":"ولدي");
+  return str.replace(/\{name\}/g,nm).replace(/\{([^{}|]*)\|([^{}|]*)\}/g,(_,m,f)=>PLAYER.g==="f"?f:m);
+}
+
+
+/* ---------- Renderer ---------- */
+const MOBILE = matchMedia("(pointer:coarse)").matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const canvas = document.getElementById("c");
+let renderer;
+try { renderer = new THREE.WebGLRenderer({canvas, antialias:!MOBILE, powerPreference:"high-performance"}); }
+catch(e){ document.querySelector("#start .sub").textContent = "متصفحك لا يدعم العرض ثلاثي الأبعاد (WebGL). جرّب متصفحاً آخر أو جهاز كمبيوتر."; return; }
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, MOBILE?1.25:1.6));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.08;
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xcfd6d6, MOBILE?100:140, MOBILE?560:680);
+const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 1200);
+(function(){
+  const cv=document.createElement("canvas"); cv.width=4; cv.height=256; const g=cv.getContext("2d");
+  const gr=g.createLinearGradient(0,0,0,256); gr.addColorStop(0,"#4f86c0"); gr.addColorStop(.6,"#a9c4dc"); gr.addColorStop(1,"#e3e1d6");
+  g.fillStyle=gr; g.fillRect(0,0,4,256); const t=new THREE.CanvasTexture(cv); t.encoding=THREE.sRGBEncoding; scene.background=t;
+})();
+scene.add(new THREE.HemisphereLight(0xeaf2ff, 0x8a6a4c, 0.72));
+const sun = new THREE.DirectionalLight(0xffe2b8, 1.6);
+sun.position.set(-50, 70, -30); sun.castShadow = true; sun.shadow.mapSize.set(MOBILE?1024:2048,MOBILE?1024:2048);
+{ const r=MOBILE?28:45; Object.assign(sun.shadow.camera,{left:-r,right:r,top:r,bottom:-r,near:1,far:260}); }
+sun.shadow.bias=-0.0006; scene.add(sun); scene.add(sun.target);
+
+/* ---------- Textures (canvas, sampled in world space) ---------- */
+function canvasTex(size, draw){ const cv=document.createElement("canvas"); cv.width=cv.height=size; draw(cv.getContext("2d"),size);
+  const t=new THREE.CanvasTexture(cv); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.encoding=THREE.sRGBEncoding; t.anisotropy=4; return t; }
+const mudTex = canvasTex(256,(g,S)=>{
+  g.fillStyle="#b9a58c"; g.fillRect(0,0,S,S);
+  const C=8, h=S/C;
+  for(let i=0;i<C;i++){
+    const y0=i*h;
+    const gr=g.createLinearGradient(0,y0,0,y0+h); gr.addColorStop(0,"rgba(255,255,255,.16)"); gr.addColorStop(.7,"rgba(0,0,0,0)"); gr.addColorStop(1,"rgba(0,0,0,.28)");
+    g.fillStyle=gr; g.fillRect(0,y0,S,h);
+    g.strokeStyle="rgba(60,40,25,.55)"; g.lineWidth=2.2; g.beginPath();
+    for(let x=0;x<=S;x+=8){ const yy=y0+h-1+Math.sin(x*.05+i*1.7)*1.6; x?g.lineTo(x,yy):g.moveTo(x,yy); } g.stroke();
+  }
+  for(let i=0;i<1600;i++){ g.fillStyle=Math.random()<.5?"rgba(90,65,45,.18)":"rgba(255,245,230,.12)"; g.fillRect(Math.random()*S,Math.random()*S,1+Math.random()*3,1+Math.random()*2); }
+});
+const stoneTex = canvasTex(256,(g,S)=>{
+  g.fillStyle="#e6e1d6"; g.fillRect(0,0,S,S);
+  const cols=["#6e6a62","#8b8478","#a39885","#5c5850","#937f66","#7b7365"];
+  for(let y=6;y<S+10;y+=17) for(let x=(y/17%2)*9;x<S+10;x+=19){
+    g.fillStyle=cols[(Math.random()*cols.length)|0]; g.beginPath();
+    g.ellipse(x+Math.random()*4,y+Math.random()*3,7+Math.random()*3,5.5+Math.random()*2,Math.random(),0,7); g.fill();
+  }
+});
+const gravelTex = canvasTex(256,(g,S)=>{ g.fillStyle="#a49c90"; g.fillRect(0,0,S,S);
+  for(let i=0;i<5000;i++){ const c=150+Math.random()*70|0; g.fillStyle=`rgba(${c},${c-6},${c-14},.7)`; g.fillRect(Math.random()*S,Math.random()*S,2,2); } });
+const dirtTex = canvasTex(256,(g,S)=>{ g.fillStyle="#a88d6c"; g.fillRect(0,0,S,S);
+  for(let i=0;i<2500;i++){ g.fillStyle=Math.random()<.5?"rgba(120,95,70,.35)":"rgba(200,180,150,.25)"; g.beginPath(); g.arc(Math.random()*S,Math.random()*S,1+Math.random()*4,0,7); g.fill(); } });
+const qattTex = canvasTex(128,(g,S)=>{ const c=["#b8392b","#2f6e52","#e3a83a","#2c5d8a","#7a3f8f"]; g.fillStyle="#cfe3d5"; g.fillRect(0,0,S,S);
+  g.fillStyle="#e7a33b"; g.fillRect(0,S*.72,S,S*.28);
+  for(let i=0;i<8;i++){ g.fillStyle=c[i%5]; g.beginPath(); g.moveTo(i*16,S*.72); g.lineTo(i*16+8,S*.5); g.lineTo(i*16+16,S*.72); g.fill(); }
+  g.strokeStyle="#1c130e"; g.lineWidth=3; g.strokeRect(2,2,S-4,S*.5);
+  for(let i=0;i<4;i++){ g.fillStyle=c[(i+2)%5]; g.beginPath(); g.moveTo(16+i*28,S*.42); g.lineTo(30+i*28,S*.12); g.lineTo(44+i*28,S*.42); g.fill(); } });
+
+function worldMat(map, scale, extra){
+  const m = new THREE.MeshStandardMaterial(Object.assign({map, roughness:.97}, extra||{}));
+  m.onBeforeCompile = sh => {
+    sh.uniforms.uvScale = {value: scale};
+    sh.vertexShader = "varying vec3 vWP;\nvarying vec3 vWN;\n" + sh.vertexShader.replace("#include <project_vertex>",
+`#include <project_vertex>
+vec4 wp4 = vec4(transformed,1.0);
+vec3 wn = objectNormal;
+#ifdef USE_INSTANCING
+wp4 = instanceMatrix * wp4; wn = mat3(instanceMatrix) * wn;
+#endif
+wp4 = modelMatrix * wp4; vWP = wp4.xyz; vWN = normalize(mat3(modelMatrix) * wn);`);
+    sh.fragmentShader = "uniform float uvScale;\nvarying vec3 vWP;\nvarying vec3 vWN;\n" + sh.fragmentShader.replace("#include <map_fragment>",
+`#ifdef USE_MAP
+vec3 an = abs(vWN);
+vec2 wuv = an.y > 0.75 ? vWP.xz : (an.x > an.z ? vec2(vWP.z, vWP.y) : vec2(vWP.x, vWP.y));
+vec4 texelColor = texture2D(map, wuv * uvScale);
+texelColor = mapTexelToLinear(texelColor);
+diffuseColor *= texelColor;
+#endif`);
+  };
+  return m;
+}
+const MAT = {
+  mud: worldMat(mudTex,.25,{flatShading:true}),
+  stone: worldMat(stoneTex,.33),
+  gravel: worldMat(gravelTex,.18),
+  dirt: worldMat(dirtTex,.08),
+  white: new THREE.MeshStandardMaterial({color:0xf8f5ee,roughness:.9}),
+  pink: new THREE.MeshStandardMaterial({color:0xc4467c,roughness:.8}),
+  hole: new THREE.MeshStandardMaterial({color:0x22160f,roughness:1}),
+  wood: new THREE.MeshStandardMaterial({color:0x5e3d24,roughness:.85}),
+  plain: new THREE.MeshStandardMaterial({color:0xffffff,roughness:.9}),
+  palm: new THREE.MeshStandardMaterial({color:0x56712f,roughness:1,side:THREE.DoubleSide}),
+};
+
+/* ---------- Instanced collectors ---------- */
+const dummy = new THREE.Object3D(); dummy.rotation.order="YXZ";
+function mk(){ return {m:[],c:[]}; }
+const I = {body:mk(),bodyLow:mk(),base:mk(),ruin:mk(),pink:mk(),white:mk(),hole:mk(),door:mk(),cren:mk(),spout:mk(),plain:mk(),trunk:mk(),frond:mk(),canopy:mk()};
+function put(list,x,y,z,sx,sy,sz,ry,rx,color){ dummy.position.set(x,y,z); dummy.rotation.set(rx||0,ry||0,0); dummy.scale.set(sx,sy,sz); dummy.updateMatrix(); list.m.push(dummy.matrix.clone()); list.c.push(color==null?0xffffff:color); }
+const boxGeo = new THREE.BoxGeometry(1,1,1);
+function taperGeo(t){ const g=new THREE.CylinderGeometry(.7071*t,.7071,1,4,1); g.rotateY(Math.PI/4); g.translate(0,.5,0); return g; }
+const TAPER_HI=.86, TAPER_LO=.95;
+const crenGeo = new THREE.ConeGeometry(.5,1,4); crenGeo.rotateY(Math.PI/4);
+
+/* ---------- Collision & occupancy ---------- */
+const colliders=[]; const occ=[];
+function addCol(x0,x1,z0,z1,top){ colliders.push({x0,x1,z0,z1,top:top||4}); }
+function overlapsOcc(x0,x1,z0,z1,m){ return occ.some(o=>x0<o.x1+m&&x1>o.x0-m&&z0<o.z1+m&&z1>o.z0-m); }
+function rectPathDist(x0,x1,z0,z1){
+  let best=1e9;
+  for(const pl of PATHS) for(let i=0;i<pl.length-1;i++){
+    const [ax,az]=pl[i],[bx,bz]=pl[i+1]; const L=Math.hypot(bx-ax,bz-az); const n=Math.max(2,Math.ceil(L/.7));
+    for(let k=0;k<=n;k++){ const px=ax+(bx-ax)*k/n, pz=az+(bz-az)*k/n;
+      const dx=Math.max(x0-px,0,px-x1), dz=Math.max(z0-pz,0,pz-z1); const d=Math.hypot(dx,dz); if(d<best) best=d; }
+  }
+  return best;
+}
+function nearestPathDir(x,z){
+  let best=1e9, bp=null;
+  for(const pl of PATHS) for(let i=0;i<pl.length-1;i++){ const [ax,az]=pl[i],[bx,bz]=pl[i+1];
+    const vx=bx-ax, vz=bz-az; let t=((x-ax)*vx+(z-az)*vz)/(vx*vx+vz*vz); t=Math.max(0,Math.min(1,t));
+    const px=ax+vx*t, pz=az+vz*t, d=Math.hypot(px-x,pz-z); if(d<best){best=d;bp=[px-x,pz-z];} }
+  return bp;
+}
+function inPoly(x,z,poly){ let c=false; for(let i=0,j=poly.length-1;i<poly.length;j=i++){ const [xi,zi]=poly[i],[xj,zj]=poly[j];
+  if(((zi>z)!==(zj>z))&&(x<(xj-xi)*(z-zi)/(zj-zi)+xi)) c=!c; } return c; }
+
+/* ---------- Building kit ---------- */
+const MUDS=[0xf2d9bf,0xe6c6a8,0xeed8c0,0xd9c0aa,0xf0d6bb,0xe2bb9c,0xf6e2cc];
+function windowOn(x,y,z,face,size){
+  const ry = face<2?0:Math.PI/2; const s=size||1;
+  const out=(face===0||face===2)?1:-1; const ox=face>=2?out:0, oz=face<2?out:0;
+  put(I.pink,x+ox*.05,y,z+oz*.05,.95*s,.95*s,.07,ry);
+  put(I.white,x+ox*.09,y,z+oz*.09,.72*s,.72*s,.07,ry);
+  put(I.hole,x+ox*.12,y,z+oz*.12,.34*s,.38*s,.06,ry);
+}
+function doorOn(x,z,face,baseY){
+  const ry=face<2?0:Math.PI/2; const out=(face===0||face===2)?1:-1; const ox=face>=2?out:0, oz=face<2?out:0;
+  put(I.pink,x+ox*.05,baseY+1.15,z+oz*.05,1.45,2.35,.08,ry);
+  put(I.door,x+ox*.1,baseY+1.05,z+oz*.1,1.05,2.05,.08,ry,0,0x5a3a22);
+}
+function roofTop(x,top,z,tw,td,horn){
+  put(I.white,x,top-.2,z,tw+.12,.46,td+.12);
+  const step=.72;
+  for(let t=-tw/2+step/2;t<=tw/2-step/2+1e-3;t+=step){ put(I.cren,x+t,top+.27,z+td/2+.02,.62,.55,.22); put(I.cren,x+t,top+.27,z-td/2-.02,.62,.55,.22); }
+  for(let t=-td/2+step/2;t<=td/2-step/2+1e-3;t+=step){ put(I.cren,x+tw/2+.02,top+.27,z+t,.22,.55,.62); put(I.cren,x-tw/2-.02,top+.27,z+t,.22,.55,.62); }
+  if(horn) for(const sx of [-1,1]) for(const sz of [-1,1]) put(I.cren,x+sx*(tw/2-.05),top+.55,z+sz*(td/2-.05),.5,1.1,.5);
+}
+const qattPanels=[];
+function house(x,z,w,d,floors,o){
+  o=o||{};
+  const tall = floors>=3, taper = tall?TAPER_HI:TAPER_LO, fh=2.7;
+  const baseH = o.baseH!=null?o.baseH:R(.5,1.5), H=floors*fh, top=baseH+H;
+  const col = o.color||MUDS[(rnd()*MUDS.length)|0];
+  put(I.base,x,baseH/2,z,w+.22,baseH,d+.22);
+  put(tall?I.body:I.bodyLow,x,baseH,z,w,H,d,0,0,col);
+  const half=(u,s)=>.5*s*(1-(1-taper)*u);
+  const doorFace = o.doorFace!=null?o.doorFace:(()=>{ const v=nearestPathDir(x,z); if(!v) return 0; return Math.abs(v[0])>Math.abs(v[1])?(v[0]>0?2:3):(v[1]>0?0:1); })();
+  for(let f=0;f<floors;f++){
+    const yy=baseH+f*fh+1.55, u=(yy-baseH)/H, hw=half(u,w), hd=half(u,d);
+    const nz=Math.max(1,Math.floor(hw*2/1.55)), nx=Math.max(1,Math.floor(hd*2/1.55));
+    for(let face=0;face<4;face++){
+      const along = face<2?nz:nx, span=(face<2?hw:hd)*2;
+      for(let i=0;i<along;i++){
+        if(f===0 && face===doorFace && i===Math.floor(along/2)) continue;
+        if(rnd()<(f===0?.6:.22)) continue;
+        const t=(i-(along-1)/2)*(span/along);
+        if(face===0) windowOn(x+t,yy,z+hd,0); else if(face===1) windowOn(x+t,yy,z-hd,1);
+        else if(face===2) windowOn(x+hw,yy,z+t,2); else windowOn(x-hw,yy,z+t,3);
+      }
+    }
+  }
+  const dh = .5*(doorFace<2?d:w)+.11;
+  if(doorFace===0) doorOn(x,z+dh,0,0); else if(doorFace===1) doorOn(x,z-dh,1,0); else if(doorFace===2) doorOn(x+dh,z,2,0); else doorOn(x-dh,z,3,0);
+  roofTop(x,top,z,w*taper,d*taper,tall||o.horn);
+  if(tall && rnd()<.7){
+    const f=(rnd()*4)|0, hw=.5*w*taper, hd=.5*d*taper;
+    if(f===0) put(I.spout,x+R(-hw/2,hw/2),top-.5,z+hd+.4,.12,.12,.9); else if(f===1) put(I.spout,x+R(-hw/2,hw/2),top-.5,z-hd-.4,.12,.12,.9);
+    else if(f===2) put(I.spout,x+hw+.4,top-.5,z+R(-hd/2,hd/2),.9,.12,.12); else put(I.spout,x-hw-.4,top-.5,z+R(-hd/2,hd/2),.9,.12,.12);
+  }
+  if(o.qatt) qattPanels.push({x,z,face:doorFace,w,d});
+  const pad=.12; addCol(x-w/2-pad,x+w/2+pad,z-d/2-pad,z+d/2+pad,top);
+  occ.push({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2});
+  return {top,doorFace,x,z,w,d,baseH,taper,H,floors};
+}
+function ruin(x,z,w,d){
+  const col=MUDS[(rnd()*MUDS.length)|0]; const sides=[0,1,2,3].filter(()=>rnd()<.7); if(!sides.length) sides.push(0);
+  put(I.base,x,.25,z,w+.2,.5,d+.2);
+  for(const s of sides){
+    const h=R(1.2,4.2), t=.6, segs=(rnd()*3|0)+1;
+    for(let k=0;k<segs;k++){
+      const hh=h*(1-k*.28), len=(s<2?w:d)*(1-k*.25)*R(.7,1), off=R(-.3,.3)*(s<2?w:d)*.25;
+      if(s<2){ const zz=z+(s?-1:1)*(d/2-t/2); put(I.ruin,x+off,hh/2,zz,len,hh,t,0,0,col); addCol(x+off-len/2,x+off+len/2,zz-t/2,zz+t/2,hh); }
+      else { const xx=x+(s===2?1:-1)*(w/2-t/2); put(I.ruin,xx,hh/2,z+off,t,hh,len,0,0,col); addCol(xx-t/2,xx+t/2,z+off-len/2,z+off+len/2,hh); }
+    }
+  }
+  occ.push({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2});
+}
+function windowAt(x,y,z,a){
+  const nx=Math.sin(a), nz=Math.cos(a);
+  put(I.pink,x+nx*.05,y,z+nz*.05,.95,.95,.07,a); put(I.white,x+nx*.09,y,z+nz*.09,.72,.72,.07,a); put(I.hole,x+nx*.12,y,z+nz*.12,.34,.38,.06,a);
+}
+// covered passage (سباط) spanning an alley
+function sabat(px,pz,dirx,dirz,big){
+  const a=Math.atan2(dirx,dirz); const across=big?5.2:4.6, depth=big?3.4:2.8, y0=big?3:2.6, hh=big?3:2.4;
+  const g=new THREE.Group(); g.position.set(px,0,pz); g.rotation.y=a;
+  const room=new THREE.Mesh(boxGeo,MAT.mud); room.scale.set(across,hh,depth); room.position.y=y0+hh/2; g.add(room);
+  const ceil=new THREE.Mesh(boxGeo,new THREE.MeshStandardMaterial({color:0x2a1b12,roughness:1})); ceil.scale.set(across-.9,.08,depth-.2); ceil.position.y=y0+.02; g.add(ceil);
+  for(const s of [-1,1]){ const p=new THREE.Mesh(boxGeo,MAT.mud); p.scale.set(.9,y0,depth); p.position.set(s*(across/2-.45),y0/2,0); g.add(p);
+    const wx=Math.cos(a)*s*(across/2-.45), wz=-Math.sin(a)*s*(across/2-.45);
+    addCol(px+wx-.8,px+wx+.8,pz+wz-.8,pz+wz+.8,y0+hh); }
+  const cap=new THREE.Mesh(boxGeo,MAT.white); cap.scale.set(across+.1,.35,depth+.1); cap.position.y=y0+hh-.1; g.add(cap);
+  g.traverse(o=>{ if(o.isMesh){o.castShadow=o.receiveShadow=true;} });
+  scene.add(g);
+  for(const s of [-1,1]){ const wx=px+Math.sin(a)*s*(depth/2), wz=pz+Math.cos(a)*s*(depth/2); windowAt(wx,y0+hh/2,wz,a+(s>0?0:Math.PI)); }
+}
+
+/* ---------- Ground ---------- */
+function hillH(x,z){ const dx=Math.max(0,Math.abs(x)-85), dz=Math.max(0,Math.abs(z)-75); const r=Math.hypot(dx,dz); if(r<=0) return 0;
+  const k=Math.min(1,r/80); return k*k*(14+8*Math.sin(x*.03)*Math.cos(z*.035)+5*Math.sin(x*.08+z*.05)); }
+(function(){
+  const geo=new THREE.PlaneGeometry(900,900,150,150); geo.rotateX(-Math.PI/2);
+  const p=geo.attributes.position; for(let i=0;i<p.count;i++) p.setY(i,hillH(p.getX(i),p.getZ(i))); geo.computeVertexNormals();
+  const gnd=new THREE.Mesh(geo,MAT.dirt); gnd.receiveShadow=true; scene.add(gnd);
+  const shp=new THREE.Shape(FOOT.map(q=>new THREE.Vector2(q[0],-q[1])));
+  const vg=new THREE.ShapeGeometry(shp); vg.rotateX(-Math.PI/2);
+  const v=new THREE.Mesh(vg,MAT.gravel); v.position.y=.02; v.receiveShadow=true; scene.add(v);
+  if(HD) return;
+  const road=new THREE.Mesh(new THREE.PlaneGeometry(220,10),new THREE.MeshStandardMaterial({color:0x4b4b4e,roughness:.9}));
+  road.rotation.x=-Math.PI/2; road.position.set(0,.03,-58.5); road.receiveShadow=true; scene.add(road);
+  for(let x=-90;x<100;x+=6){ const m=new THREE.Mesh(boxGeo,MAT.white); m.scale.set(2.6,.02,.18); m.position.set(x,.05,-58.5); scene.add(m); }
+  const curb=new THREE.Mesh(boxGeo,new THREE.MeshStandardMaterial({color:0xbdb6aa})); curb.scale.set(220,.18,1.6); curb.position.set(0,.09,-52.8); curb.receiveShadow=true; scene.add(curb);
+})();
+if(!HD){
+const gaps=[-18.7,-5.5,18.7];
+const GAP=4.5;
+for(let x=-46;x<=30;x+=6.2){
+  if(gaps.some(g=>Math.abs(g-x)<GAP)) continue;
+  const h=R(3.6,4.6), c=[0xe7e1d4,0xdcd3c3,0xeee9df][(rnd()*3)|0];
+  put(I.plain,x,h/2,-49.6,5.6,h,4.6,0,0,c);
+  put(I.plain,x,1.4,-47.25,4.4,2.6,.1,0,0,0x8e9399);
+  put(I.plain,x,h-.45,-47.25,5.2,.6,.12,0,0,[0x2c5d8a,0x2f6e52,0xb8392b][(rnd()*3)|0]);
+  addCol(x-2.8,x+2.8,-51.9,-47.3,h); occ.push({x0:x-2.8,x1:x+2.8,z0:-51.9,z1:-47.3});
+}
+[[34,-44,10,7,7],[46,-42,9,8,6],[58,-40,10,7,8],[40,-33,7,6,4],[54,-30,8,7,5],[66,-30,7,8,4]].forEach(b=>{
+  put(I.plain,b[0],b[4]/2,b[1],b[2],b[4],b[3],0,0,0xe9e6df);
+  for(let y=1.8;y<b[4]-.5;y+=3) put(I.plain,b[0],y,b[1]+b[3]/2+.02,b[2]*.7,.9,.06,0,0,0x5d7286);
+  addCol(b[0]-b[2]/2,b[0]+b[2]/2,b[1]-b[3]/2,b[1]+b[3]/2,b[4]); occ.push({x0:b[0]-b[2]/2,x1:b[0]+b[2]/2,z0:b[1]-b[3]/2,z1:b[1]+b[3]/2});
+});
+}
+
+/* ---------- Landmarks from the coding map ---------- */
+const LABELS=[];
+/* ---------- Building name signs: a big board on the facade + a plaque over the door ---------- */
+const SIGNS=[];
+function signAt(x,z,face,dist,y,width,text,big){
+  const p= face===0?[x,y,z+dist]: face===1?[x,y,z-dist]: face===2?[x+dist,y,z]:[x-dist,y,z];
+  const ry= face===0?0: face===1?Math.PI: face===2?Math.PI/2:-Math.PI/2;
+  SIGNS.push({p,ry,width,text,big});
+}
+function signFor(b,text){
+  const {x,z,w,d,doorFace:f,baseH,taper,H,floors}=b, span=f<2?w:d, depth=f<2?d:w;
+  const half=u=>.5*depth*(1-(1-taper)*Math.min(1,Math.max(0,u)));
+  const dy=2.62, dist=Math.max(.5*depth+.11, half((dy-baseH)/H)+.06)+.03;
+  signAt(x,z,f,dist,dy,Math.min(2.2,span*.55),text,false);
+  if(floors>=2){
+    const fy=baseH+2.9+2.7*(floors-2);
+    signAt(x,z,f,half((fy-baseH)/H)+.1,fy,Math.min(4.6,span*taper*.85),text,true);
+  }
+}
+function buildSign(sg){
+  const cv=document.createElement("canvas"); cv.width=1024; cv.height=256; const g=cv.getContext("2d");
+  const gr=g.createLinearGradient(0,0,0,256); gr.addColorStop(0,"#76492a"); gr.addColorStop(1,"#5a361e");
+  g.fillStyle=gr; g.fillRect(0,0,1024,256);
+  g.strokeStyle="rgba(40,22,10,.35)"; g.lineWidth=2; for(let y=14;y<256;y+=22){ g.beginPath(); g.moveTo(0,y+Math.sin(y)*3); g.bezierCurveTo(340,y+6,680,y-6,1024,y+Math.cos(y)*3); g.stroke(); }
+  g.strokeStyle="#c89b45"; g.lineWidth=12; g.strokeRect(14,14,996,228);
+  g.fillStyle="#f6f1e7"; g.textAlign="center"; g.textBaseline="middle"; g.direction="rtl";
+  let fs=130; g.font=`700 ${fs}px "Reem Kufi", Tahoma, sans-serif`;
+  while(g.measureText(sg.text).width>900&&fs>50){ fs-=6; g.font=`700 ${fs}px "Reem Kufi", Tahoma, sans-serif`; }
+  g.fillText(sg.text,512,136);
+  const tex=new THREE.CanvasTexture(cv); tex.encoding=THREE.sRGBEncoding; tex.anisotropy=4;
+  const W=sg.width, Hh=W/4;
+  const grp=new THREE.Group(); grp.position.set(sg.p[0],sg.p[1],sg.p[2]); grp.rotation.y=sg.ry;
+  const back=new THREE.Mesh(boxGeo,MAT.wood); back.scale.set(W+.08,Hh+.08,.06); back.position.z=-.02; grp.add(back);
+  const face=new THREE.Mesh(new THREE.PlaneGeometry(W,Hh),new THREE.MeshStandardMaterial({map:tex,emissiveMap:tex,emissive:new THREE.Color(0x777777),roughness:.85}));
+  face.position.z=.015; grp.add(face);
+  if(sg.big){ for(const sx of [-1,1]){ const peg=new THREE.Mesh(boxGeo,MAT.wood); peg.scale.set(.08,.08,.25); peg.position.set(sx*W*.4,Hh/2+.02,-.1); grp.add(peg); } }
+  scene.add(grp);
+}
+function label(t,x,y,z){ LABELS.push([t,x,y,z]); }
+if(!HD){
+house(-24.2,-46,5,5,4,{color:0xeed8c0,doorFace:0}); label("البوابة الشمالية",-18.7,9.5,-46.5);
+sabat(-18.9,-46.6,-.2,1,true);
+{ const a=Math.atan2(-.2,1); for(const s2 of [-1,1]) SIGNS.push({p:[-18.9+Math.sin(a)*s2*1.78,3.5,-46.6+Math.cos(a)*s2*1.78],ry:a+(s2>0?0:Math.PI),width:3.4,text:"البوابة الشمالية",big:true}); }
+signFor(house(-34.5,-37,6,5,4,{doorFace:2}),"الجمارك"); label("الجمارك",-34.5,15.5,-37);
+signFor(house(-38,-26.5,8,6,2,{doorFace:2,horn:true}),"المدرسة الثانية"); label("المدرسة الثانية",-38,9,-26.5);
+(function(){
+  const x=-22,z=-25.5,w=10,d=7, sh=2.7, mh=2.3;
+  put(I.base,x,sh/2,z,w,sh,d);
+  put(I.ruin,x,sh+mh/2,z,w-.25,mh,d-.25,0,0,0xf0dcc0);
+  roofTop(x,sh+mh,z,w-.25,d-.25,true);
+  for(let i=-1;i<=1;i++){ windowOn(x+i*3,sh+1.1,z+d/2-.1,0,.9); windowOn(x+i*3,sh+1.1,z-d/2+.1,1,.9); }
+  doorOn(x+w/2+.05,z+1.5,2,0); windowOn(x+w/2-.1,sh+1.1,z-1.5,2,.9);
+  signAt(x,z+1.5,2,w/2+.12,2.62,2.0,"المسجد التاريخي",false); signAt(x+1.2,z,0,d/2+.1,1.95,4.2,"المسجد التاريخي",true);
+  for(let i=-2;i<=2;i++) put(I.spout,x+i*2.2,sh+mh-.55,z+d/2+.35,.14,.14,.8);
+  const plq=new THREE.Mesh(boxGeo,MAT.white); plq.scale.set(1.3,.8,.05); plq.position.set(x-2.2,sh+.6,z+d/2+.03); scene.add(plq);
+  addCol(x-w/2,x+w/2,z-d/2,z+d/2,sh+mh); occ.push({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2});
+  label("المسجد التاريخي",x,8.6,z);
+})();
+signFor(house(-7,-28,6,6,5,{doorFace:0,qatt:true}),"مبنى الإمارة"); label("مبنى الإمارة",-7,17.5,-28);
+house(-11,-13.2,7,6,2,{baseH:2.4,doorFace:3,horn:true}); label("بيت حجري طيني",-11,9.5,-13.2);
+signFor(house(24,-32,9,6,2,{doorFace:3,horn:true}),"المدرسة الأولى"); label("المدرسة الأولى",24,9,-32);
+signFor(house(33.5,-24.5,6,6,5,{doorFace:3}),"مبنى الشرطة"); label("مبنى الشرطة",33.5,17.5,-24.5);
+signFor(house(-33.5,21,9,5,1,{baseH:.4,doorFace:2,qatt:true}),"المستوصف الأول"); label("المستوصف الأول",-33.5,6,21);
+signFor(house(8.5,19.4,7,7,6,{doorFace:1,color:0xe8c9a6}),"قصر آل زابن"); house(1.2,20.8,5,5,4,{doorFace:1});
+label("قصر آل زابن",6,21.5,19.4);
+(function(){
+  const flag=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1),new THREE.MeshStandardMaterial({color:0x1f7a3a,side:THREE.DoubleSide})); flag.position.set(9.4,22.9,19.4); scene.add(flag);
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,3,6),MAT.white); pole.position.set(8.6,22.3,19.4); scene.add(pole);
+})();
+signFor(house(-48,32,7,7,5,{doorFace:2}),"قصر آل دوبان"); label("قصر آل دوبان",-48,18,32);
+(function(){
+  const [x,z]=L1;
+  const drum=new THREE.Mesh(new THREE.CylinderGeometry(1.75,1.85,1.05,28),MAT.mud); drum.position.set(x,.52,z); drum.castShadow=drum.receiveShadow=true; scene.add(drum);
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(1.6,.14,8,28),new THREE.MeshStandardMaterial({color:0xd9c7aa,roughness:.95})); rim.rotation.x=Math.PI/2; rim.position.set(x,1.06,z); scene.add(rim);
+  const gcv=document.createElement("canvas"); gcv.width=gcv.height=128; const gg=gcv.getContext("2d"); gg.fillStyle="#1b1b1b"; gg.fillRect(0,0,128,128);
+  gg.strokeStyle="#4a4a4a"; gg.lineWidth=3; for(let i=0;i<128;i+=10){ gg.beginPath(); gg.moveTo(i,0); gg.lineTo(i,128); gg.stroke(); }
+  const grate=new THREE.Mesh(new THREE.CircleGeometry(1.5,28),new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(gcv),roughness:.6,metalness:.4}));
+  grate.rotation.x=-Math.PI/2; grate.position.set(x,1.07,z); scene.add(grate);
+  const p1=new THREE.Mesh(new THREE.CylinderGeometry(.11,.14,3.4,7),MAT.wood); p1.position.set(x-2.1,1.7,z+.3); p1.rotation.z=.05; scene.add(p1);
+  const fork=new THREE.Mesh(new THREE.CylinderGeometry(.06,.08,.8,6),MAT.wood); fork.position.set(x-1.95,3.55,z+.3); fork.rotation.z=-.5; scene.add(fork);
+  const p2=new THREE.Mesh(new THREE.CylinderGeometry(.09,.12,2.6,7),MAT.wood); p2.position.set(x+1.9,1.3,z-.6); scene.add(p2);
+  const bar=new THREE.Mesh(new THREE.CylinderGeometry(.07,.08,4.4,7),MAT.wood); bar.position.set(x-.1,3.05,z-.15); bar.rotation.z=Math.PI/2+.17; bar.rotation.y=.2; scene.add(bar);
+  [p1,p2,bar,fork].forEach(m=>m.castShadow=true);
+  addCol(x-1.95,x+1.95,z-1.95,z+1.95,1.1); addCol(x-2.3,x-1.9,z+.1,z+.5,3); occ.push({x0:x-8,x1:x+8,z0:z-7,z1:z+7});
+  label("البئر",x,5.6,z);
+})();
+// the heritage square: the town's centre for celebrations — round green lawn, small stands on its north side
+(function(){
+  const [x,z]=L3;
+  const lawnTex=canvasTex(256,(g,S)=>{ g.fillStyle="#5c8a35"; g.fillRect(0,0,S,S);
+    for(let i=0;i<9000;i++){ const c=Math.random(); g.fillStyle=c<.5?"rgba(70,115,40,.6)":"rgba(120,165,70,.5)"; g.fillRect(Math.random()*S,Math.random()*S,1,2+Math.random()*3); } });
+  lawnTex.repeat.set(5,5);
+  const lawn=new THREE.Mesh(new THREE.CircleGeometry(7.6,64),new THREE.MeshStandardMaterial({map:lawnTex,roughness:1}));
+  lawn.rotation.x=-Math.PI/2; lawn.position.set(x,.06,z); lawn.receiveShadow=true; scene.add(lawn);
+  // stone kerb around the lawn (low, walkable)
+  const kerb=new THREE.Mesh(new THREE.TorusGeometry(7.75,.18,6,72),MAT.white); kerb.rotation.x=Math.PI/2; kerb.position.set(x,.1,z); kerb.scale.z=.6; scene.add(kerb);
+  // gravel walkway ring
+  const walk=new THREE.Mesh(new THREE.RingGeometry(7.9,9.6,64),new THREE.MeshStandardMaterial({map:gravelTex,color:0xe6dccb,roughness:1}));
+  walk.rotation.x=-Math.PI/2; walk.position.set(x,.04,z); walk.receiveShadow=true; scene.add(walk);
+  // stands: stepped seating in an arc facing the lawn, on the north side
+  const a0=Math.PI/2-1.25, a1=Math.PI/2+1.25, tiers=4, rIn=9.8, step=.95, th=.48;
+  for(let i=0;i<tiers;i++){
+    const r0=rIn+i*step, r1=rIn+tiers*step+.4;
+    const sh=new THREE.Shape(); sh.absarc(0,0,r1,a0,a1,false); sh.absarc(0,0,r0,a1,a0,true);
+    const g=new THREE.ExtrudeGeometry(sh,{depth:th*(i+1),bevelEnabled:false,curveSegments:40}); g.rotateX(-Math.PI/2);
+    const m=new THREE.Mesh(g,i%2?MAT.stone:new THREE.MeshStandardMaterial({color:0xe9e0cf,roughness:.95}));
+    m.position.set(x,0,z); m.castShadow=m.receiveShadow=true; scene.add(m);
+  }
+  for(let k=0;k<=12;k++){ const ang=a0+(a1-a0)*k/12, rc=rIn+tiers*step*.55, cx2=x+Math.cos(ang)*rc, cz2=z-Math.sin(ang)*rc; addCol(cx2-1.6,cx2+1.6,cz2-1.6,cz2+1.6,tiers*th); }
+  occ.push({x0:x-15,x1:x+15,z0:z-15,z1:z+11});
+  label("الساحة التراثية",x,5,z);
+})();
+occ.push({x0:30,x1:47,z0:0,z1:14});
+occ.push({x0:2,x1:10,z0:7,z1:14.5});
+ITEMS.forEach(it=>occ.push({x0:it.pos[0]-2.2,x1:it.pos[0]+2.2,z0:it.pos[1]-2.2,z1:it.pos[1]+2.2}));
+Object.values(NPCS).forEach(n=>{ [n.pos,n.end].forEach(p=>{ if(p) occ.push({x0:p[0]-2.4,x1:p[0]+2.4,z0:p[1]-2.4,z1:p[1]+2.4}); }); });
+occ.push({x0:-11.4,x1:-7.8,z0:-45,z1:-42.2});
+[[0,4],[0,9],[2,2],[1,1],[4,1],[5,1]].forEach(([pi,si])=>{
+  const pl=PATHS[pi]; const a=pl[si], b=pl[si+1]; const mx=(a[0]+b[0])/2, mz=(a[1]+b[1])/2; const L=Math.hypot(b[0]-a[0],b[1]-a[1]);
+  if(ITEMS.some(it=>Math.hypot(it.pos[0]-mx,it.pos[1]-mz)<4)) return;
+  if(overlapsOcc(mx-1,mx+1,mz-1,mz+1,0)) return;
+  sabat(mx,mz,(b[0]-a[0])/L,(b[1]-a[1])/L,false);
+  occ.push({x0:mx-2.6,x1:mx+2.6,z0:mz-2.6,z1:mz+2.6});
+});
+
+/* ---------- Dense village fill ---------- */
+const center=[-2,-8];
+for(let gx=-62;gx<=48;gx+=6.1){
+  for(let gz=-46;gz<=50;gz+=6.1){
+    const x=gx+R(-1.1,1.1), z=gz+R(-1.1,1.1);
+    if(!inPoly(x,z,FOOT)) continue;
+    let w=R(3.8,5.9), d=R(3.8,5.9), ok=false;
+    for(let k=0;k<3;k++){
+      if(rectPathDist(x-w/2,x+w/2,z-d/2,z+d/2)>=1.55 && !overlapsOcc(x-w/2,x+w/2,z-d/2,z+d/2,.55)){ ok=true; break; }
+      w-=.8; d-=.8; if(w<2.8) break;
+    }
+    if(!ok) continue;
+    const r=rnd(), dc=Math.hypot(x-center[0],z-center[1]);
+    if(r<.16) ruin(x,z,w,d);
+    else if(r<.36 || dc>48) house(x,z,w,d,(rnd()<.5?1:2),{});
+    else house(x,z,w,d,Math.min(6,Math.max(3,Math.round(R(3,6.4)-dc/30))),{qatt:rnd()<.05});
+  }
+}
+
+/* ---------- Farms (F1–F3), palms, trees ---------- */
+for(let x=-6;x<=34;x+=8.5) for(let z=31;z<=58;z+=7){
+  if(Math.hypot(x-L3[0],z-L3[1])<15) continue;
+  if(overlapsOcc(x-3.8,x+3.8,z-3,z+3,0)) continue;
+  put(I.plain,x,.06,z,7.6,.12,6.1,0,0,[0x5f8a3a,0x6f9a45,0x4f7d34,0x7a9a4a][(rnd()*4)|0]);
+  put(I.ruin,x,.35,z-3.3,8.4,.7,.5,0,0,0xd9c0aa);
+}
+for(let x=-58;x<=-16;x+=8.5) for(let z=52;z<=60;z+=7){ put(I.plain,x,.06,z,7.6,.12,6.1,0,0,[0x5f8a3a,0x6f9a45,0x4f7d34][(rnd()*3)|0]); put(I.ruin,x,.35,z-3.3,8.4,.7,.5,0,0,0xd9c0aa); }
+label("المزارع",14,5,44);
+}
+const trunkGeo=new THREE.CylinderGeometry(.16,.26,1,7); trunkGeo.translate(0,.5,0);
+const frondGeo=new THREE.BoxGeometry(.7,.04,3.3); frondGeo.translate(0,0,1.65);
+function palm(x,z){ const h=R(6,10), lean=R(-.12,.12);
+  put(I.trunk,x,0,z,1,h,1,0,lean,0x7a6248);
+  const ty=h*Math.cos(lean), tz=z+h*Math.sin(lean);
+  for(let k=0;k<9;k++) put(I.frond,x,ty,tz,1,1,1,k*Math.PI*2/9+R(-.2,.2),R(.25,.75),0xffffff);
+  addCol(x-.3,x+.3,z-.3,z+.3,h);
+}
+const canopyGeo=new THREE.IcosahedronGeometry(1,0);
+function tree(x,z,s){ put(I.trunk,x,0,z,.9*s,2.2*s,.9*s,0,0,0x6a5038); put(I.canopy,x,2.4*s,z,2.1*s,1.2*s,2.1*s,R(0,3),0,0x5d6e33); addCol(x-.35,x+.35,z-.35,z+.35,3*s); }
+if(!HD){
+for(let i=0;i<(MOBILE?22:46);i++) palm(R(-82,-58),R(-44,46));
+for(let i=0;i<14;i++){ const x=R(-10,60), z=R(32,62); if(Math.hypot(x-L3[0],z-L3[1])<10) continue; palm(x,z); }
+[[2,-18],[16,-24],[-16,-34],[-30,0],[14,4],[-40,10],[36,-8],[40,16],[-4,30],[22,30],[-20,40],[-52,-30],[60,8]].forEach(t=>tree(t[0],t[1],R(.9,1.4)));
+} else buildHaydan();
+
+function buildHaydan(){
+  if(HD) MAT.pink.color.set(0xd9cfbf); // plain plaster window frames until the residents' photos say otherwise
+  const STONE_MUDS=[0xcdb79c,0xbfa98e,0xd4c0a5,0xb59d82,0xc8b294];
+  const stops=ITEMS.map(it=>it.pos);
+  const nearStop=(x,z,r)=>stops.some(p=>Math.hypot(p[0]-x,p[1]-z)<r);
+  ITEMS.forEach(it=>occ.push({x0:it.pos[0]-2.6,x1:it.pos[0]+2.6,z0:it.pos[1]-2.6,z1:it.pos[1]+2.6}));
+  Object.values(NPCS).forEach(n=>occ.push({x0:n.pos[0]-2.4,x1:n.pos[0]+2.4,z0:n.pos[1]-2.4,z1:n.pos[1]+2.4}));
+  // the road (R1): asphalt along the south
+  const roadMat=new THREE.MeshStandardMaterial({color:0x4b4b4e,roughness:.9});
+  { // one smooth ribbon along the road's centre line
+    const pts=[]; for(let i=0;i<HAYDAN_ROAD.length-1;i++){ const [ax,az]=HAYDAN_ROAD[i],[bx,bz]=HAYDAN_ROAD[i+1]; const n=Math.ceil(Math.hypot(bx-ax,bz-az)/3);
+      for(let k=0;k<n;k++) pts.push([ax+(bx-ax)*k/n, az+(bz-az)*k/n]); } pts.push(HAYDAN_ROAD[HAYDAN_ROAD.length-1]);
+    for(let it=0;it<3;it++) for(let i=1;i<pts.length-1;i++) pts[i]=[(pts[i-1][0]+2*pts[i][0]+pts[i+1][0])/4,(pts[i-1][1]+2*pts[i][1]+pts[i+1][1])/4];
+    const pos=[], idx=[];
+    pts.forEach((p,i)=>{ const a=pts[Math.max(0,i-1)], b=pts[Math.min(pts.length-1,i+1)], dx=b[0]-a[0], dz=b[1]-a[1], L=Math.hypot(dx,dz)||1, nx=-dz/L*3.5, nz=dx/L*3.5;
+      pos.push(p[0]+nx,.04,p[1]+nz, p[0]-nx,.04,p[1]-nz); if(i){ const q=(i-1)*2; idx.push(q,q+2,q+1, q+1,q+2,q+3); } });
+    const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx); g.computeVertexNormals();
+    const m=new THREE.Mesh(g,roadMat); m.material.side=THREE.DoubleSide; m.receiveShadow=true; scene.add(m); }
+  // the valley (V1): a pale sandy bed with scattered stones along the north
+  const bed=new THREE.Mesh(new THREE.PlaneGeometry(190,15),new THREE.MeshStandardMaterial({color:0xcfbf9d,roughness:1})); bed.rotation.x=-Math.PI/2; bed.position.set(-10,.025,-41); bed.receiveShadow=true; scene.add(bed);
+  for(let i=0;i<(MOBILE?40:90);i++){ const x=R(-100,85), z=R(-48,-34); if(nearStop(x,z,3)) continue; const s=R(.3,1.1); put(I.base,x,s*.35,z,s*R(1,1.6),s*.7,s*R(.8,1.3),R(0,3)); }
+  label("وادي العرين",-40,5,-42);
+  // palms and trees (F1) on the valley bank
+  for(let i=0;i<(MOBILE?34:70);i++){ const x=R(-85,12), z=R(-31,-11); if(nearStop(x,z,3.2)) continue; palm(x,z); }
+  for(let i=0;i<(MOBILE?12:26);i++){ const x=R(-85,10), z=R(-30,-12); if(nearStop(x,z,3.2)) continue; tree(x,z,R(1,1.6)); }
+  label("النخيل والأشجار",-45,11,-22);
+  // stone-walled farms (F2) between the palms and the road
+  const FARM=[0x6f8a3c,0x7c9446,0x8a8a4c,0xa08a5c,0x627f36];
+  for(let x=-62;x<=6;x+=9.5) for(let z=-7;z<=15;z+=8.5){
+    const roadZ=26+(x+26)*(14/48); if(z+4>Math.min(roadZ-4,22)) continue;
+    put(I.plain,x,.05,z,8.2,.1,7.2,0,0,FARM[(rnd()*FARM.length)|0]);
+    const hh=R(.7,1.1);
+    put(I.base,x,hh/2,z-3.9,9.2,hh,.55); put(I.base,x,hh/2,z+3.9,9.2,hh,.55);
+    put(I.base,x-4.45,hh/2,z,.55,hh,7.2); if(rnd()<.6) put(I.base,x+4.45,hh/2,z-1.8,.55,hh,3.6);
+  }
+  label("المزارع المسوّرة بالحجر",-28,4.5,6);
+  // the village wall (W1): follows the houses, some parts standing and some worn down; gaps where the lanes pass
+  const C=[48,-3]; const ring=HAYDAN_FOOT.map(([x,z])=>{ const dx=x-C[0], dz=z-C[1], L=Math.hypot(dx,dz); return [x+dx/L*4,z+dz/L*4]; });
+  for(let i=0;i<ring.length;i++){
+    const [ax,az]=ring[i],[bx,bz]=ring[(i+1)%ring.length], L=Math.hypot(bx-ax,bz-az), n=Math.ceil(L/1.6), ang=Math.atan2(bx-ax,bz-az);
+    for(let k=0;k<n;k++){ const t=(k+.5)/n, x=ax+(bx-ax)*t, z=az+(bz-az)*t;
+      if(rectPathDist(x-.5,x+.5,z-.5,z+.5)<2.4) continue; // an opening for the lane
+      if(nearStop(x,z,2.8)) continue;
+      const worn=rnd()<.22; const h=worn?R(.5,1.2):R(2,3.1);
+      put(I.base,x,h/2,z,.85,h,L/n+.05,ang); if(h>.9) addCol(x-.6,x+.6,z-.6,z+.6,h);
+    }
+  }
+  label("سور حيدان",6,6,-16);
+  // the mosque of Ibn Ajla (M3), south of the houses by the road
+  (function(){ const x=54,z=34,w=7.4,d=5, sh=2.6, mh=2.2;
+    put(I.base,x,sh/2,z,w,sh,d); put(I.ruin,x,sh+mh/2,z,w-.25,mh,d-.25,0,0,0xe7d6bd); roofTop(x,sh+mh,z,w-.25,d-.25,true);
+    doorOn(x,z+d/2+.05,0,0); windowOn(x-2.4,sh+1.1,z+d/2-.1,0,.9); windowOn(x+2.4,sh+1.1,z+d/2-.1,0,.9);
+    windowOn(x-w/2+.1,sh+1.1,z,3,.9); windowOn(x+w/2-.1,sh+1.1,z,2,.9);
+    signAt(x,z,0,d/2+.12,2.62,2.2,"مسجد بن عجلة",false); signAt(x,z,0,d/2+.1,sh+mh-.7,4,"مسجد بن عجلة",true);
+    addCol(x-w/2,x+w/2,z-d/2,z+d/2,sh+mh); occ.push({x0:x-w/2-1,x1:x+w/2+1,z0:z-d/2-1,z1:z+d/2+1});
+    label("مسجد بن عجلة",x,9,z); })();
+  // the houses (B): stone bases, mud upper floors, many old ones fallen
+  for(let gx=10;gx<=88;gx+=5.6) for(let gz=-34;gz<=28;gz+=5.6){
+    const x=gx+R(-1,1), z=gz+R(-1,1); if(!inPoly(x,z,HAYDAN_FOOT)) continue;
+    let w=R(3.6,5.4), d=R(3.6,5.4), ok=false;
+    for(let k=0;k<3;k++){ if(rectPathDist(x-w/2,x+w/2,z-d/2,z+d/2)>=1.4&&!overlapsOcc(x-w/2,x+w/2,z-d/2,z+d/2,.5)){ ok=true; break; } w-=.7; d-=.7; if(w<2.8) break; }
+    if(!ok) continue;
+    const r=rnd(), col=STONE_MUDS[(rnd()*STONE_MUDS.length)|0];
+    if(r<.26) ruin(x,z,w,d);
+    else house(x,z,w,d,r<.62?1:(r<.9?2:3),{color:col,baseH:R(1.1,2.4)});
+  }
+  label("بيوت القرية",50,14,-8);
+  label("قرية حيدان التراثية",30,22,-20);
+}
+
+function massif(x,z,rb,rt,h,sd){
+  const geo=new THREE.CylinderGeometry(rt,rb,h,64,10,true); const p=geo.attributes.position, col=[];
+  for(let i=0;i<p.count;i++){ const vx=p.getX(i),vy=p.getY(i),vz=p.getZ(i),a=Math.atan2(vz,vx);
+    const n=1+.14*Math.sin(a*5+sd)+.08*Math.sin(a*11+sd*2)+.05*Math.sin(a*23+vy*.3); p.setX(i,vx*n); p.setZ(i,vz*n);
+    const band=Math.floor((vy+h/2)/(h/11))%2; const c=new THREE.Color(band?0x6f655b:0x7e7266); col.push(c.r,c.g,c.b); }
+  geo.setAttribute("color",new THREE.Float32BufferAttribute(col,3)); geo.computeVertexNormals();
+  const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,flatShading:true})); m.position.set(x,h/2-3,z); scene.add(m);
+  const t=new THREE.Mesh(new THREE.CircleGeometry(rt*1.1,64),new THREE.MeshStandardMaterial({color:0x6b6656,roughness:1})); t.rotation.x=-Math.PI/2; t.position.set(x,h-3,z); scene.add(t);
+}
+massif(-260,-240,110,60,62,2); massif(320,-120,90,50,48,3); massif(-300,160,80,40,38,4); massif(150,320,120,70,44,5);
+// Jabal Shithath (جبل شثاث), north of the old town — modelled from the team's photos:
+// broad cone, flat summit, a dark cap of vertical basalt columns, reddish strata on the slopes
+function shathath(cx,cz){
+  const H=200, SEG=220, RINGS=72, base=-4;
+  const prof=u=> u<.55 ? 200+(120-200)*Math.pow(u/.55,.7)
+               : u<.80 ? 120+(78-120)*((u-.55)/.25)
+               : u<.95 ? 78+(66-78)*((u-.80)/.15)
+               : 66*(1-(u-.95)/.05);
+  const pos=[], col=[], idx=[]; const c=new THREE.Color(); const HAZE=new THREE.Color(0xcfd6d6);
+  const CAP=new THREE.Color(0x67625c), TOP=new THREE.Color(0x77736c), SLOPE=new THREE.Color(0x938779), LOW=new THREE.Color(0xa08b74), RED=new THREE.Color(0xa37c60);
+  const bump=(a,ac,w)=>{ let d=Math.atan2(Math.sin(a-ac),Math.cos(a-ac)); return Math.exp(-(d/w)*(d/w)); };
+  for(let i=0;i<=RINGS;i++){
+    const u=i/RINGS;
+    for(let j=0;j<SEG;j++){
+      const a=j/SEG*Math.PI*2;
+      let r=prof(u)*(1+.07*Math.sin(3*a+1)+.04*Math.sin(7*a+2)+.025*Math.sin(17*a+u*9));
+      if(u<.5) r*=1+.45*bump(a,Math.PI,.45)*(1-u/.5)+.25*bump(a,.15,.4)*(1-u/.5); // west and east shoulders
+      if(u>.8&&u<.95) r*=1+.012*Math.sin(a*170); // fluted basalt columns
+      const y=base+u*H+(u<.95?0:0);
+      pos.push(cx+r*Math.cos(a), y, cz+r*Math.sin(a));
+      const sp=(Math.random()-.5)*.08;
+      if(u>.95) c.copy(TOP);
+      else if(u>.78){ c.copy(CAP).multiplyScalar(.8+.2*(.5+.5*Math.sin(a*170))); }
+      else if(u>.3){ c.copy(SLOPE); const band=.5+.5*Math.sin(u*62+Math.sin(a*5)*1.6); if(band>.68) c.lerp(RED,.55*(band-.68)/.32+.15); }
+      else { c.copy(LOW).lerp(SLOPE,u/.3); }
+      c.offsetHSL(0,0,sp); c.lerp(HAZE,.18); col.push(c.r,c.g,c.b);
+    }
+  }
+  for(let i=0;i<RINGS;i++) for(let j=0;j<SEG;j++){
+    const a=i*SEG+j, b=i*SEG+(j+1)%SEG, d=(i+1)*SEG+j, e=(i+1)*SEG+(j+1)%SEG;
+    idx.push(a,d,b, b,d,e);
+  }
+  const top=pos.length/3; pos.push(cx,base+H,cz); c.copy(TOP); col.push(c.r,c.g,c.b);
+  for(let j=0;j<SEG;j++) idx.push(RINGS*SEG+j, top, RINGS*SEG+(j+1)%SEG);
+  const g=new THREE.BufferGeometry();
+  g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute("color",new THREE.Float32BufferAttribute(col,3));
+  g.setIndex(idx); g.computeVertexNormals();
+  const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,fog:false}));
+  scene.add(m);
+  label("جبل شثاث · حارس ظهران الجنوب",cx,base+H+14,cz);
+}
+if(!HD) shathath(8,-305);
+
+
+/* ---------- Commit instanced meshes ---------- */
+function commit(list,geo,mat,cast){
+  if(!list.m.length) return;
+  const im=new THREE.InstancedMesh(geo,mat,list.m.length); const c=new THREE.Color();
+  list.m.forEach((m,i)=>{ im.setMatrixAt(i,m); im.setColorAt(i,c.set(list.c[i])); });
+  im.castShadow=!!cast; im.receiveShadow=true; scene.add(im);
+}
+commit(I.body,taperGeo(TAPER_HI),MAT.mud,true);
+commit(I.bodyLow,taperGeo(TAPER_LO),MAT.mud,true);
+commit(I.ruin,boxGeo,MAT.mud,true);
+commit(I.base,boxGeo,MAT.stone,true);
+commit(I.pink,boxGeo,MAT.pink);
+commit(I.white,boxGeo,MAT.white,true);
+commit(I.hole,boxGeo,MAT.hole);
+commit(I.door,boxGeo,MAT.plain);
+commit(I.cren,crenGeo,MAT.white,true);
+commit(I.spout,boxGeo,MAT.wood,true);
+commit(I.plain,boxGeo,MAT.plain,true);
+commit(I.trunk,trunkGeo,MAT.plain,true);
+commit(I.frond,frondGeo,MAT.palm,true);
+commit(I.canopy,canopyGeo,MAT.plain,true);
+qattPanels.forEach(q=>{
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1.6),new THREE.MeshStandardMaterial({map:qattTex,roughness:.9}));
+  const off=1.4;
+  if(q.face===0) m.position.set(q.x+off,1.3,q.z+q.d/2+.13);
+  else if(q.face===1){ m.position.set(q.x-off,1.3,q.z-q.d/2-.13); m.rotation.y=Math.PI; }
+  else if(q.face===2){ m.position.set(q.x+q.w/2+.13,1.3,q.z-off); m.rotation.y=Math.PI/2; }
+  else { m.position.set(q.x-q.w/2-.13,1.3,q.z+off); m.rotation.y=-Math.PI/2; }
+  scene.add(m);
+});
+
+/* ---------- Labels ---------- */
+const labels=[];
+function roundRect(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+function makeLabel(text,x,y,z){
+  const cv=document.createElement("canvas"); cv.width=760; cv.height=140; const g=cv.getContext("2d");
+  g.font='700 58px "Reem Kufi", Tahoma, sans-serif'; g.textAlign="center"; g.textBaseline="middle"; g.direction="rtl";
+  const w=Math.min(740,g.measureText(text).width+70);
+  g.fillStyle="rgba(28,19,14,.74)"; roundRect(g,380-w/2,22,w,96,48); g.fill(); g.fillStyle="#f6f1e7"; g.fillText(text,380,72);
+  const tex=new THREE.CanvasTexture(cv); tex.encoding=THREE.sRGBEncoding;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,fog:false}));
+  if(y>100) sp.scale.set(52,9.6,1); else sp.scale.set(7.6,1.4,1); sp.position.set(x,y,z); scene.add(sp); labels.push(sp);
+}
+const fontReady=(document.fonts&&document.fonts.load)?document.fonts.load('700 58px "Reem Kufi"').catch(()=>{}):Promise.resolve();
+fontReady.then(()=>SIGNS.forEach(buildSign));
+function buildSignLater(sg){ fontReady.then(()=>buildSign(sg)); }
+fontReady.then(()=>LABELS.forEach(l=>makeLabel(l[0],l[1],l[2],l[3])));
+
+/* ---------- Artifact models ---------- */
+function mat(c,metal,rough,emis){ return new THREE.MeshStandardMaterial({color:c,metalness:metal||0,roughness:rough==null?.6:rough,emissive:new THREE.Color(c).multiplyScalar(emis||.12)}); }
+function lathe(pts,m){ return new THREE.Mesh(new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),24),m); }
+function buildModel(key){
+  const g=new THREE.Group();
+  if(key==="dallah"){ const m=mat(0xd2a24a,.55,.32,.15);
+    g.add(lathe([[0,0],[.32,0],[.36,.08],[.3,.3],[.17,.48],[.15,.6],[.22,.66],[.16,.72],[.05,.8],[0,.86]],m));
+    const sp=new THREE.Mesh(new THREE.CylinderGeometry(.035,.07,.55,8),m); sp.position.set(.32,.45,0); sp.rotation.z=-.85; g.add(sp);
+    const bk=new THREE.Mesh(new THREE.ConeGeometry(.05,.16,8),m); bk.position.set(.52,.66,0); bk.rotation.z=-1.6; g.add(bk);
+    const h=new THREE.Mesh(new THREE.TorusGeometry(.24,.025,6,16,Math.PI),m); h.position.set(-.26,.42,0); h.rotation.z=Math.PI/2; g.add(h);
+    const f=new THREE.Mesh(new THREE.ConeGeometry(.05,.14,8),m); f.position.y=.93; g.add(f);
+  } else if(key==="najr"){ const m=mat(0xc0703e,.5,.35,.14);
+    g.add(lathe([[0,0],[.3,0],[.3,.05],[.2,.18],[.19,.4],[.28,.58],[.3,.62],[.25,.62],[0,.5]],m));
+    const p=new THREE.Mesh(new THREE.CylinderGeometry(.04,.06,.8,8),m); p.position.set(.08,.75,0); p.rotation.z=-.35; g.add(p);
+    const k=new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),m); k.position.set(.21,1.12,0); g.add(k);
+  } else if(key==="gerba"){ const m=mat(0x7a4a2a,0,.8,.1);
+    const b=new THREE.Mesh(new THREE.SphereGeometry(.38,16,12),m); b.scale.set(1.15,.8,.75); b.position.y=.38; g.add(b);
+    const n=new THREE.Mesh(new THREE.CylinderGeometry(.06,.1,.3,10),m); n.position.set(.4,.6,0); n.rotation.z=-.9; g.add(n);
+    const t=new THREE.Mesh(new THREE.TorusGeometry(.08,.02,6,12),mat(0xd9c39a)); t.position.set(.47,.66,0); t.rotation.y=Math.PI/2; g.add(t);
+    for(const s of [-1,1]){ const l=new THREE.Mesh(new THREE.CylinderGeometry(.05,.03,.25,6),m); l.position.set(s*.32,.1,.15); g.add(l); }
+    const st=new THREE.Mesh(new THREE.TorusGeometry(.42,.02,6,20,Math.PI),mat(0x3d2414)); st.position.y=.45; g.add(st);
+  } else if(key==="midhaan"){ const m=mat(0x5a554d,.05,.9,.08);
+    g.add(lathe([[0,0],[.3,0],[.42,.08],[.45,.32],[.42,.36],[.36,.34],[.34,.1],[0,.1]],m));
+    for(const s of [-1,1]){ const h=new THREE.Mesh(boxGeo,m); h.scale.set(.14,.08,.16); h.position.set(s*.5,.28,0); g.add(h); }
+    const fd=new THREE.Mesh(new THREE.CircleGeometry(.35,20),mat(0xc98a3c,0,.9)); fd.rotation.x=-Math.PI/2; fd.position.y=.28; g.add(fd);
+  } else if(key==="palm"){ const tr=mat(0x7a6248,0,.9), lf=mat(0x56712f,0,.9);
+    const t=new THREE.Mesh(new THREE.CylinderGeometry(.05,.08,1,7),tr); t.position.y=.5; g.add(t);
+    for(let k=0;k<7;k++){ const f=new THREE.Mesh(boxGeo,lf); f.scale.set(.12,.02,.55); f.position.set(Math.sin(k*.9)*.22,1.0,Math.cos(k*.9)*.22); f.rotation.y=k*.9; f.rotation.x=.45; g.add(f); }
+  } else if(key==="farm"){ const st=mat(0x8b8478,0,.95);
+    const gr=new THREE.Mesh(boxGeo,mat(0x6f8a3c,0,1)); gr.scale.set(.9,.05,.9); gr.position.y=.2; g.add(gr);
+    [[0,.45,.9,.08],[0,-.45,.9,.08],[.45,0,.08,.9],[-.45,0,.08,.9]].forEach(w=>{ const m=new THREE.Mesh(boxGeo,st); m.scale.set(w[2],.18,w[3]); m.position.set(w[0],.29,w[1]); g.add(m); });
+  } else if(key==="wall"){ const cs=[0x8b8478,0x6e6a62,0xa39885];
+    for(let r=0;r<4;r++) for(let c=0;c<3;c++){ const m=new THREE.Mesh(boxGeo,mat(cs[(r+c)%3],0,.95)); m.scale.set(.3,.18,.22); m.position.set((c-1)*.31+(r%2)*.15-.07,.12+r*.19,0); g.add(m); }
+  } else if(key==="house"){ const m=new THREE.Mesh(taperGeo(.88),mat(0xd4c0a5,0,.95)); m.scale.set(.6,.95,.6); m.position.y=.15; g.add(m);
+    const b=new THREE.Mesh(boxGeo,mat(0x8b8478,0,.95)); b.scale.set(.66,.2,.66); b.position.y=.1; g.add(b);
+    for(let i=0;i<2;i++){ const w=new THREE.Mesh(boxGeo,mat(0xf4efe6)); w.scale.set(.14,.14,.02); w.position.set(0,.5+i*.3,.29); g.add(w); }
+  } else if(key==="mosque"){ const m=new THREE.Mesh(boxGeo,mat(0xe7d6bd,0,.95)); m.scale.set(.9,.55,.6); m.position.y=.38; g.add(m);
+    const b=new THREE.Mesh(boxGeo,mat(0x8b8478,0,.95)); b.scale.set(.94,.2,.64); b.position.y=.1; g.add(b);
+    const dr=new THREE.Mesh(boxGeo,mat(0x5a3a22)); dr.scale.set(.16,.28,.02); dr.position.set(0,.3,.31); g.add(dr);
+    for(let k=-2;k<=2;k++){ const c=new THREE.Mesh(new THREE.ConeGeometry(.05,.1,4),mat(0xf4efe6)); c.position.set(k*.18,.71,.3); g.add(c); }
+  } else if(key==="janbiya"){ const gold=mat(0xc89b45,.6,.3,.15), dark=mat(0x2f2016,0,.7);
+    const sh=new THREE.Mesh(new THREE.TorusGeometry(.32,.07,8,20,Math.PI*.6),gold); sh.rotation.z=-Math.PI*.15; sh.position.set(-.05,.1,0); g.add(sh);
+    const tp=new THREE.Mesh(new THREE.SphereGeometry(.09,10,8),gold); tp.position.set(.08,-.2,0); g.add(tp);
+    const hl=new THREE.Mesh(new THREE.CylinderGeometry(.06,.08,.34,10),dark); hl.position.set(-.33,.5,0); hl.rotation.z=.2; g.add(hl);
+    const pm=new THREE.Mesh(new THREE.SphereGeometry(.1,10,8),dark); pm.scale.y=.6; pm.position.set(-.37,.7,0); g.add(pm);
+    const bt=new THREE.Mesh(boxGeo,mat(0x2f6e52,0,.8)); bt.scale.set(1.1,.14,.05); bt.position.set(-.1,.3,-.06); g.add(bt);
+  }
+  return g;
+}
+const artifacts=ITEMS.map((it,i)=>{
+  const root=new THREE.Group(); root.position.set(it.pos[0],0,it.pos[1]); root.visible=false;
+  const model=buildModel(it.key); model.scale.setScalar(1.5); model.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+  const holder=new THREE.Group(); holder.add(model); holder.position.y=1.1; root.add(holder);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.95,1.15,48),new THREE.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:.85,depthWrite:false}));
+  ring.rotation.x=-Math.PI/2; ring.position.y=.06; root.add(ring);
+  scene.add(root);
+  return {it,root,holder,ring,got:false,given:false,i,collecting:0,appear:0};
+});
+// one golden beam marks the current objective
+const beam=new THREE.Mesh(new THREE.CylinderGeometry(.55,.9,34,16,1,true),new THREE.MeshBasicMaterial({color:0xffcf6a,transparent:true,opacity:.18,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,fog:false}));
+beam.position.y=17; const beamRoot=new THREE.Group(); beamRoot.add(beam); scene.add(beamRoot);
+
+/* ---------- People ---------- */
+function patternTex(bg,fg){ const cv=document.createElement("canvas"); cv.width=cv.height=64; const g=cv.getContext("2d");
+  g.fillStyle=bg; g.fillRect(0,0,64,64); if(fg){ g.fillStyle=fg; for(let y=0;y<64;y+=8) for(let x=(y/8)%2*4;x<64;x+=8) g.fillRect(x,y,4,4); }
+  const t=new THREE.CanvasTexture(cv); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(4,3); t.encoding=THREE.sRGBEncoding; return t; }
+const LOOKS={
+  player:  {bisht:0x5a1f1c, trim:0xc89b45, head:["#f4efe6","#b8392b"], vest:null, jn:0xc89b45, beard:true},
+  player_f:{bisht:null, thobe:0x232029, head:["#141317",null], vest:0x7a2a34, jn:null, beard:false, agal:false, belt:0xc89b45, wrap:true},
+  abu:     {bisht:0x23262b, trim:0xb9bcbf, head:["#f4efe6","#b8392b"], vest:null, jn:0xc89b45, beard:true, cane:true, skin:0xa8724e, beardColor:0x9a948c},
+  merchant:{bisht:null, head:["#f4efe6","#b8392b"], vest:0x2c5d8a, jn:0xc89b45, beard:true},
+  worker:  {bisht:null, head:["#e9e2d4",null], vest:0x7a5a3a, thobe:0xd9cdb6, beard:false},
+  elder:   {bisht:0x3b3a36, trim:0xb38a3e, head:["#f7f5f0",null], vest:null, jn:0xc89b45, beard:true, cane:true, beardColor:0xdddddd},
+  guard:   {bisht:null, head:["#f4efe6","#b8392b"], vest:0x2f6e52, jn:0xc89b45, beard:true, thobe:0xe8e2d6},
+  owner:   {bisht:0x8a6a45, trim:0xd4a63c, head:["#f4efe6","#b8392b"], vest:null, jn:0xc89b45, beard:true, beardColor:0x3a2a20}
+};
+function makePerson(lk){
+  const L=LOOKS[lk], g=new THREE.Group();
+  const thobe=new THREE.Mesh(new THREE.CylinderGeometry(.3,.42,1.45,14),new THREE.MeshStandardMaterial({color:L.thobe||0xf4efe6,roughness:.9})); thobe.position.y=.75; g.add(thobe);
+  if(L.vest){ const v=new THREE.Mesh(new THREE.CylinderGeometry(.32,.36,.7,14,1,true,Math.PI*.12,Math.PI*1.76),new THREE.MeshStandardMaterial({color:L.vest,roughness:.85,side:THREE.DoubleSide})); v.position.y=1.08; g.add(v); }
+  if(L.bisht){ const b=new THREE.Mesh(new THREE.CylinderGeometry(.35,.52,1.38,16,1,true,Math.PI*.2,Math.PI*1.6),new THREE.MeshStandardMaterial({color:L.bisht,roughness:.85,side:THREE.DoubleSide})); b.position.y=.86; g.add(b);
+    for(const s of [-1,1]){ const tr=new THREE.Mesh(boxGeo,new THREE.MeshStandardMaterial({color:L.trim,metalness:.4,roughness:.4})); tr.scale.set(.06,1.32,.03); tr.position.set(s*.15,.86,.41); tr.rotation.z=s*.12; g.add(tr); } }
+  const skin=new THREE.MeshStandardMaterial({color:L.skin||0xb27a55,roughness:.8});
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.2,16,12),skin); head.position.y=1.72; g.add(head);
+  if(L.beard){ const bd=new THREE.Mesh(new THREE.SphereGeometry(.15,10,8),new THREE.MeshStandardMaterial({color:L.beardColor||0x221812})); bd.scale.set(1,.7,.7); bd.position.set(0,1.6,.1); g.add(bd); }
+  const st=patternTex(L.head[0],L.head[1]);
+  const shm=new THREE.Mesh(new THREE.ConeGeometry(.42,.75,16,1,true,.55,Math.PI*2-1.1),new THREE.MeshStandardMaterial({map:st,roughness:.9,side:THREE.DoubleSide})); shm.position.set(0,1.62,-.04); g.add(shm);
+  const cap=new THREE.Mesh(new THREE.SphereGeometry(.22,16,8,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({map:st,roughness:.9})); cap.position.y=1.76; g.add(cap);
+  if(L.agal!==false){ const agal=new THREE.Mesh(new THREE.TorusGeometry(.2,.035,8,20),new THREE.MeshStandardMaterial({color:0x111111})); agal.rotation.x=Math.PI/2; agal.position.y=1.88; g.add(agal); }
+  if(L.wrap){ const w=new THREE.Mesh(new THREE.CylinderGeometry(.26,.34,.5,16,1,true),new THREE.MeshStandardMaterial({color:0x141317,roughness:.9,side:THREE.DoubleSide})); w.position.y=1.5; g.add(w); }
+  const belt=new THREE.Mesh(new THREE.CylinderGeometry(.33,.33,.08,14),new THREE.MeshStandardMaterial({color:L.belt||(L.jn===0xb9bcbf?0x8f9396:0x3d2414),metalness:L.jn===0xb9bcbf?.6:0})); belt.position.y=1.0; g.add(belt);
+  if(L.jn){ const jn=new THREE.Mesh(new THREE.TorusGeometry(.1,.03,6,10,Math.PI*.7),new THREE.MeshStandardMaterial({color:L.jn,metalness:.55,roughness:.35})); jn.position.set(0,.95,.33); jn.rotation.z=-.6; g.add(jn); }
+  if(L.cane){ const c=new THREE.Mesh(new THREE.CylinderGeometry(.025,.03,1.25,6),new THREE.MeshStandardMaterial({color:0xc9a35a,roughness:.6})); c.position.set(-.42,.62,.18); c.rotation.z=.08; g.add(c); }
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+  return g;
+}
+const player=new THREE.Group(); let playerModel=makePerson("player"); player.add(playerModel);
+function setAvatar(){ player.remove(playerModel); playerModel=makePerson(PLAYER.g==="f"?"player_f":"player"); player.add(playerModel); }
+const START=HD?[-32,25.4]:[-18.7,-56], START_ROT=HD?Math.PI:0;
+player.position.set(START[0],0,START[1]); scene.add(player);
+
+function nameSprite(text,sub){
+  const cv=document.createElement("canvas"); cv.width=512; cv.height=150; const g=cv.getContext("2d");
+  g.textAlign="center"; g.direction="rtl"; g.textBaseline="middle";
+  g.fillStyle="rgba(28,19,14,.7)"; roundRect(g,56,14,400,122,30); g.fill();
+  g.fillStyle="#f6f1e7"; g.font='700 50px "Reem Kufi", Tahoma, sans-serif'; g.fillText(text,256,58);
+  g.fillStyle="#e3a83a"; g.font='500 30px "IBM Plex Sans Arabic", Tahoma, sans-serif'; g.fillText(sub,256,108);
+  const tex=new THREE.CanvasTexture(cv); tex.encoding=THREE.sRGBEncoding;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false})); sp.scale.set(2.4,.7,1); return sp;
+}
+function bangSprite(){
+  const cv=document.createElement("canvas"); cv.width=cv.height=128; const g=cv.getContext("2d");
+  g.fillStyle="#e3a83a"; g.beginPath(); g.arc(64,64,54,0,7); g.fill(); g.fillStyle="#1c130e"; g.font='900 86px Tahoma, sans-serif'; g.textAlign="center"; g.textBaseline="middle"; g.fillText("!",64,70);
+  const t=new THREE.CanvasTexture(cv); t.encoding=THREE.sRGBEncoding; const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,fog:false})); sp.scale.set(.75,.75,1); return sp;
+}
+const npcs={};
+Object.keys(NPCS).forEach(k=>{
+  const d=NPCS[k]; const g=makePerson(d.look); g.position.set(d.pos[0],0,d.pos[1]); scene.add(g);
+  const tag=new THREE.Group(); tag.position.y=2.55; g.add(tag);
+  const bang=bangSprite(); bang.position.y=.75; bang.visible=false; tag.add(bang);
+  npcs[k]={...d,key:k,obj:g,tag,bang,nameSp:null,col:null};
+  setNpcCollider(k);
+});
+function setNpcCollider(k){ const n=npcs[k]; const p=n.obj.position;
+  if(n.col){ n.col.x0=p.x-.35; n.col.x1=p.x+.35; n.col.z0=p.z-.35; n.col.z1=p.z+.35; }
+  else { n.col={x0:p.x-.35,x1:p.x+.35,z0:p.z-.35,z1:p.z+.35,top:1.9}; colliders.push(n.col); } }
+fontReady.then(()=>Object.values(npcs).forEach(n=>{ n.nameSp=nameSprite(n.name,n.role); n.tag.add(n.nameSp); }));
+// a simple souq stall next to Uncle Hasan
+if(!HD)(function(){ const x=-9.6,z=-43.6;
+  const parts=[[0,.9,0,2.6,.12,1.3,0x6b4426],[-1.2,1.2,-.6,.12,2.4,.12,0x6b4426],[1.2,1.2,-.6,.12,2.4,.12,0x6b4426],[-1.2,1.2,.6,.12,2.4,.12,0x6b4426],[1.2,1.2,.6,.12,2.4,.12,0x6b4426],[0,2.45,0,2.9,.06,1.8,0xb8392b]];
+  parts.forEach(p=>{ const m=new THREE.Mesh(boxGeo,new THREE.MeshStandardMaterial({color:p[6],roughness:.9})); m.scale.set(p[3],p[4],p[5]); m.position.set(x+p[0],p[1],z+p[2]); m.castShadow=true; scene.add(m); });
+  [0xb08850,0xcf6b33,0x7a8f3c].forEach((c,i)=>{ const s=new THREE.Mesh(new THREE.SphereGeometry(.26,8,6),new THREE.MeshStandardMaterial({color:c,roughness:1})); s.scale.y=.8; s.position.set(x-.8+i*.8,1.15,z); scene.add(s); });
+  addCol(x-1.4,x+1.4,z-.8,z+.8,2.5);
+  buildSignLater({p:[x,2.95,z-.95],ry:Math.PI,width:2.4,text:"السوق",big:true});
+})();
+
+/* ---------- Sound (generated with Web Audio, no files needed) ---------- */
+const SFX=(function(){
+  let ctx=null, master=null, on=true, noiseBuf=null, babbleGain=null, windGain=null;
+  const timers={};
+  function init(){
+    if(ctx){ if(ctx.state==="suspended") ctx.resume(); return; }
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    ctx=new AC(); master=ctx.createGain(); master.gain.value=on?.9:0; master.connect(ctx.destination);
+    noiseBuf=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate); const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  }
+  function out(pan){ if(!ctx.createStereoPanner) return master; const p=ctx.createStereoPanner(); p.pan.value=pan||0; p.connect(master); return p; }
+  function env(g,t,a,peak,dec){ g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(Math.max(.0002,peak),t+a); g.gain.exponentialRampToValueAtTime(0.0001,t+a+dec); }
+  function tone(freq,t,dur,type,vol,to,dest){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type=type||"sine"; o.frequency.setValueAtTime(freq,t); if(to) o.frequency.exponentialRampToValueAtTime(to,t+dur);
+    env(g,t,.008,vol||.2,dur); o.connect(g); g.connect(dest||master); o.start(t); o.stop(t+dur+.05); return o; }
+  function noise(t,dur,type,freq,q,vol,dest){ const s=ctx.createBufferSource(); s.buffer=noiseBuf; const f=ctx.createBiquadFilter(); f.type=type; f.frequency.value=freq; f.Q.value=q||1;
+    const g=ctx.createGain(); env(g,t,.004,vol,dur); s.connect(f); f.connect(g); g.connect(dest||master); s.start(t,Math.random()*1.5); s.stop(t+dur+.05); }
+  // voiced animal call: sawtooth through two formant filters, with pitch contour and vibrato
+  function voice(t,pts,dur,f1,f2,vol,vib,vibDepth,dest){
+    const o=ctx.createOscillator(); o.type="sawtooth"; o.frequency.setValueAtTime(pts[0],t);
+    for(let i=1;i<pts.length;i++) o.frequency.linearRampToValueAtTime(pts[i],t+dur*i/(pts.length-1));
+    if(vib){ const l=ctx.createOscillator(); l.frequency.value=vib; const lg=ctx.createGain(); lg.gain.value=vibDepth; l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t+dur+.1); }
+    const a=ctx.createBiquadFilter(); a.type="bandpass"; a.frequency.value=f1; a.Q.value=4;
+    const b=ctx.createBiquadFilter(); b.type="bandpass"; b.frequency.value=f2; b.Q.value=6;
+    const g=ctx.createGain(); g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.06); g.gain.setValueAtTime(vol,t+dur*.75); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(a); o.connect(b); a.connect(g); b.connect(g); g.connect(dest||master); o.start(t); o.stop(t+dur+.05);
+  }
+  function pluck(freq,t,vol){ tone(freq,t,.9,"triangle",(vol||.16)); tone(freq*2,t,.35,"sine",(vol||.16)*.35); noise(t,.05,"bandpass",freq*3,4,(vol||.16)*.6); }
+  const HIJAZ=[293.66,311.13,369.99,392,440,466.16,523.25,587.33];
+  const R=(a,b)=>a+Math.random()*(b-a), P=()=>R(-.8,.8);
+
+  /* --- village sounds --- */
+  const sounds={
+    sparrows(v){ const t=ctx.currentTime, d=out(P()); const n=3+(Math.random()*5|0); for(let i=0;i<n;i++){ const f=R(3200,5200); tone(f,t+i*R(.07,.14),.06,"sine",.05*v,f*R(.7,1.3),d); } },
+    pigeon(v){ const t=ctx.currentTime, d=out(P()); [[0,.35],[.45,.6]].forEach(([o,l])=>{ voice(t+o,[360,400,330],l,380,800,.06*v,9,12,d); }); },
+    rooster(v){ const t=ctx.currentTime, d=out(P()); voice(t,[520,640],.18,900,1800,.07*v,0,0,d); voice(t+.22,[600,700],.16,950,1900,.07*v,0,0,d); voice(t+.42,[680,760,700,520],1.1,1000,2100,.08*v,6,10,d); },
+    hen(v){ const t=ctx.currentTime, d=out(P()); const n=3+(Math.random()*4|0); for(let i=0;i<n;i++) voice(t+i*R(.18,.3),[R(520,640),R(420,500)],.1,800,1700,.05*v,0,0,d); },
+    goat(v){ const t=ctx.currentTime, d=out(P()); const f=R(380,480); voice(t,[f,f*1.08,f*.95],R(.6,.9),1050,2300,.07*v,R(6,8),f*.06,d); },
+    sheep(v){ const t=ctx.currentTime, d=out(P()); const f=R(240,300); voice(t,[f,f*1.05,f*.92],R(.8,1.1),780,1900,.07*v,R(5,6.5),f*.07,d); },
+    cow(v){ const t=ctx.currentTime, d=out(P()); voice(t,[118,132,110],R(1.6,2.2),450,900,.08*v,3,3,d); },
+    donkey(v){ const t=ctx.currentTime, d=out(P()); for(let i=0;i<3;i++){ voice(t+i*.62,[520,640],.3,1100,2400,.05*v,0,0,d); voice(t+i*.62+.31,[180,150],.28,600,1300,.06*v,0,0,d); } },
+    dog(v){ const t=ctx.currentTime, d=out(P()); for(let i=0;i<2;i++){ voice(t+i*.28,[420,330],.14,900,1800,.06*v,0,0,d); noise(t+i*.28,.1,"bandpass",1200,2,.03*v,d); } },
+    clink(v){ const t=ctx.currentTime, d=out(P()); const b=R(1900,2600); [1,1.52,2.38].forEach((m,i)=>tone(b*m,t,R(.25,.5),"sine",(.04/(i+1))*v,null,d)); },
+    hammer(v){ const t=ctx.currentTime, d=out(P()); for(let i=0;i<3;i++){ const tt=t+i*R(.28,.38); tone(2100+i*30,tt,.35,"sine",.03*v,null,d); tone(3300,tt,.2,"sine",.015*v,null,d); noise(tt,.03,"highpass",3000,1,.04*v,d); } },
+    cart(v){ const t=ctx.currentTime, d=out(P()); for(let i=0;i<8;i++) noise(t+i*.18+R(0,.03),.06,"bandpass",R(300,520),3,.04*v,d); },
+    creak(v){ const t=ctx.currentTime, d=out(P()); voice(t,[160,210,180,240],R(.6,1),700,1500,.035*v,14,25,d); },
+    drip(v){ const t=ctx.currentTime, d=out(P()); tone(R(1300,1900),t,.12,"sine",.05*v,500,d); },
+  };
+  // [sound, base events per minute] for each zone
+  // only clean, natural sounds: birds and water (bells/metal and buzzy synthetic animal calls removed)
+  const ZONES={
+    village:[["sparrows",6]],
+    souq:[["cart",1.5]],
+    farm:[["sparrows",10]],
+    well:[["drip",20]]
+  };
+  return {
+    init,
+    get on(){ return on; },
+    toggle(){ on=!on; if(master) master.gain.setTargetAtTime(on?.9:0,ctx.currentTime,.05); return on; },
+    /* called every frame with zone weights 0..1 */
+    ambience(dt,w){
+      if(!ctx||!on) return;
+      if(babbleGain) babbleGain.gain.setTargetAtTime(.11*w.souq,ctx.currentTime,.4);
+      for(const z in ZONES){ const wz=w[z]; if(wz<=.02) continue;
+        ZONES[z].forEach(([name,perMin])=>{ if(Math.random()<dt*perMin/60*wz) sounds[name](Math.min(1,.35+wz*.75)); }); }
+    },
+    click(){ if(!ctx) return; tone(880,ctx.currentTime,.06,"sine",.08,660); },
+    step(speed){ if(!ctx) return; const t=ctx.currentTime; noise(t,.07+Math.random()*.03,"highpass",1400+Math.random()*900,.7,.035+speed*.006); noise(t+.01,.05,"bandpass",500,1.5,.02); },
+    blip(){ if(!ctx) return; tone(520+Math.random()*80,ctx.currentTime,.035,"sine",.025); },
+    talk(){ if(!ctx) return; const t=ctx.currentTime; pluck(HIJAZ[0],t,.12); pluck(HIJAZ[2],t+.09,.1); },
+    give(){ if(!ctx) return; const t=ctx.currentTime; tone(300,t,.5,"sine",.07,900); noise(t,.4,"bandpass",2500,2,.04); },
+    chime(){ if(!ctx) return; const t=ctx.currentTime; [0,2,4,7].forEach((n,i)=>pluck(HIJAZ[n],t+i*.11,.13)); tone(HIJAZ[7]*2,t+.45,1.2,"sine",.05); },
+    najr(){ if(!ctx) return; const t=ctx.currentTime+.5; [0,.32,.64,.8,1.12].forEach((d,i)=>{ tone(150,t+d,.18,"sine",.22,70); noise(t+d,.25,"bandpass",1250+i*40,14,.12); tone(2480,t+d,.4,"sine",.025); }); },
+    win(){ if(!ctx) return; const t=ctx.currentTime; [0,1,2,3,4,3,4,7].forEach((n,i)=>pluck(HIJAZ[n],t+i*.18,.15)); tone(HIJAZ[0]/2,t,2.2,"triangle",.06); }
+  };
+})();
+// Read dialogue aloud with the browser's Arabic voice (if the device has one)
+const VOICE=(function(){
+  const ok=typeof window.speechSynthesis!=="undefined"; let voice=null, enabled=true;
+  function pick(){ if(!ok) return; const vs=speechSynthesis.getVoices(); voice=vs.find(v=>/^ar(-|_)SA/i.test(v.lang))||vs.find(v=>/^ar/i.test(v.lang))||null; }
+  if(ok){ pick(); speechSynthesis.onvoiceschanged=pick; }
+  return {
+    get available(){ return ok&&!!voice; },
+    get enabled(){ return enabled&&ok&&!!voice; },
+    toggle(){ enabled=!enabled; if(!enabled&&ok) speechSynthesis.cancel(); return enabled; },
+    say(text){ if(!this.enabled) return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.voice=voice; u.lang=voice.lang; u.rate=.95; u.pitch=.95; speechSynthesis.speak(u); },
+    stop(){ if(ok) speechSynthesis.cancel(); }
+  };
+})();
+document.addEventListener("click",e=>{ if(e.target.closest&&e.target.closest("button")) SFX.click(); },true);
+// Recorded voice lines from the people of the town (voice/NN.mp3, numbered as in the recording sheet)
+const CLIPS=(function(){
+  const HAVE=[]; let cur=null;
+  return {
+    has(n){ return HAVE.includes(n); },
+    get active(){ return !!cur && !cur.paused && !cur.ended; },
+    play(n){ this.stop(); if(!HAVE.includes(n)) return false; if(!SFX.on) return true;
+      const a=new Audio("voice/"+String(n).padStart(2,"0")+".mp3"); cur=a; a.play().catch(()=>{}); return true; },
+    stop(){ if(cur){ try{cur.pause();}catch(_){} cur=null; } }
+  };
+})();
+
+/* ---------- Input ---------- */
+let state="start", aerial=false;
+const keys={};
+addEventListener("keydown",e=>{ keys[e.code]=true;
+  if(state==="play"&&["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code)) e.preventDefault();
+  if(e.code==="KeyM"&&state==="play") toggleAerial();
+  if((e.code==="KeyE"||e.code==="Enter")&&state==="play"&&nearNpc){ e.preventDefault(); startDialog(); }
+  else if(state==="dialog"&&(e.code==="KeyE"||((e.code==="Space"||e.code==="Enter")&&!(e.target&&e.target.tagName==="BUTTON")))){ e.preventDefault(); advanceDialog(); } });
+addEventListener("keyup",e=>{keys[e.code]=false;});
+let yaw=Math.PI, pitch=.36, dragging=null;
+canvas.addEventListener("pointerdown",e=>{ dragging={x:e.clientX,y:e.clientY,id:e.pointerId}; try{canvas.setPointerCapture(e.pointerId);}catch(_){} });
+canvas.addEventListener("pointermove",e=>{ if(dragging&&dragging.id===e.pointerId){ yaw-=(e.clientX-dragging.x)*.006; pitch=Math.max(-.4,Math.min(1.15,pitch+(e.clientY-dragging.y)*.005)); dragging.x=e.clientX; dragging.y=e.clientY; } });
+addEventListener("pointerup",e=>{ if(dragging&&dragging.id===e.pointerId) dragging=null; });
+const stick=document.getElementById("stick"), knob=document.getElementById("knob");
+let joy={x:0,y:0,id:null};
+function joyMove(e){ const r=stick.getBoundingClientRect(); let dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2);
+  const m=Math.hypot(dx,dy), max=r.width/2-14; if(m>max){dx*=max/m;dy*=max/m;} knob.style.transform=`translate(${dx}px,${dy}px)`; joy.x=dx/max; joy.y=-dy/max; }
+stick.addEventListener("pointerdown",e=>{ joy.id=e.pointerId; try{stick.setPointerCapture(e.pointerId);}catch(_){} joyMove(e); e.stopPropagation(); });
+stick.addEventListener("pointermove",e=>{ if(joy.id===e.pointerId) joyMove(e); });
+function joyEnd(e){ if(joy.id===e.pointerId){ joy={x:0,y:0,id:null}; knob.style.transform=""; } }
+stick.addEventListener("pointerup",joyEnd); stick.addEventListener("pointercancel",joyEnd);
+const aerialBtn=document.getElementById("aerialBtn");
+function toggleAerial(){ aerial=!aerial; aerialBtn.setAttribute("aria-pressed",String(aerial)); resize(); }
+aerialBtn.addEventListener("click",()=>{ toggleAerial(); canvas.focus(); });
+const sndBtn=document.getElementById("sndBtn"), ttsBtn=document.getElementById("ttsBtn");
+sndBtn.addEventListener("click",()=>{ const o=SFX.toggle(); sndBtn.textContent=o?"الصوت: يعمل":"الصوت: متوقف"; sndBtn.setAttribute("aria-pressed",String(o)); canvas.focus(); });
+ttsBtn.addEventListener("click",()=>{
+  if(!VOICE.available){ ttsBtn.textContent="لا يوجد صوت عربي في هذا الجهاز"; ttsBtn.disabled=true; return; }
+  const o=VOICE.toggle(); ttsBtn.setAttribute("aria-pressed",String(o)); ttsBtn.textContent=o?"قراءة الحوار: تعمل":"قراءة الحوار بصوت"; canvas.focus(); });
+
+/* ---------- Quest state ---------- */
+const $=id=>document.getElementById(id);
+let stepIdx=0, collected=0, nearNpc=null, dlg=null;
+function curStep(){ return STEPS[stepIdx]; }
+function pendingItem(){ return artifacts.find(a=>a.given&&!a.got); }
+function currentTarget(){
+  const a=pendingItem(); if(a) return {x:a.it.pos[0],z:a.it.pos[1],label:a.it.goal?T(a.it.goal):T("{خذ|خذي} ")+a.it.name};
+  const s=curStep(); if(!s||!s.npc) return null; const n=npcs[s.npc]; return {x:n.obj.position.x,z:n.obj.position.z,label:T(s.obj),npc:s.npc};
+}
+function refreshQuestUI(){
+  const s=curStep(), a=pendingItem();
+  $("qObj").textContent = a ? (a.it.goal?T(a.it.goal):T("{خذ|خذي} ")+a.it.name+" من أمامك") : (s&&s.obj ? T(s.obj) : "اكتملت المهمة");
+  $("cnt").textContent=`${AR(collected)} / ${AR(ITEMS.length)}`;
+  Object.values(npcs).forEach(n=>n.bang.visible=false);
+  if(!a && s && s.npc) npcs[s.npc].bang.visible=true;
+  const t=currentTarget(); if(t){ beamRoot.visible=true; beamRoot.position.set(t.x,0,t.z); } else beamRoot.visible=false;
+}
+ITEMS.forEach((it,i)=>{ const d=document.createElement("div"); d.className="slot"; d.id="slot"+i; d.textContent=AR(i+1); $("slots").appendChild(d); });
+
+/* ---------- Dialogue ---------- */
+let typeT=0, typeFull="", typeShown=0;
+function startDialog(){
+  const s=curStep(); if(!s||!nearNpc||nearNpc!==s.npc) return;
+  state="dialog"; dlg={step:s,line:0}; $("talk").hidden=true; $("dlg").hidden=false;
+  const n=npcs[s.npc]; $("dName").textContent=n.name; $("dRole").textContent=n.role;
+  SFX.talk(); showLine();
+}
+function lineNumber(){ let n=0; for(const st of STEPS){ if(st===dlg.step) return n+dlg.line+1; n+=st.lines.length; } return 0; }
+function showLine(){ typeFull=T(dlg.step.lines[dlg.line]); typeShown=0; typeT=0; $("dText").textContent=""; if(!CLIPS.play(lineNumber())) VOICE.say(typeFull);
+  $("dNext").textContent = dlg.line<dlg.step.lines.length-1 ? "التالي" : (dlg.step.item!=null?"استلم":"حاضر"); $("dNext").focus(); }
+function advanceDialog(){
+  if(typeShown<typeFull.length){ typeShown=typeFull.length; $("dText").textContent=typeFull; return; }
+  if(dlg.line<dlg.step.lines.length-1){ dlg.line++; showLine(); return; }
+  $("dlg").hidden=true; const s=dlg.step; dlg=null; state="play"; canvas.focus(); VOICE.stop(); CLIPS.stop();
+  if(s.item!=null){ const a=artifacts[s.item]; a.given=true; a.root.visible=true; a.appear=0; SFX.give(); }
+  else { stepIdx++; activateVisit(); }
+  refreshQuestUI();
+}
+$("dNext").addEventListener("click",advanceDialog);
+$("talk").addEventListener("click",()=>{ if(state==="play") startDialog(); });
+
+// a "visit" step shows its landmark marker; reaching it opens the landmark card
+function activateVisit(){ const s=curStep(); if(s&&s.visit!=null){ const a=artifacts[s.visit]; if(!a.given){ a.given=true; a.root.visible=true; a.appear=0; } } }
+
+/* ---------- HUD ---------- */
+const mg=$("mini").getContext("2d");
+function drawMini(){
+  const W=300, S=2.4; mg.clearRect(0,0,W,W); mg.save(); mg.beginPath(); mg.arc(W/2,W/2,W/2,0,7); mg.clip();
+  mg.fillStyle="#8a6a48"; mg.fillRect(0,0,W,W);
+  const cx=W/2-player.position.x*S, cz=W/2-player.position.z*S;
+  if(HD){ mg.strokeStyle="#4b4b4e"; mg.lineWidth=7*S; mg.lineCap="round"; mg.beginPath(); HAYDAN_ROAD.forEach((p,i)=>{ const X=cx+p[0]*S, Y=cz+p[1]*S; i?mg.lineTo(X,Y):mg.moveTo(X,Y); }); mg.stroke(); }
+  else { mg.fillStyle="#4b4b4e"; mg.fillRect(0,cz-63.5*S,W,10*S); }
+  mg.strokeStyle="#c9c0b2"; mg.lineWidth=2.6*S; mg.lineCap="round"; mg.lineJoin="round";
+  PATHS.forEach(pl=>{ mg.beginPath(); pl.forEach((p,i)=>{ const X=cx+p[0]*S, Y=cz+p[1]*S; i?mg.lineTo(X,Y):mg.moveTo(X,Y); }); mg.stroke(); });
+  mg.fillStyle="#efe6d6";
+  colliders.forEach(c=>{ if(c.x1-c.x0<1.4&&c.z1-c.z0<1.4) return; mg.fillRect(cx+c.x0*S,cz+c.z0*S,(c.x1-c.x0)*S,(c.z1-c.z0)*S); });
+  if(!HD){ mg.fillStyle="#5c8a35"; mg.beginPath(); mg.arc(cx+L3[0]*S,cz+L3[1]*S,7.6*S,0,7); mg.fill(); }
+  const t=currentTarget(), ph=performance.now()/300;
+  if(t){ mg.fillStyle="#e3a83a"; mg.strokeStyle="#1c130e"; mg.lineWidth=3; mg.beginPath(); mg.arc(cx+t.x*S,cz+t.z*S,10+Math.sin(ph)*1.6,0,7); mg.fill(); mg.stroke(); }
+  mg.translate(W/2,W/2); mg.rotate(-player.rotation.y+Math.PI);
+  mg.fillStyle="#1c130e"; mg.beginPath(); mg.moveTo(0,-15); mg.lineTo(11,12); mg.lineTo(0,6); mg.lineTo(-11,12); mg.closePath(); mg.fill();
+  mg.restore();
+}
+function updateHint(){
+  const t=currentTarget(); if(!t){ $("hintText").textContent="اكتملت المهمة"; return; }
+  const d=Math.hypot(t.x-player.position.x,t.z-player.position.z);
+  $("hintText").innerHTML=`${t.label} <small>· ${AR(Math.round(d))} م</small>`;
+  const tx=t.x-player.position.x, tz=t.z-player.position.z;
+  const f=[-Math.sin(yaw),-Math.cos(yaw)], r=[Math.cos(yaw),-Math.sin(yaw)];
+  $("arrow").style.transform=`rotate(${Math.atan2(tx*r[0]+tz*r[1],tx*f[0]+tz*f[1])}rad)`;
+}
+
+/* ---------- Card / flow ---------- */
+const thumbR=new THREE.WebGLRenderer({canvas:$("thumb"),antialias:true,alpha:true});
+thumbR.outputEncoding=THREE.sRGBEncoding; thumbR.setPixelRatio(1); thumbR.setSize(216,216,false);
+const tScene=new THREE.Scene(); tScene.add(new THREE.HemisphereLight(0xffffff,0x8a6a48,1.1)); const tl=new THREE.DirectionalLight(0xffffff,.9); tl.position.set(2,3,4); tScene.add(tl);
+const tCam=new THREE.PerspectiveCamera(35,1,.1,50); tCam.position.set(0,1.1,3.4); tCam.lookAt(0,.6,0);
+let tModel=null;
+function showCard(a){
+  state="card";
+  $("cEyebrow").textContent=`${HD?"معلم":"قطعة تراثية"} ${AR(collected)} من ${AR(ITEMS.length)}`;
+  $("cTitle").textContent=a.it.name;
+  $("cPlace").textContent=`${HD?"الموقع":"وُجدت عند"}: ${a.it.place}`;
+  $("cDesc").textContent=a.it.desc; $("cUse").textContent=a.it.use; $("cFact").textContent=a.it.fact;
+  if(tModel) tScene.remove(tModel); tModel=buildModel(a.it.key); tModel.scale.setScalar(1.35); tScene.add(tModel);
+  $("cardWrap").hidden=false; setTimeout(()=>$("cOk").focus(),50);
+}
+$("cOk").addEventListener("click",()=>{ $("cardWrap").hidden=true; if(collected===ITEMS.length) showWin(); else { state="play"; canvas.focus(); } });
+function showWin(){ state="win"; SFX.win(); $("winEyebrow").textContent=HD?T("{أحسنت|أحسنتِ} يا {name}، {أكملت|أكملتِ} جولة حيدان"):T("{أحسنت|أحسنتِ} يا {name}، اكتملت المهمة وأُكرم الضيف"); const gg=$("gotGrid"); gg.innerHTML=""; ITEMS.forEach(it=>{ const d=document.createElement("div"); d.textContent=it.name; gg.appendChild(d); }); $("win").hidden=false; setTimeout(()=>$("again").focus(),50); }
+function placeAbu(end){ if(!npcs.abu) return; const n=npcs.abu, p=end?n.end:n.pos; n.obj.position.set(p[0],0,p[1]); setNpcCollider("abu"); }
+function reset(){
+  collected=0; stepIdx=0; nearNpc=null;
+  artifacts.forEach((a,i)=>{ a.got=false; a.given=false; a.root.visible=false; a.holder.scale.setScalar(1); a.collecting=0; a.ring.material.opacity=.85; $("slot"+i).classList.remove("got"); $("slot"+i).textContent=AR(i+1); });
+  placeAbu(false);
+  player.position.set(START[0],0,START[1]); player.rotation.y=START_ROT; yaw=START_ROT+Math.PI;
+  refreshQuestUI();
+}
+
+/* ---------- Asir map → governorate → village → adventure ---------- */
+const GOVS=[["أبها",42.50,18.22],["خميس مشيط",42.73,18.30],["بيشة",42.60,20.00],["النماص",42.12,19.14],["محايل",42.05,18.55],["تثليث",43.50,19.53],
+  ["رجال ألمع",42.27,18.21],["ظهران الجنوب",43.51,17.67,1],["سراة عبيدة",43.10,18.17],["أحد رفيدة",42.85,18.21],["بلقرن",41.98,19.58],["المجاردة",41.91,19.12],
+  ["تنومة",42.16,18.93],["طريب",43.25,18.85],["بارق",41.93,18.93],["البرك",41.55,18.21],["الحرجة",43.36,17.93],["الأمواه",42.75,19.55],["الفرشة",42.95,17.95]];
+const AREA=[[41.45,19.7],[41.9,20.2],[42.4,20.85],[43.1,20.9],[44.2,20.4],[44.9,19.7],[44.6,18.8],[44.2,18.1],[43.8,17.5],[43.3,17.35],[42.9,17.6],[42.4,17.9],[41.9,17.95],[41.5,18.2],[41.38,18.9]];
+const MX=lon=>(lon-41.1)*100, MY=lat=>(21.2-lat)*100;
+function drawMap(){
+  const svg=$("asirMap"); const NS="http://www.w3.org/2000/svg"; svg.innerHTML="";
+  const el=(t,a)=>{ const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); return e; };
+  svg.appendChild(el("path",{class:"sea",d:"M0 0 H44 L36 150 L29 230 L41 300 L81 326 L64 420 H0 Z"}));
+  const sea=el("text",{x:16,y:200,fill:"#cfe3ea","font-size":"11","text-anchor":"middle",transform:"rotate(-90 16 200)"}); sea.textContent="البحر الأحمر"; svg.appendChild(sea);
+  svg.appendChild(el("path",{class:"land",d:"M"+AREA.map(p=>MX(p[0]).toFixed(1)+" "+MY(p[1]).toFixed(1)).join(" L")+" Z"}));
+  const yem=el("text",{x:300,y:405,fill:"rgba(246,241,231,.6)","font-size":"11"}); yem.textContent="اليمن"; svg.appendChild(yem);
+  GOVS.slice().sort((a,b)=>(a[3]?1:0)-(b[3]?1:0)).forEach(g=>{
+    const x=MX(g[1]), y=MY(g[2]), on=!!g[3];
+    const grp=el("g",{class:"pin"+(on?" on":""),tabindex:on?"0":"-1",role:on?"button":"img","aria-label":g[0]+(on?"":" (قريباً)")});
+    if(on) grp.appendChild(el("circle",{class:"halo",cx:x,cy:y,r:7}));
+    grp.appendChild(el("circle",{cx:x,cy:y,r:on?7:3.6}));
+    const L={"أبها":["middle",0,13],"أحد رفيدة":["middle",0,13],"رجال ألمع":["end",-6,3],"بارق":["end",-6,4],"المجاردة":["end",-6,3],"تنومة":["start",6,4],
+      "البرك":["middle",0,13],"الفرشة":["end",-6,4],"الحرجة":["start",6,0],"ظهران الجنوب":["start",13,5]}[g[0]]||["middle",0,-7];
+    const t=el("text",{x:x+L[1],y:y+L[2],"text-anchor":L[0]}); t.textContent=g[0]; grp.appendChild(t);
+    if(on){ grp.addEventListener("click",openVillages); grp.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openVillages(); } }); }
+    else grp.addEventListener("click",()=>{ $("mapTip").textContent="محافظة "+g[0]+": قريباً بإذن الله."; });
+    svg.appendChild(grp);
+  });
+}
+function showScreen(id){ ["title","mapScreen","villages","start"].forEach(k=>$(k).hidden=k!==id); }
+function openMap(){ SFX.init(); drawMap(); showScreen("mapScreen"); }
+function openVillages(){ showScreen("villages"); setTimeout(()=>$("pickTown").focus(),30); }
+$("toMap").addEventListener("click",openMap);
+$("backToMap").addEventListener("click",openMap);
+function goVillage(v){ if((v==="haydan")===HD){ showScreen("start"); setTimeout(()=>$("go").focus(),30); return; } location.hash=v; location.reload(); }
+$("pickTown").addEventListener("click",()=>goVillage("dhahran"));
+$("pickHaydan").addEventListener("click",()=>goVillage("haydan"));
+[["pinTown","dhahran"],["pinHaydan","haydan"]].forEach(([id,v])=>{ const g=$(id); g.addEventListener("click",()=>goVillage(v)); g.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); goVillage(v); } }); });
+$("backToVillages").addEventListener("click",openVillages);
+$("winMap").addEventListener("click",()=>{ $("win").hidden=true; $("hud").hidden=true; reset(); state="start"; openMap(); });
+
+if(HD){
+  $("start").querySelector("h1.town").innerHTML="قرية حيدان <span>التراثية</span>";
+  $("start").querySelector(".sub").textContent="جولة في قرية حيدان بآل المؤنس في ظهران الجنوب: وادي العرين والنخيل، والمزارع المسوّرة بالحجر، وسور حيدان، وبيوت القرية، ومسجد بن عجلة. نسخة أولى، وتُضاف بقية المعالم بعد تحديد مواقعها مع أهل القرية.";
+  $("go").textContent="ابدأ: جولة في حيدان";
+  document.querySelector(".counter h2").firstChild.textContent="جولة في حيدان ";
+  $("wTitle").textContent="بطاقة القرية: حيدان";
+  $("wText").textContent="قرية تراثية في آل المؤنس بمحافظة ظهران الجنوب، يحيطها سور له بابان، وتُعرف بأنها دار أمان. قريباً في اللعبة: مسجد الصحابي معاذ بن جبل وبئره، ودار الفروق «سداح» ومغامرة مفاتيحها الأربعة، وقصر ابن عجلة، بعد تحديد مواقعها مع أهل القرية.";
+  $("cUseL").textContent="الرمز"; $("cFactL").textContent="يُستكمل";
+  canvas.setAttribute("aria-label","مشهد ثلاثي الأبعاد لقرية حيدان التراثية");
+}
+if(/^#(haydan|dhahran)$/i.test(location.hash)) showScreen("start");
+$("pname").value=PLAYER.name;
+function setG(g){ PLAYER.g=g; $("gm").setAttribute("aria-checked",String(g==="m")); $("gf").setAttribute("aria-checked",String(g==="f")); }
+setG(PLAYER.g);
+$("gm").addEventListener("click",()=>setG("m")); $("gf").addEventListener("click",()=>setG("f"));
+$("who").addEventListener("submit",e=>{ e.preventDefault(); $("go").click(); });
+function commitPlayer(){ PLAYER.name=$("pname").value.replace(/[<>{}|]/g,"").trim().slice(0,20); try{ localStorage.setItem("asirPlayer",JSON.stringify(PLAYER)); }catch(_){} setAvatar(); }
+$("go").addEventListener("click",()=>{ SFX.init(); commitPlayer(); $("start").hidden=true; $("hud").hidden=false; reset(); state="play"; canvas.focus(); });
+$("again").addEventListener("click",()=>{ SFX.init(); $("win").hidden=true; reset(); state="play"; canvas.focus(); });
+function collect(a){
+  a.got=true; collected++;
+  const s=$("slot"+a.i); s.classList.add("got"); s.textContent="✓";
+  a.collecting=0; stepIdx++;
+  SFX.chime(); if(a.it.key==="najr") SFX.najr();
+  if(STEPS[stepIdx] && STEPS[stepIdx].at==="end") placeAbu(true);
+  activateVisit();
+  refreshQuestUI();
+  state="card-wait"; setTimeout(()=>showCard(a),380);
+}
+
+/* ---------- Movement ---------- */
+function resolve(p){
+  const r=.42;
+  for(const c of colliders){
+    if(p.x<c.x0-1||p.x>c.x1+1||p.z<c.z0-1||p.z>c.z1+1) continue;
+    const qx=Math.max(c.x0,Math.min(p.x,c.x1)), qz=Math.max(c.z0,Math.min(p.z,c.z1)); const dx=p.x-qx, dz=p.z-qz, d2=dx*dx+dz*dz;
+    if(d2<r*r){ if(d2>1e-6){ const d=Math.sqrt(d2); p.x=qx+dx/d*r; p.z=qz+dz/d*r; }
+      else { const ex=[p.x-c.x0,c.x1-p.x,p.z-c.z0,c.z1-p.z], m=Math.min(...ex);
+        if(m===ex[0]) p.x=c.x0-r; else if(m===ex[1]) p.x=c.x1+r; else if(m===ex[2]) p.z=c.z0-r; else p.z=c.z1+r; } }
+  }
+  if(HD){ p.x=Math.max(-95,Math.min(95,p.x)); p.z=Math.max(-50,Math.min(50,p.z)); }
+  else { p.x=Math.max(-80,Math.min(70,p.x)); p.z=Math.max(-62,Math.min(64,p.z)); }
+}
+let speed=0, walkT=0, stepPhase=0;
+function step(dt){
+  let ix=0, iy=0;
+  if(keys.KeyW||keys.ArrowUp) iy+=1; if(keys.KeyS||keys.ArrowDown) iy-=1;
+  if(keys.KeyD||keys.ArrowRight) ix+=1; if(keys.KeyA||keys.ArrowLeft) ix-=1;
+  if(keys.KeyR) pitch=Math.max(-.4,pitch-1.2*dt); if(keys.KeyF) pitch=Math.min(1.15,pitch+1.2*dt);
+  if(keys.KeyQ) yaw+=1.8*dt; if(keys.KeyE&&!nearNpc) yaw-=1.8*dt;
+  ix+=joy.x; iy+=joy.y;
+  const m=Math.min(1,Math.hypot(ix,iy));
+  const run=keys.ShiftLeft||keys.ShiftRight||(joy.id!==null&&Math.hypot(joy.x,joy.y)>.9);
+  const target=m>.1?(run?8:4.2)*m:0; speed+=(target-speed)*Math.min(1,dt*9);
+  if(m>.1){ const f=[-Math.sin(yaw),-Math.cos(yaw)], r=[Math.cos(yaw),-Math.sin(yaw)];
+    const want=Math.atan2(f[0]*iy+r[0]*ix,f[1]*iy+r[1]*ix); let d=want-player.rotation.y; d=Math.atan2(Math.sin(d),Math.cos(d)); player.rotation.y+=d*Math.min(1,dt*12); }
+  if(speed>.02){ const p={x:player.position.x+Math.sin(player.rotation.y)*speed*dt, z:player.position.z+Math.cos(player.rotation.y)*speed*dt}; resolve(p); player.position.x=p.x; player.position.z=p.z; }
+  walkT+=dt*speed*2.2;
+  { const ph=Math.floor(walkT/Math.PI); if(ph!==stepPhase){ stepPhase=ph; if(speed>.6) SFX.step(speed); } }
+  player.position.y=Math.abs(Math.sin(walkT))*.06*Math.min(1,speed/3); playerModel.children[0].rotation.z=Math.sin(walkT)*.04*Math.min(1,speed/3);
+  // talk prompt
+  const s=curStep(); let nn=null;
+  if(s && s.npc && !pendingItem()){ const n=npcs[s.npc]; if(Math.hypot(n.obj.position.x-player.position.x,n.obj.position.z-player.position.z)<2.8) nn=s.npc; }
+  if(nn!==nearNpc){ nearNpc=nn; $("talk").hidden=!nn; if(nn){ $("talkName").textContent=npcs[nn].name; $("talkVerb").textContent=T("{تحدّث|تحدّثي}"); } }
+  // pick up items that were handed over
+  artifacts.forEach(a=>{ if(a.given&&!a.got&&a.appear>.6&&Math.hypot(a.it.pos[0]-player.position.x,a.it.pos[1]-player.position.z)<(a.it.r||1.7)) collect(a); });
+}
+function camClear(px,pz,hy,cx,cy,cz){
+  const n=16;
+  for(let k=1;k<=n;k++){ const s=k/n, x=px+(cx-px)*s, y=hy+(cy-hy)*s, z=pz+(cz-pz)*s;
+    for(const c of colliders){ if(c.top<2)continue; if(y<c.top+.3&&x>c.x0-.25&&x<c.x1+.25&&z>c.z0-.25&&z<c.z1+.25) return Math.max(.18,(k-1)/n); } }
+  return 1;
+}
+
+/* ---------- Loop ---------- */
+function resize(){ const w=innerWidth,h=innerHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.fov=w<h?70:(aerial?62:55); camera.updateProjectionMatrix(); }
+addEventListener("resize",resize); resize();
+const clock=new THREE.Clock(); const camPos=new THREE.Vector3(), look=new THREE.Vector3();
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let miniT=0, hintT=0, camDist=6.8;
+function frame(){
+  const dt=Math.min(.05,clock.getDelta()), t=clock.elapsedTime;
+  if(state==="play") step(dt);
+  if(state==="dialog"&&typeShown<typeFull.length){ typeT+=dt; const n=Math.min(typeFull.length,Math.floor(typeT*(reduce?999:48))); if(n!==typeShown){ if(!VOICE.enabled&&!CLIPS.active&&Math.floor(n/3)!==Math.floor(typeShown/3)) SFX.blip(); typeShown=n; $("dText").textContent=typeFull.slice(0,n); } }
+  artifacts.forEach(a=>{
+    if(!a.root.visible) return;
+    if(a.got){ a.collecting+=dt; const s=Math.max(0,1-a.collecting*3); a.holder.scale.setScalar(s); a.holder.position.y=1.1+a.collecting*3; a.ring.material.opacity=.85*s; if(s<=0) a.root.visible=false; return; }
+    a.appear=Math.min(1,a.appear+dt*1.5); const e=1-Math.pow(1-a.appear,3);
+    a.holder.scale.setScalar(e); a.holder.position.y=(1.15+Math.sin(t*2+a.i)*.22)*e; a.holder.rotation.y=t*1.1+a.i; a.ring.material.opacity=(.55+Math.sin(t*3+a.i)*.3)*e;
+  });
+  // people idle + face the player when close
+  Object.values(npcs).forEach((n,i)=>{
+    const o=n.obj; o.children[0].scale.y=1+Math.sin(t*1.6+i)*.008;
+    const dx=player.position.x-o.position.x, dz=player.position.z-o.position.z;
+    if(dx*dx+dz*dz<64){ const want=Math.atan2(dx,dz); let d=want-o.rotation.y; d=Math.atan2(Math.sin(d),Math.cos(d)); o.rotation.y+=d*Math.min(1,dt*4); }
+    n.bang.position.y=.75+Math.sin(t*3)*.08;
+    if(n.nameSp){ const dc=camera.position.distanceTo(o.position); n.nameSp.material.opacity=aerial?0:Math.max(0,Math.min(1,(16-dc)/5)); }
+  });
+  beam.material.opacity=.14+Math.sin(t*2)*.04;
+  if(state==="start"){
+    const ang=reduce?.5:t*.05+.5, ox=HD?20:-5, oz=HD?-2:-4; camera.position.set(Math.sin(ang)*105+ox,52,Math.cos(ang)*105+oz); camera.lookAt(ox,2,oz);
+    sun.target.position.set(0,0,0); sun.position.set(-50,70,-30);
+  } else if(aerial){
+    // oblique view from the south, wide enough to keep Jabal Shithath in frame behind the town
+    if(HD){ camPos.set(player.position.x*.3+10,72,96); look.set(player.position.x*.3+10,0,-8); }
+    else { camPos.set(player.position.x*.25,82,128); look.set(player.position.x*.25,22,-120); }
+    camera.position.lerp(camPos,Math.min(1,dt*3)); camera.lookAt(look);
+  } else if(state==="dialog"&&dlg){
+    // over-the-shoulder shot on the speaker
+    const n=npcs[dlg.step.npc].obj; const mx=(n.position.x+player.position.x)/2, mz=(n.position.z+player.position.z)/2;
+    const vx=n.position.x-player.position.x, vz=n.position.z-player.position.z, L=Math.hypot(vx,vz)||1;
+    camPos.set(player.position.x-vx/L*2.6+vz/L*1.1, 2.3, player.position.z-vz/L*2.6-vx/L*1.1);
+    camera.position.lerp(camPos,Math.min(1,dt*5)); look.set(mx+vx/L*.6,1.55,mz+vz/L*.6); camera.lookAt(look);
+  } else {
+    const hy=player.position.y+1.6;
+    const tx=player.position.x+Math.sin(yaw)*6.8*Math.cos(pitch), ty=Math.max(.45,1.6+Math.sin(pitch)*6.8), tz=player.position.z+Math.cos(yaw)*6.8*Math.cos(pitch);
+    const want=6.8*camClear(player.position.x,player.position.z,hy,tx,ty,tz);
+    camDist+=(want-camDist)*Math.min(1,dt*(want<camDist?14:4));
+    const f=camDist/6.8;
+    camPos.set(player.position.x+(tx-player.position.x)*f, hy+(ty-hy)*f, player.position.z+(tz-player.position.z)*f);
+    camera.position.lerp(camPos,Math.min(1,dt*10)); look.set(player.position.x,hy+Math.max(0,.2-pitch)*22,player.position.z); camera.lookAt(look);
+  }
+  if(state!=="start"){ sun.target.position.set(player.position.x,0,player.position.z); sun.position.set(player.position.x-50,70,player.position.z-30); }
+  labels.forEach(l=>{ const d=camera.position.distanceTo(l.position); l.material.opacity=(state==="start"||aerial)?.95:Math.max(0,Math.min(1,(40-d)/12)); });
+  if(state!=="start"){
+    const px=player.position.x, pz=player.position.z, cl=v=>Math.max(0,Math.min(1,v));
+    if(HD){ const farm=cl(1-(Math.hypot(px+30,pz+10)-14)/30); SFX.ambience(dt,{souq:0,farm,well:0,village:.6*(1-farm*.5)}); } else {
+    const dSouq=Math.min(Math.hypot(Math.max(-46-px,0,px-30),pz+49), Math.hypot(px+9.6,pz+43.6));
+    const farm=Math.max(cl((pz-18)/18), cl((-px-48)/12));
+    SFX.ambience(dt,{souq:cl(1-(dSouq-3)/22), farm, well:cl(1-(Math.hypot(px-L1[0],pz-L1[1])-4)/12), village:.6*(1-farm*.5)}); }
+  }
+  if(state!=="start"){ miniT+=dt; hintT+=dt; if(miniT>.05){drawMini();miniT=0;} if(hintT>.1){updateHint();hintT=0;} }
+  renderer.render(scene,camera);
+  if(state==="card"&&tModel){ tModel.rotation.y=t*.9; thumbR.render(tScene,tCam); }
+  requestAnimationFrame(frame);
+}
+frame();
+})();
+
+</script>
+</body>
+</html>
